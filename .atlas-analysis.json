@@ -1,0 +1,129 @@
+{
+  "projectType": "saas",
+  "projectName": "jshERP",
+  "projectDescription": "Open-source ERP system for small and medium enterprises, focusing on inventory, sales, purchasing, and financial management with SaaS multi-tenant architecture.",
+  "theme": "linden",
+  "primaryColor": "#1890ff",
+  "lightColor": "#40a9ff",
+  "darkColor": "#096dd9",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "features",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Core Modules",
+            "pages": [
+              "modules/retail-management",
+              "modules/purchase-management",
+              "modules/sales-management",
+              "modules/warehouse-management",
+              "modules/financial-management",
+              "modules/material-management"
+            ]
+          },
+          {
+            "group": "Reporting & Analytics",
+            "pages": [
+              "reporting/inventory-reports",
+              "reporting/financial-reports",
+              "reporting/sales-reports",
+              "reporting/purchase-reports"
+            ]
+          },
+          {
+            "group": "Administration",
+            "pages": [
+              "admin/tenant-management",
+              "admin/user-management",
+              "admin/role-permissions",
+              "admin/system-configuration"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
+              "development/architecture",
+              "development/database-schema",
+              "development/plugin-system",
+              "development/customization"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/introduction",
+              "api/authentication"
+            ]
+          },
+          {
+            "group": "Business Operations",
+            "pages": [
+              "api/depot",
+              "api/material",
+              "api/supplier",
+              "api/account"
+            ]
+          },
+          {
+            "group": "System APIs",
+            "pages": [
+              "api/user",
+              "api/tenant",
+              "api/role",
+              "api/organization"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Multi-tenant SaaS architecture",
+    "Retail management with POS support",
+    "Purchase order management and procurement",
+    "Sales order and customer management",
+    "Warehouse and inventory tracking",
+    "Financial accounting and reporting",
+    "Material/product catalog management",
+    "Advanced reporting and analytics",
+    "Role-based access control (RBAC)",
+    "Multi-language support (73 languages)",
+    "Plugin system for extensibility",
+    "Warehouse transfer and assembly/disassembly"
+  ],
+  "publicApiSurface": [
+    "DepotController - Warehouse/depot management",
+    "DepotHeadController - Warehouse transaction headers",
+    "DepotItemController - Warehouse transaction items",
+    "MaterialController - Product/material management",
+    "MaterialCategoryController - Material categorization",
+    "MaterialAttributeController - Material attributes",
+    "SupplierController - Vendor/supplier management",
+    "AccountController - Financial accounts",
+    "AccountHeadController - Financial transaction headers",
+    "AccountItemController - Financial transaction items",
+    "UserController - User management",
+    "TenantController - Tenant/organization management",
+    "RoleController - Role and permissions",
+    "OrganizationController - Organization structure",
+    "FunctionController - System functions/menus",
+    "SystemConfigController - System configuration",
+    "PlatformConfigController - Platform settings",
+    "PluginController - Plugin management"
+  ]
+}
