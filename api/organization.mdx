@@ -69,7 +69,7 @@ Retrieves detailed information for a specific organization.
 
 <CodeGroup>
 ```bash Request Example
-curl -X GET "http://localhost:8080/organization/info?id=1" \
+curl -X GET "http://localhost:9999/jshERP-boot/organization/info?id=1" \
   -H "Authorization: Bearer {token}"
 ```
 
@@ -251,7 +251,7 @@ Retrieves a hierarchical tree structure of organizations starting from a specifi
 
 <CodeGroup>
 ```bash Request Example
-curl -X GET "http://localhost:8080/organization/getOrganizationTree?id=0" \
+curl -X GET "http://localhost:9999/jshERP-boot/organization/getOrganizationTree?id=0" \
   -H "Authorization: Bearer {token}"
 ```
 
@@ -306,7 +306,7 @@ Only users with public role type can access the full organization tree. Other us
 
 <CodeGroup>
 ```bash Request Example
-curl -X GET "http://localhost:8080/organization/getAllOrganizationTreeByUser" \
+curl -X GET "http://localhost:9999/jshERP-boot/organization/getAllOrganizationTreeByUser" \
   -H "Authorization: Bearer {token}"
 ```
 </CodeGroup>
@@ -399,7 +399,7 @@ Checks if an organization name (abbreviation) is already in use.
 
 <CodeGroup>
 ```bash Request Example
-curl -X GET "http://localhost:8080/organization/checkIsNameExist?id=0&name=Finance" \
+curl -X GET "http://localhost:9999/jshERP-boot/organization/checkIsNameExist?id=0&name=Finance" \
   -H "Authorization: Bearer {token}"
 ```
 

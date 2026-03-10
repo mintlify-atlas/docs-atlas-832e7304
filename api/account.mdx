@@ -85,7 +85,7 @@ POST /account/add
 
 <CodeGroup>
 ```bash cURL
-curl -X POST "http://localhost:8080/account/add" \
+curl -X POST "http://localhost:9999/jshERP-boot/account/add" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "ICBC Main Account",
@@ -170,7 +170,7 @@ GET /account/getAccount
 
 <CodeGroup>
 ```bash cURL
-curl -X GET "http://localhost:8080/account/getAccount"
+curl -X GET "http://localhost:9999/jshERP-boot/account/getAccount"
 ```
 
 ```json Response
@@ -356,7 +356,7 @@ GET /account/findAccountInOutList
 
 <CodeGroup>
 ```bash cURL
-curl -X GET "http://localhost:8080/account/findAccountInOutList?currentPage=1&pageSize=20&accountId=1&initialAmount=100000"
+curl -X GET "http://localhost:9999/jshERP-boot/account/findAccountInOutList?currentPage=1&pageSize=20&accountId=1&initialAmount=100000"
 ```
 
 ```json Response
@@ -471,7 +471,7 @@ POST /accountHead/addAccountHeadAndDetail
 
 <CodeGroup>
 ```bash cURL
-curl -X POST "http://localhost:8080/accountHead/addAccountHeadAndDetail" \
+curl -X POST "http://localhost:9999/jshERP-boot/accountHead/addAccountHeadAndDetail" \
   -H "Content-Type: application/json" \
   -d '{
     "info": "{\"type\":\"付款\",\"organId\":5,\"totalPrice\":5000,\"operTime\":\"2024-03-15 10:00:00\"}",
@@ -622,7 +622,7 @@ GET /accountItem/getDetailList?headerId={headerId}
 
 <CodeGroup>
 ```bash cURL
-curl -X GET "http://localhost:8080/accountItem/getDetailList?headerId=123"
+curl -X GET "http://localhost:9999/jshERP-boot/accountItem/getDetailList?headerId=123"
 ```
 
 ```json Response

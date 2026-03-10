@@ -69,7 +69,7 @@ Retrieves detailed information for a specific role.
 
 <CodeGroup>
 ```bash Request Example
-curl -X GET "http://localhost:8080/role/info?id=1" \
+curl -X GET "http://localhost:9999/jshERP-boot/role/info?id=1" \
   -H "Authorization: Bearer {token}"
 ```
 
@@ -116,7 +116,7 @@ Retrieves a paginated list of roles with optional filtering.
 
 <CodeGroup>
 ```bash Request Example
-curl -X GET "http://localhost:8080/role/list?search={\"name\":\"admin\"}" \
+curl -X GET "http://localhost:9999/jshERP-boot/role/list?search={\"name\":\"admin\"}" \
   -H "Authorization: Bearer {token}"
 ```
 
@@ -335,7 +335,7 @@ Retrieves roles for a specific user with checked status for role assignment.
 
 <CodeGroup>
 ```bash Request Example
-curl -X GET "http://localhost:8080/role/findUserRole?UBType=UserRole&UBKeyId=123" \
+curl -X GET "http://localhost:9999/jshERP-boot/role/findUserRole?UBType=UserRole&UBKeyId=123" \
   -H "Authorization: Bearer {token}"
 ```
 

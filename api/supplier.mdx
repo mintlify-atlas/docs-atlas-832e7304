@@ -121,7 +121,7 @@ POST /supplier/add
 
 <CodeGroup>
 ```bash cURL
-curl -X POST "http://localhost:8080/supplier/add" \
+curl -X POST "http://localhost:9999/jshERP-boot/supplier/add" \
   -H "Content-Type: application/json" \
   -d '{
     "supplier": "ABC Trading Co.",
@@ -239,7 +239,7 @@ POST /supplier/findBySelect_cus
 
 <CodeGroup>
 ```bash cURL
-curl -X POST "http://localhost:8080/supplier/findBySelect_cus" \
+curl -X POST "http://localhost:9999/jshERP-boot/supplier/findBySelect_cus" \
   -H "Content-Type: application/json" \
   -d '{
     "key": "ABC",
@@ -490,7 +490,7 @@ POST /supplier/importVendor
 
 <CodeGroup>
 ```bash cURL
-curl -X POST "http://localhost:8080/supplier/importVendor" \
+curl -X POST "http://localhost:9999/jshERP-boot/supplier/importVendor" \
   -F "file=@vendors.xlsx"
 ```
 

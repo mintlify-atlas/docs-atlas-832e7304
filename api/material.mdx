@@ -130,7 +130,7 @@ POST /material/add
 
 <CodeGroup>
 ```bash cURL
-curl -X POST "http://localhost:8080/material/add" \
+curl -X POST "http://localhost:9999/jshERP-boot/material/add" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Laptop Computer",
@@ -284,7 +284,7 @@ GET /material/findBySelect
 
 <CodeGroup>
 ```bash cURL
-curl -X GET "http://localhost:8080/material/findBySelect?page=1&rows=20&q=laptop&depotId=1"
+curl -X GET "http://localhost:9999/jshERP-boot/material/findBySelect?page=1&rows=20&q=laptop&depotId=1"
 ```
 
 ```json Response
@@ -368,7 +368,7 @@ GET /material/getMaterialByBarCode
 
 <CodeGroup>
 ```bash cURL
-curl -X GET "http://localhost:8080/material/getMaterialByBarCode?barCode=LAP001&depotId=1&mpList=model,brand&prefixNo=XSCK"
+curl -X GET "http://localhost:9999/jshERP-boot/material/getMaterialByBarCode?barCode=LAP001&depotId=1&mpList=model,brand&prefixNo=XSCK"
 ```
 
 ```json Response
