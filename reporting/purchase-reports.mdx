@@ -1,0 +1,517 @@
+---
+title: 'Purchase Reports'
+description: 'Analyze purchasing performance, track supplier orders, and monitor procurement costs'
+icon: 'truck-fast'
+---
+
+## Overview
+
+jshERP's purchase reporting provides comprehensive insights into your procurement operations, helping you understand spending patterns, analyze supplier performance, track product costs, and optimize purchasing decisions.
+
+## Available Reports
+
+<CardGroup cols={2}>
+  <Card title="Buy In Report" icon="cart-plus" href="#buy-in-report">
+    Analyze product-level purchases with quantities, costs, and returns
+  </Card>
+  <Card title="In Detail Report" icon="list-check" href="#in-detail-report">
+    View line-item details for all inbound transactions
+  </Card>
+  <Card title="In Material Count" icon="calculator" href="#in-material-count">
+    Summarize total quantities received by material
+  </Card>
+  <Card title="Allocation Detail" icon="arrows-split-up-and-left" href="#allocation-detail-report">
+    Track internal transfers and material allocations
+  </Card>
+</CardGroup>
+
+---
+
+## Buy In Report
+
+**Location:** Reports > Buy In Report
+
+**Purpose:** Analyze product-level purchasing performance showing purchase quantities, costs, returns, and net purchase amounts.
+
+### Key Metrics
+
+<AccordionGroup>
+  <Accordion title="Purchase Performance Indicators">
+    - **Purchase Quantity** (采购数量): Total units purchased
+    - **Purchase Amount** (采购金额): Total cost of purchases
+    - **Return Quantity** (退货数量): Units returned to suppliers
+    - **Return Amount** (退货金额): Credit received for returns
+    - **Net Purchase Amount** (实际采购金额): Purchase Amount - Return Amount
+  </Accordion>
+
+  <Accordion title="Material Information">
+    - Barcode, name, specifications, model
+    - Color, brand, manufacturer
+    - Custom property fields (3 configurable fields)
+    - Unit of measure
+  </Accordion>
+
+  <Accordion title="Multi-Dimensional Filtering">
+    - Date range (document date)
+    - Supplier selection
+    - Warehouse/depot
+    - Organization/department
+    - Material category
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Access the Report**
+   - Navigate to **Reports > Buy In Report**
+   - Report loads with default date range (last 3 months)
+
+2. **Set Date Range** (Required)
+   ```
+   Document Date: Select start and end dates
+   Default: Previous 3 months to today
+   This filter is mandatory for performance
+   ```
+
+3. **Apply Additional Filters** (Optional)
+   ```
+   Material Info: Search by barcode, name, specs, model
+   Supplier: Select specific supplier
+   Warehouse: Filter by receiving warehouse
+   Organization: Filter by department/branch
+   Category: Choose material category
+   ```
+
+4. **Analyze Results**
+   - View **Net Purchase Amount** at top of page
+   - Sort by purchase amount to identify top purchases
+   - Review return quantities to spot supplier quality issues
+   - Compare costs across different suppliers and time periods
+
+5. **Export and Share**
+   - Click **Export** for Excel download
+   - Share with purchasing team for analysis
+   - Use data for supplier negotiations
+
+<Note>
+  The Net Purchase Amount represents your actual procurement cost after deducting supplier returns. This is the true cost that impacts your cost of goods sold.
+</Note>
+
+### Business Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Supplier Performance" icon="handshake">
+    Evaluate supplier quality by analyzing return rates and purchase volumes
+  </Card>
+  <Card title="Cost Analysis" icon="dollar-sign">
+    Monitor purchasing costs and identify cost-saving opportunities
+  </Card>
+  <Card title="Procurement Planning" icon="clipboard-list">
+    Analyze historical purchase patterns to improve procurement planning
+  </Card>
+  <Card title="Budget Tracking" icon="chart-pie">
+    Track actual procurement spending against budgets
+  </Card>
+</CardGroup>
+
+---
+
+## In Detail Report
+
+**Location:** Reports > In Detail
+
+**Purpose:** View detailed line-item information for all inbound transactions including purchase orders, receipts, and other goods receipts.
+
+### Detailed Information
+
+<AccordionGroup>
+  <Accordion title="Transaction Details">
+    - Document number and type
+    - Transaction date
+    - Supplier/organization
+    - Receiving warehouse/depot
+    - Approval status
+    - Handler/receiver information
+  </Accordion>
+
+  <Accordion title="Line Item Details">
+    - Material information (barcode, name, specs)
+    - Quantity received
+    - Unit price
+    - Line amount
+    - Tax information
+    - Discount applied
+    - Storage location assigned
+  </Accordion>
+
+  <Accordion title="Search and Filter">
+    - Date range selection
+    - Supplier filter
+    - Material search
+    - Document number search
+    - Warehouse filter
+    - Status filter
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Access Detail Report**
+   - Navigate to **Reports > In Detail**
+   - Report shows all inbound transactions
+
+2. **Filter Transactions**
+   ```
+   Date Range: Select period to analyze
+   Supplier: Choose specific supplier
+   Material: Search by material name or barcode
+   Warehouse: Filter by receiving location
+   Document Number: Search specific PO number
+   ```
+
+3. **Review Line Items**
+   - See every individual receipt line
+   - Verify quantities and prices
+   - Check approval status
+   - Review supplier information
+   - Validate storage locations
+
+4. **Export for Analysis**
+   - Export to Excel for detailed analysis
+   - Use for three-way matching (PO, receipt, invoice)
+   - Share with auditors or management
+   - Perform cost variance analysis
+
+<Note>
+  Use this report to verify that received quantities and prices match purchase orders. This is essential for the three-way matching process.
+</Note>
+
+### Use Cases
+
+- **Three-Way Matching**: Compare PO, receipt, and invoice data for accurate payment
+- **Receipt Verification**: Verify specific receipts and quantities received
+- **Audit Trail**: Provide detailed transaction history for internal/external audits
+- **Supplier Disputes**: Research receipt details for supplier inquiries
+- **Cost Analysis**: Extract transaction data for cost variance analysis
+
+---
+
+## In Material Count
+
+**Location:** Reports > In Material Count
+
+**Purpose:** Summarize total quantities received by material across all inbound transactions.
+
+### What It Shows
+
+<AccordionGroup>
+  <Accordion title="Summary Information">
+    - Material identification (barcode, name, specs)
+    - Total quantity received in period
+    - Number of receipt transactions
+    - Summary by material category
+    - Aggregated across all suppliers and warehouses
+  </Accordion>
+
+  <Accordion title="Analysis Capabilities">
+    - Sort by quantity to identify high-volume items
+    - Filter by category for category-level analysis
+    - Search specific materials
+    - Compare across different time periods
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Access Summary Report**
+   - Navigate to **Reports > In Material Count**
+   - Select date range for analysis
+
+2. **Filter Results**
+   ```
+   Date Range: Choose period to analyze
+   Material Category: Filter by category
+   Material Info: Search specific materials
+   Warehouse: Filter by receiving location
+   ```
+
+3. **Analyze Volume**
+   - Identify high-volume materials
+   - Review purchase frequency
+   - Compare period-over-period changes
+   - Plan storage capacity needs
+
+4. **Export for Planning**
+   - Export to Excel
+   - Use for demand forecasting
+   - Share with supply chain team
+   - Support procurement planning
+
+### Use Cases
+
+- **Procurement Planning**: Analyze purchase patterns to optimize procurement schedules
+- **Supplier Consolidation**: Identify opportunities to consolidate suppliers for volume discounts
+- **Warehouse Planning**: Plan storage capacity based on receipt volumes
+- **Performance Metrics**: Track procurement throughput and efficiency
+
+---
+
+## Allocation Detail Report
+
+**Location:** Reports > Allocation Detail
+
+**Purpose:** Track internal transfers and material allocations between warehouses, departments, or cost centers.
+
+### Key Features
+
+<AccordionGroup>
+  <Accordion title="Transfer Information">
+    - Transfer document number
+    - Transfer date
+    - Source warehouse/location
+    - Destination warehouse/location
+    - Transfer reason/purpose
+    - Approval status
+  </Accordion>
+
+  <Accordion title="Material Details">
+    - Material identification
+    - Quantity transferred
+    - Unit cost
+    - Transfer value
+    - Storage locations (from/to)
+  </Accordion>
+
+  <Accordion title="Filtering Options">
+    - Date range selection
+    - Source warehouse filter
+    - Destination warehouse filter
+    - Material search
+    - Organization filter
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Access Allocation Report**
+   - Navigate to **Reports > Allocation Detail**
+   - Report displays all transfer transactions
+
+2. **Filter Transfers**
+   ```
+   Date Range: Select period
+   From Warehouse: Source location
+   To Warehouse: Destination location
+   Material: Search specific items
+   Organization: Filter by department
+   ```
+
+3. **Review Transfers**
+   - Verify transfer quantities
+   - Check source and destination
+   - Review transfer values
+   - Validate approval status
+
+4. **Analyze Patterns**
+   - Identify frequent transfer routes
+   - Review transfer frequency by material
+   - Optimize warehouse stock distribution
+   - Plan inventory balancing
+
+### Use Cases
+
+- **Inventory Balancing**: Track transfers to optimize stock distribution
+- **Cost Center Allocation**: Allocate material costs to proper cost centers
+- **Transfer Verification**: Verify quantities transferred match receiving records
+- **Warehouse Optimization**: Analyze transfer patterns to optimize warehouse network
+
+---
+
+## Advanced Analysis
+
+### Supplier Performance Analysis
+
+<AccordionGroup>
+  <Accordion title="Supplier Comparison">
+    - Run Buy In Report filtered by supplier
+    - Compare purchase volumes across suppliers
+    - Analyze return rates by supplier
+    - Evaluate supplier reliability and quality
+  </Accordion>
+
+  <Accordion title="Supplier Scorecarding">
+    - Track on-time delivery performance
+    - Monitor quality through return rates
+    - Evaluate pricing competitiveness
+    - Assess overall supplier value
+  </Accordion>
+</AccordionGroup>
+
+### Cost Analysis
+
+<AccordionGroup>
+  <Accordion title="Price Trend Analysis">
+    - Compare unit costs over time
+    - Identify price increases/decreases
+    - Analyze impact of quantity discounts
+    - Evaluate negotiation effectiveness
+  </Accordion>
+
+  <Accordion title="Spend Analysis">
+    - Total spend by category
+    - Spend by supplier
+    - Spend by warehouse/location
+    - Spend by organization/department
+  </Accordion>
+</AccordionGroup>
+
+### Category Analysis
+
+<AccordionGroup>
+  <Accordion title="Category Performance">
+    - Filter reports by material category
+    - Compare category purchase volumes
+    - Identify high-spend categories
+    - Optimize category sourcing strategies
+  </Accordion>
+
+  <Accordion title="Category Trends">
+    - Track category growth over time
+    - Identify emerging needs
+    - Plan category-specific sourcing
+    - Develop category expertise
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Report Actions
+
+All purchase reports support standard actions:
+
+### Export to Excel
+
+- Complete dataset with all columns
+- Includes summary totals and calculations
+- Preserves filters and sorting
+- Enables advanced Excel analysis (pivot tables, charts)
+
+### Print Reports
+
+- Professional formatted output
+- Shows date range and applied filters
+- Includes summary statistics
+- Suitable for management review and audits
+
+### Column Customization
+
+- Show/hide columns based on needs
+- Reorder columns by dragging
+- Adjust column widths
+- Save preferences per user and report
+
+<Note>
+  Click the Settings icon in the table header to customize displayed columns. Your preferences are automatically saved.
+</Note>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Regular Performance Reviews">
+    - Run Buy In Report weekly to monitor spending
+    - Review top 20 purchased items monthly
+    - Analyze supplier return rates monthly
+    - Share results with procurement team
+  </Accordion>
+
+  <Accordion title="Supplier Management">
+    - Track supplier performance metrics
+    - Conduct quarterly supplier reviews
+    - Use data for supplier negotiations
+    - Maintain preferred supplier lists
+  </Accordion>
+
+  <Accordion title="Cost Management">
+    - Monitor price trends for key materials
+    - Negotiate volume discounts for high-volume items
+    - Consolidate suppliers where beneficial
+    - Track savings from procurement initiatives
+  </Accordion>
+
+  <Accordion title="Data Accuracy">
+    - Verify receipts match purchase orders
+    - Ensure proper approval workflow
+    - Validate material and supplier information
+    - Perform regular data quality checks
+  </Accordion>
+
+  <Accordion title="Strategic Sourcing">
+    - Use historical data for demand forecasting
+    - Identify strategic materials for special focus
+    - Develop category-specific strategies
+    - Plan long-term supplier relationships
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Purchase amounts don't match expectations">
+    **Solutions:**
+    - Verify all purchase orders are approved and posted
+    - Check if date range includes all relevant transactions
+    - Ensure no receipts are pending approval
+    - Review if returns are properly recorded
+    - Verify supplier invoices match system data
+  </Accordion>
+
+  <Accordion title="Missing receipts in report">
+    **Solutions:**
+    - Verify transactions are within selected date range
+    - Check that receipts have been approved
+    - Ensure warehouse filter includes correct locations
+    - Clear supplier filter if accidentally set
+    - Verify receipts are not in draft status
+    - Check if goods receipt was properly posted
+  </Accordion>
+
+  <Accordion title="Return quantities seem incorrect">
+    **Solutions:**
+    - Verify all return-to-supplier orders are posted
+    - Check that returns are linked to original purchases
+    - Review return document dates
+    - Ensure return warehouse is correct
+    - Verify approval status of return documents
+  </Accordion>
+
+  <Accordion title="Price discrepancies in report">
+    **Solutions:**
+    - Verify unit prices in purchase orders
+    - Check if price includes or excludes tax
+    - Review if discounts are properly applied
+    - Ensure correct unit of measure
+    - Contact supplier to verify pricing
+  </Accordion>
+
+  <Accordion title="Export file too large or slow">
+    **Solutions:**
+    - Reduce date range to smaller period
+    - Filter by specific supplier or category
+    - Export in smaller batches by warehouse
+    - Contact system administrator about performance tuning
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Related Topics
+
+- [Sales Reports](/reporting/sales-reports) - Sales analysis and customer insights
+- [Inventory Reports](/reporting/inventory-reports) - Stock levels and movements
+- [Financial Reports](/reporting/financial-reports) - Vendor payables and financial data
+- [Purchase Management](/modules/purchase-management) - Create and manage purchase orders
+- [Warehouse Management](/modules/warehouse-management) - Transfer and allocation operations

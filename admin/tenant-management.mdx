@@ -1,0 +1,278 @@
+---
+title: Tenant Management
+description: Configure and manage multi-tenant architecture in jshERP
+icon: building
+---
+
+## Overview
+
+jshERP implements a robust multi-tenant architecture that allows multiple organizations to use the same system while maintaining complete data isolation. Each tenant operates independently with its own users, data, and configurations.
+
+<Note>
+The tenant system is fundamental to jshERP's architecture. All users must be associated with a tenant, and data is automatically filtered by tenant ID.
+</Note>
+
+## Tenant Types
+
+jshERP supports two types of tenants:
+
+| Type | Description | Features |
+|------|-------------|----------|
+| **0 - Free Tenant** | Basic tier for trial or small businesses | Limited user count, basic features |
+| **1 - Paid Tenant** | Premium tier for full access | Extended user limits, all features |
+
+## Creating a New Tenant
+
+<Steps>
+  <Step title="Navigate to Tenant Management">
+    Access the tenant management interface from the admin panel.
+  </Step>
+  
+  <Step title="Click Add Tenant">
+    Click the "New Tenant" button to open the creation form.
+  </Step>
+  
+  <Step title="Configure Tenant Details">
+    Fill in the required information:
+    
+    <ParamField path="loginName" type="string" required>
+      Primary administrator login name for this tenant
+    </ParamField>
+    
+    <ParamField path="userNumLimit" type="integer" required>
+      Maximum number of users allowed for this tenant
+    </ParamField>
+    
+    <ParamField path="type" type="string" required>
+      Tenant type: "0" for free, "1" for paid
+    </ParamField>
+    
+    <ParamField path="expireTime" type="date">
+      Subscription expiration date (for paid tenants)
+    </ParamField>
+    
+    <ParamField path="enabled" type="boolean">
+      Whether the tenant is active (default: true)
+    </ParamField>
+    
+    <ParamField path="remark" type="string">
+      Additional notes about this tenant
+    </ParamField>
+  </Step>
+  
+  <Step title="Save and Activate">
+    Submit the form to create the tenant. The system will generate a unique `tenantId`.
+  </Step>
+</Steps>
+
+## API Endpoints
+
+The tenant management system exposes the following REST API endpoints:
+
+### Get Tenant Information
+
+```java
+GET /tenant/info?id={tenantId}
+```
+
+Returns detailed information about a specific tenant.
+
+**Reference**: `TenantController.java:36-48`
+
+### List All Tenants
+
+```java
+GET /tenant/list?search={searchParams}
+```
+
+Returns a paginated list of tenants with optional filtering:
+- `loginName`: Filter by admin login name
+- `type`: Filter by tenant type (0 or 1)
+- `enabled`: Filter by enabled status
+- `remark`: Search in remarks
+
+**Reference**: `TenantController.java:50-60`
+
+### Create Tenant
+
+```java
+POST /tenant/add
+```
+
+**Request Body**:
+```json
+{
+  "loginName": "admin@example.com",
+  "userNumLimit": 50,
+  "type": "1",
+  "expireTime": "2025-12-31",
+  "enabled": true,
+  "remark": "Enterprise customer"
+}
+```
+
+**Reference**: `TenantController.java:62-68`
+
+### Update Tenant
+
+```java
+PUT /tenant/update
+```
+
+**Reference**: `TenantController.java:70-76`
+
+### Delete Tenant
+
+```java
+DELETE /tenant/delete?id={tenantId}
+DELETE /tenant/deleteBatch?ids={id1,id2,id3}
+```
+
+<Warning>
+Deleting a tenant will mark it as deleted but preserve the data for audit purposes. This operation should be performed with caution.
+</Warning>
+
+**Reference**: `TenantController.java:78-92`
+
+## Batch Operations
+
+### Enable/Disable Multiple Tenants
+
+```java
+POST /tenant/batchSetStatus
+```
+
+**Request Body**:
+```json
+{
+  "status": true,
+  "ids": "1,2,3"
+}
+```
+
+This allows you to enable or disable multiple tenants simultaneously.
+
+**Reference**: `TenantController.java:114-127`
+
+## Tenant Expiration Management
+
+For paid tenants, jshERP automatically checks the expiration date during login:
+
+<Steps>
+  <Step title="Expiration Check">
+    When a user logs in, the system validates their tenant's `expireTime`.
+  </Step>
+  
+  <Step title="Auto-Logout">
+    If the tenant has expired, the user session is automatically terminated and they cannot access the system.
+  </Step>
+  
+  <Step title="Renewal Process">
+    Update the tenant's `expireTime` to extend access.
+  </Step>
+</Steps>
+
+**Reference**: `UserController.java:571-575`
+
+## User Limit Enforcement
+
+Tenants cannot exceed their configured user limit:
+
+```java
+// When adding a new user
+if (currentUserCount >= tenant.getUserNumLimit()) {
+    throw new BusinessParamCheckingException(
+        "USER_OVER_LIMIT",
+        "User limit exceeded for this tenant"
+    );
+}
+```
+
+**Reference**: `UserController.java:320-325`
+
+## Data Model
+
+The Tenant entity structure:
+
+<ParamField path="id" type="Long">
+  Primary key (auto-generated)
+</ParamField>
+
+<ParamField path="tenantId" type="Long">
+  Unique tenant identifier used throughout the system
+</ParamField>
+
+<ParamField path="loginName" type="String">
+  Primary administrator's login name
+</ParamField>
+
+<ParamField path="userNumLimit" type="Integer">
+  Maximum allowed users
+</ParamField>
+
+<ParamField path="type" type="String">
+  Tenant type: "0" (free) or "1" (paid)
+</ParamField>
+
+<ParamField path="enabled" type="Boolean">
+  Active status
+</ParamField>
+
+<ParamField path="createTime" type="Date">
+  Tenant creation timestamp
+</ParamField>
+
+<ParamField path="expireTime" type="Date">
+  Subscription expiration date
+</ParamField>
+
+<ParamField path="remark" type="String">
+  Additional notes
+</ParamField>
+
+<ParamField path="deleteFlag" type="String">
+  Soft delete marker
+</ParamField>
+
+**Reference**: `Tenant.java:1-105`
+
+## Best Practices
+
+<Warning>
+**Important Considerations**:
+- Always verify tenant status before performing critical operations
+- Monitor user counts against limits to prevent disruption
+- Set appropriate expiration dates for paid tenants
+- Use meaningful remarks to track tenant business information
+</Warning>
+
+<Note>
+**Multi-Tenant Data Isolation**:
+
+Every database query in jshERP automatically filters by `tenantId` to ensure complete data separation. This is handled at the service layer and requires no additional configuration.
+</Note>
+
+## Validation
+
+### Check Name Uniqueness
+
+```java
+GET /tenant/checkIsNameExist?id={id}&name={name}
+```
+
+Validates whether a login name is already in use by another tenant.
+
+**Reference**: `TenantController.java:94-106`
+
+## Monitoring and Reporting
+
+Administrators can monitor tenant usage through:
+
+1. **User Count Tracking**: View current vs. limit for each tenant
+2. **Expiration Monitoring**: Track upcoming tenant expirations
+3. **Activity Status**: Monitor enabled/disabled tenant states
+4. **Type Distribution**: Analyze free vs. paid tenant ratios
+
+<Note>
+For detailed user management within each tenant, see [User Management](/admin/user-management).
+</Note>

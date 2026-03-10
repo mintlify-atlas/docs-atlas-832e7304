@@ -1,0 +1,588 @@
+---
+title: 'Role Management API'
+description: 'API reference for role and permission management'
+icon: 'shield'
+---
+
+## Overview
+
+The Role Management API provides endpoints for managing user roles, permissions, and access control in jshERP. Roles define what actions users can perform and what data they can access.
+
+**Base Path:** `/role`
+
+<Info>
+Roles are essential for implementing role-based access control (RBAC) throughout the system.
+</Info>
+
+---
+
+## CRUD Operations
+
+### Get Role Information
+
+```http
+GET /role/info?id={id}
+```
+
+Retrieves detailed information for a specific role.
+
+<ParamField query="id" type="long" required>
+  Role ID
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code (200 for success)
+</ResponseField>
+
+<ResponseField name="info" type="object">
+  Role entity object
+  <Expandable title="Role Fields">
+    <ResponseField name="id" type="long">
+      Role ID
+    </ResponseField>
+    <ResponseField name="name" type="string">
+      Role name
+    </ResponseField>
+    <ResponseField name="type" type="string">
+      Role type (e.g., "public", "tenant")
+    </ResponseField>
+    <ResponseField name="priceLimit" type="string">
+      Price visibility limitations
+    </ResponseField>
+    <ResponseField name="value" type="string">
+      Role value/identifier
+    </ResponseField>
+    <ResponseField name="description" type="string">
+      Role description
+    </ResponseField>
+    <ResponseField name="enabled" type="boolean">
+      Role enabled status
+    </ResponseField>
+    <ResponseField name="sort" type="string">
+      Sort order
+    </ResponseField>
+    <ResponseField name="tenantId" type="long">
+      Associated tenant ID
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```bash Request Example
+curl -X GET "http://localhost:8080/role/info?id=1" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response Example
+{
+  "code": 200,
+  "info": {
+    "id": 1,
+    "name": "Administrator",
+    "type": "public",
+    "priceLimit": "0",
+    "value": "admin",
+    "description": "System administrator with full access",
+    "enabled": true,
+    "sort": "1"
+  }
+}
+```
+</CodeGroup>
+
+---
+
+### Get Role List
+
+```http
+GET /role/list?search={search}
+```
+
+Retrieves a paginated list of roles with optional filtering.
+
+<ParamField query="search" type="string">
+  JSON string containing search filters:
+  - `name`: Filter by role name
+  - `description`: Filter by description
+</ParamField>
+
+<ResponseField name="rows" type="array">
+  Array of RoleEx objects with extended information
+</ResponseField>
+
+<ResponseField name="total" type="integer">
+  Total number of records
+</ResponseField>
+
+<CodeGroup>
+```bash Request Example
+curl -X GET "http://localhost:8080/role/list?search={\"name\":\"admin\"}" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response Example
+{
+  "rows": [
+    {
+      "id": 1,
+      "name": "Administrator",
+      "type": "public",
+      "description": "System administrator",
+      "enabled": true,
+      "sort": "1"
+    }
+  ],
+  "total": 1
+}
+```
+</CodeGroup>
+
+---
+
+### Create Role
+
+```http
+POST /role/add
+```
+
+Creates a new role.
+
+<ParamField body="name" type="string" required>
+  Role name (must be unique)
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  Role type:
+  - `public`: System-wide role
+  - `tenant`: Tenant-specific role
+</ParamField>
+
+<ParamField body="value" type="string">
+  Role value/identifier
+</ParamField>
+
+<ParamField body="description" type="string">
+  Role description
+</ParamField>
+
+<ParamField body="priceLimit" type="string">
+  Price visibility configuration:
+  - `0`: No price limit (can see all prices)
+  - `1`: Purchase price hidden
+  - `2`: Retail price hidden
+  - `3`: Sale price hidden
+</ParamField>
+
+<ParamField body="enabled" type="boolean" default="true">
+  Role enabled status
+</ParamField>
+
+<ParamField body="sort" type="string">
+  Sort order for display
+</ParamField>
+
+<CodeGroup>
+```json Request Example
+{
+  "name": "Sales Manager",
+  "type": "tenant",
+  "value": "sales_manager",
+  "description": "Manages sales operations",
+  "priceLimit": "1",
+  "enabled": true,
+  "sort": "10"
+}
+```
+
+```json Response Example
+{
+  "code": 200,
+  "data": {}
+}
+```
+</CodeGroup>
+
+---
+
+### Update Role
+
+```http
+PUT /role/update
+```
+
+Updates an existing role's configuration.
+
+<ParamField body="id" type="long" required>
+  Role ID
+</ParamField>
+
+<ParamField body="name" type="string">
+  Role name
+</ParamField>
+
+<ParamField body="type" type="string">
+  Role type
+</ParamField>
+
+<ParamField body="value" type="string">
+  Role value/identifier
+</ParamField>
+
+<ParamField body="description" type="string">
+  Role description
+</ParamField>
+
+<ParamField body="priceLimit" type="string">
+  Price visibility configuration
+</ParamField>
+
+<ParamField body="enabled" type="boolean">
+  Role enabled status
+</ParamField>
+
+<ParamField body="sort" type="string">
+  Sort order
+</ParamField>
+
+---
+
+### Delete Role
+
+```http
+DELETE /role/delete?id={id}
+```
+
+Deletes a role (soft delete).
+
+<Warning>
+Deleting a role will affect all users assigned to that role. Ensure users are reassigned before deletion.
+</Warning>
+
+<ParamField query="id" type="long" required>
+  Role ID to delete
+</ParamField>
+
+---
+
+### Batch Delete Roles
+
+```http
+DELETE /role/deleteBatch?ids={ids}
+```
+
+Deletes multiple roles in a single operation.
+
+<ParamField query="ids" type="string" required>
+  Comma-separated role IDs (e.g., "1,2,3")
+</ParamField>
+
+---
+
+## Role Management
+
+### Check Role Name Exists
+
+```http
+GET /role/checkIsNameExist?id={id}&name={name}
+```
+
+Checks if a role name is already in use.
+
+<ParamField query="id" type="long" required>
+  Role ID (0 for new role)
+</ParamField>
+
+<ParamField query="name" type="string">
+  Role name to check
+</ParamField>
+
+<ResponseField name="status" type="boolean">
+  `true` if name exists, `false` otherwise
+</ResponseField>
+
+---
+
+### Find User Roles
+
+```http
+GET /role/findUserRole?UBType={type}&UBKeyId={keyId}
+```
+
+Retrieves roles for a specific user with checked status for role assignment.
+
+<ParamField query="UBType" type="string" required>
+  User business type (e.g., "UserRole")
+</ParamField>
+
+<ParamField query="UBKeyId" type="string" required>
+  User business key ID (typically user ID)
+</ParamField>
+
+<ResponseField name="array" type="array">
+  Array of role objects with checked status
+  <Expandable title="Role Item Structure">
+    <ResponseField name="id" type="long">
+      Role ID
+    </ResponseField>
+    <ResponseField name="text" type="string">
+      Role name
+    </ResponseField>
+    <ResponseField name="checked" type="boolean">
+      Whether this role is assigned to the user
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```bash Request Example
+curl -X GET "http://localhost:8080/role/findUserRole?UBType=UserRole&UBKeyId=123" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response Example
+[
+  {
+    "id": 1,
+    "text": "Administrator",
+    "checked": true
+  },
+  {
+    "id": 2,
+    "text": "Sales Manager",
+    "checked": false
+  }
+]
+```
+</CodeGroup>
+
+---
+
+### Get All Roles
+
+```http
+GET /role/allList
+```
+
+Retrieves a complete list of all roles without pagination.
+
+<ResponseField name="array" type="array">
+  Array of all Role objects
+</ResponseField>
+
+<CodeGroup>
+```json Response Example
+[
+  {
+    "id": 1,
+    "name": "Administrator",
+    "type": "public",
+    "enabled": true
+  },
+  {
+    "id": 2,
+    "name": "Sales Manager",
+    "type": "tenant",
+    "enabled": true
+  }
+]
+```
+</CodeGroup>
+
+---
+
+### Get Tenant Role List
+
+```http
+GET /role/tenantRoleList
+```
+
+Retrieves roles specific to the current tenant.
+
+<ResponseField name="array" type="array">
+  Array of Role objects belonging to the current tenant
+</ResponseField>
+
+---
+
+### Batch Set Role Status
+
+```http
+POST /role/batchSetStatus
+```
+
+Enables or disables multiple roles at once.
+
+<ParamField body="status" type="boolean" required>
+  Status to set:
+  - `true`: Enable roles
+  - `false`: Disable roles
+</ParamField>
+
+<ParamField body="ids" type="string" required>
+  Comma-separated role IDs
+</ParamField>
+
+<CodeGroup>
+```json Request Example
+{
+  "status": true,
+  "ids": "1,2,3"
+}
+```
+</CodeGroup>
+
+---
+
+## Data Models
+
+### Role Entity
+
+<ResponseField name="id" type="long">
+  Unique role identifier
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Role name (displayed to users)
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  Role type:
+  - `public`: System-wide role available to all tenants
+  - `tenant`: Tenant-specific role
+</ResponseField>
+
+<ResponseField name="priceLimit" type="string">
+  Price visibility restrictions:
+  - `0`: No restrictions
+  - `1`: Purchase price hidden
+  - `2`: Retail price hidden
+  - `3`: Sale price hidden
+</ResponseField>
+
+<ResponseField name="value" type="string">
+  Role value/identifier (used in code)
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Detailed description of the role's purpose
+</ResponseField>
+
+<ResponseField name="enabled" type="boolean">
+  Role enabled status:
+  - `true`: Role is active and can be assigned
+  - `false`: Role is disabled
+</ResponseField>
+
+<ResponseField name="sort" type="string">
+  Sort order for display purposes
+</ResponseField>
+
+<ResponseField name="tenantId" type="long">
+  Associated tenant ID (null for public roles)
+</ResponseField>
+
+<ResponseField name="deleteFlag" type="string">
+  Soft delete flag (used internally)
+</ResponseField>
+
+---
+
+## Role Types
+
+### Public Roles
+
+- System-wide roles defined by administrators
+- Available across all tenants
+- Cannot be modified by tenant users
+- Examples: Administrator, System Manager
+
+### Tenant Roles
+
+- Created and managed by tenant administrators
+- Specific to individual tenants
+- Can be customized per tenant needs
+- Examples: Sales Manager, Warehouse Staff
+
+---
+
+## Price Limit Configuration
+
+The `priceLimit` field controls what price information users with this role can view:
+
+| Value | Description | Hidden Prices |
+|-------|-------------|---------------|
+| 0 | No limit | None (full access) |
+| 1 | Purchase price hidden | Purchase/cost prices |
+| 2 | Retail price hidden | Retail prices |
+| 3 | Sale price hidden | Sale prices |
+
+<Tip>
+Use price limits to restrict sensitive pricing information from users who don't need access to it, such as hiding purchase costs from sales staff.
+</Tip>
+
+---
+
+## Common Use Cases
+
+### Creating a New Role
+
+1. Check if the role name exists using `/role/checkIsNameExist`
+2. Create the role using `/role/add` with appropriate permissions
+3. Configure price limits if needed
+4. Assign the role to users
+
+### Assigning Roles to Users
+
+1. Get the user's current roles using `/role/findUserRole`
+2. Update the user's role assignments through the user business API
+3. Verify the changes by checking user permissions
+
+### Managing Role Hierarchy
+
+1. Use the `sort` field to establish role display order
+2. Public roles typically have lower sort values
+3. Tenant-specific roles follow the public roles
+
+---
+
+## Best Practices
+
+<Tip>
+**Role Naming**: Use clear, descriptive names that indicate the role's purpose and permissions level.
+</Tip>
+
+<Tip>
+**Price Limits**: Carefully configure price limits based on business requirements. Consider what information each role needs to perform their job effectively.
+</Tip>
+
+<Warning>
+**Role Deletion**: Always check for users assigned to a role before deleting it. Consider disabling the role instead of deleting it.
+</Warning>
+
+<Info>
+**Tenant Isolation**: Tenant roles are isolated per tenant. Each tenant can create roles with the same name without conflicts.
+</Info>
+
+---
+
+## Permissions and Access Control
+
+Roles work in conjunction with other permission systems:
+
+- **Button Permissions**: Control which UI buttons are visible
+- **Module Permissions**: Control access to different modules
+- **Data Permissions**: Control what data can be viewed/modified
+- **Price Limits**: Control price information visibility
+
+---
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| 200  | Success |
+| 500  | Internal server error |
+
+<Note>
+All endpoints return a standard response format with `code` and `data` fields. Check the `code` field to determine success or failure.
+</Note>

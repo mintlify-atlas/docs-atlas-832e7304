@@ -1,0 +1,353 @@
+---
+title: 'Purchase Management'
+description: 'Procurement, supplier management, and purchase order processing'
+icon: 'cart-shopping'
+---
+
+The Purchase Management module handles the complete procurement lifecycle from requisitions and purchase orders to goods receipt and supplier payments.
+
+## Overview
+
+Manage your purchasing operations efficiently with support for purchase requisitions, orders, receiving, returns, and supplier account reconciliation.
+
+<Note>
+Purchase documents support multi-account payments, partial receiving, and integration with inventory and financial modules.
+</Note>
+
+## Module Components
+
+<CardGroup cols={2}>
+  <Card title="Purchase Requisition" icon="file-lines">
+    Create internal requests for materials needed by departments or projects
+  </Card>
+  <Card title="Purchase Order" icon="file-contract">
+    Issue formal purchase orders to suppliers without immediate payment
+  </Card>
+  <Card title="Purchase Receipt" icon="boxes-packing">
+    Record goods received from suppliers with payment and inventory updates
+  </Card>
+  <Card title="Purchase Return" icon="rotate-left">
+    Return defective or incorrect items to suppliers
+  </Card>
+</CardGroup>
+
+## Purchase Requisition Process
+
+<Steps>
+  <Step title="Create Requisition">
+    Navigate to **Bills > Purchase Requisition** and click **New**.
+    
+    Purchase requisitions are internal documents used to request purchasing approval before creating orders.
+  </Step>
+  
+  <Step title="Add Required Items">
+    Add products with:
+    - Product name and specifications
+    - Required quantity
+    - Target price (optional)
+    - Urgency level
+    - Purpose/remarks
+  </Step>
+  
+  <Step title="Submit for Approval">
+    Save and submit the requisition. Depending on your workflow configuration:
+    - May require department manager approval
+    - May require purchasing manager approval
+    - May require budget approval
+  </Step>
+  
+  <Step title="Convert to Purchase Order">
+    Once approved, the requisition can be converted to a purchase order. The system links the order back to the originating requisition.
+  </Step>
+</Steps>
+
+## Purchase Order Management
+
+### Creating Purchase Orders
+
+Purchase orders can be created:
+
+1. **From Requisition**: Convert approved requisitions to orders
+2. **From Sales Order**: Support "order-on-demand" (以销定购) procurement
+3. **Direct Entry**: Create standalone purchase orders
+
+<Tabs>
+  <Tab title="Standard Purchase Order">
+    **Use Case**: Regular procurement from suppliers
+    
+    Key Fields:
+    - Supplier selection
+    - Product details (with barcode, name, specs search)
+    - Quantity and unit price
+    - Discount rate
+    - Delivery date
+    - Linked requisition (if applicable)
+    - Settlement account for deposits
+    - Remarks
+    
+    <Note>
+    Purchase orders do not affect inventory or payments until converted to purchase receipts.
+    </Note>
+  </Tab>
+  
+  <Tab title="Order-on-Demand (以销定购)">
+    **Use Case**: Purchase goods specifically to fulfill customer sales orders
+    
+    Workflow:
+    1. Receive customer sales order
+    2. Convert sales order to purchase order
+    3. System links the purchase to the originating sale
+    4. Track fulfillment status across both orders
+    
+    This approach minimizes inventory holding costs for made-to-order or JIT scenarios.
+  </Tab>
+</Tabs>
+
+### Purchase Order Status
+
+| Status | Description | Actions Available |
+|--------|-------------|-------------------|
+| **Unapproved** | Draft state | Edit, Delete, Audit |
+| **Under Review** | Multi-level approval pending | View only |
+| **Approved** | Order confirmed | Convert to Receipt |
+| **Partial Receipt** | Some items received | Continue receiving |
+| **Completed** | All items received | View history |
+
+### Force Close Orders
+
+For orders in **Partial Receipt** status that won't be fully fulfilled:
+
+1. Select the partial orders
+2. Click **Force Close**
+3. Confirm the action
+4. Status changes to **Completed** without waiting for remaining items
+
+<Note>
+Use force close when suppliers cannot deliver remaining quantities or when you've decided to source items elsewhere.
+</Note>
+
+## Purchase Receipt (Goods Receiving)
+
+### Receipt Process
+
+<Steps>
+  <Step title="Access Purchase Receipts">
+    Go to **Bills > Purchase Receipt** or convert from an approved purchase order.
+  </Step>
+  
+  <Step title="Select Supplier and Warehouse">
+    - Choose the supplier
+    - Select receiving warehouse (only warehouses with your permission appear)
+    - Link to purchase order if applicable
+  </Step>
+  
+  <Step title="Record Received Items">
+    For each product:
+    - Verify product details
+    - Enter received quantity
+    - Confirm unit price
+    - Record tax amount if applicable
+    - Add serial numbers or batch numbers if required
+  </Step>
+  
+  <Step title="Calculate Totals">
+    The system calculates:
+    - Subtotal (before tax)
+    - Tax total
+    - Grand total (including tax)
+    - Discount amount
+    - Other fees (shipping, handling, etc.)
+    - Deposit deduction (if advance payment was made)
+    - Amount payable
+  </Step>
+  
+  <Step title="Process Payment">
+    Record payment details:
+    - Select payment account(s)
+    - Enter payment amount
+    - Record outstanding payable (debt)
+    - Support multi-account payment
+    
+    The system tracks:
+    - Current payment
+    - Current debt
+    - Final outstanding balance
+  </Step>
+  
+  <Step title="Audit and Complete">
+    Audit the receipt to:
+    - Add inventory to warehouse
+    - Record payment in accounts
+    - Update supplier payables
+    - Update purchase order status
+  </Step>
+</Steps>
+
+### Partial Receiving
+
+Support receiving items in multiple shipments:
+
+- Create multiple receipts linked to the same purchase order
+- Each receipt records a portion of the total quantity
+- Purchase order status shows **Partial Receipt**
+- When all items received, status changes to **Completed**
+
+### Payment and Debt Tracking
+
+The receipt document tracks complex payment scenarios:
+
+```
+Grand Total (including tax): $10,000
+Discount: -$200
+Other Fees: +$150
+Deposit Applied: -$1,000
+─────────────────────────────
+Amount Payable: $8,950
+
+Payment Made: $5,000
+Current Debt: $3,950
+Previous Outstanding: $2,000
+─────────────────────────────
+Final Payable Balance: $5,950
+```
+
+<Note>
+Debt indicators:
+- **Green amount**: Payment has been made (linked payment document exists)
+- **Red amount**: No payment yet (full debt outstanding)
+</Note>
+
+## Purchase Returns
+
+Return goods to suppliers for defects, overshipment, or other reasons:
+
+1. **Create Return**: Use **Convert to Purchase Return** from original receipt
+2. **Select Return Items**: Choose products and quantities to return
+3. **Enter Return Reason**: Document why items are being returned
+4. **Process Refund**: Record refund from supplier or apply to payables
+5. **Audit**: Updates inventory and accounts
+
+Returned receipts show **[退]** indicator on the original document.
+
+## Supplier Management
+
+Within purchase documents, you can:
+
+- Search suppliers by name
+- Refresh supplier list
+- View supplier credit terms
+- Track total payables per supplier
+- Link to supplier account details
+
+## Search and Filtering
+
+**Basic Search:**
+- Document number
+- Product information (barcode, name, mnemonic, specs, model)
+- Date range
+
+**Advanced Filters:**
+- Supplier
+- Warehouse
+- Operator
+- Linked order/requisition number
+- Settlement account
+- Debt status (has debt / no debt)
+- Document status
+- Remarks
+
+## Batch Operations
+
+<CardGroup cols={2}>
+  <Card title="Batch Delete" icon="trash">
+    Remove multiple unapproved documents
+  </Card>
+  <Card title="Batch Audit" icon="check">
+    Approve multiple receipts or orders simultaneously
+  </Card>
+  <Card title="Batch Reverse Audit" icon="ban">
+    Unapprove multiple documents for corrections
+  </Card>
+  <Card title="Force Close" icon="lock">
+    Complete partial orders that won't be fully fulfilled
+  </Card>
+</CardGroup>
+
+## Multi-Account Payments
+
+Purchase receipts support splitting payments across multiple accounts:
+
+**Example:**
+- Bank Account A: $3,000
+- Bank Account B: $2,000
+- Cash: $500
+- Remaining Payable: $2,500
+
+This flexibility accommodates various payment arrangements with suppliers.
+
+## Column Customization
+
+Customize list views by showing/hiding columns:
+
+- Supplier
+- Document number and linked orders
+- Product information
+- Date and operator
+- Quantities
+- Financial details (amounts, discounts, deposits, debts)
+- Settlement accounts
+- Status
+
+Click **Restore Default** to reset to factory settings.
+
+## Document Display Features
+
+Document numbers show helpful indicators:
+
+- **[订]**: Converted from purchase order
+- **[退]**: Has associated return
+- **[请]**: Created from purchase requisition
+
+## Integration with Other Modules
+
+<CardGroup cols={1}>
+  <Card title="Inventory Management" icon="warehouse">
+    Purchase receipts automatically update stock levels and cost prices in connected warehouses.
+  </Card>
+  
+  <Card title="Financial Management" icon="dollar-sign">
+    Payments and payables flow to accounts payable tracking and supplier reconciliation reports.
+  </Card>
+  
+  <Card title="Sales Orders" icon="handshake">
+    Order-on-demand feature links customer sales orders to purchase orders for JIT fulfillment.
+  </Card>
+  
+  <Card title="Reporting" icon="chart-line">
+    Purchase data feeds into:
+    - Purchase analysis reports
+    - Supplier performance
+    - Cost analysis
+    - Vendor account statements
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+1. **Use Requisitions**: Implement requisition approval workflow for spending control
+2. **Link Documents**: Always link receipts to orders to maintain traceability
+3. **Record Serials/Batches**: Track serial and batch numbers for quality control
+4. **Prompt Auditing**: Audit receipts promptly to maintain accurate inventory
+5. **Reconcile Suppliers**: Regularly verify outstanding payables with supplier statements
+6. **Multi-Currency**: Configure currency settings if dealing with international suppliers
+
+## Permissions
+
+Control access to purchase functions:
+
+- **View**: See purchase documents
+- **Add/Edit**: Create and modify documents
+- **Delete**: Remove unapproved documents
+- **Audit**: Approve/unapprove documents
+- **Export**: Download data
+- **Warehouse Access**: Limit which warehouses users can receive into

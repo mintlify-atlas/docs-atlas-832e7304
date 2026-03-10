@@ -1,0 +1,498 @@
+---
+title: Database Schema
+description: Understanding jshERP's database structure and key tables
+---
+
+## Overview
+
+jshERP uses MySQL 8.0+ as its relational database, with a well-structured schema containing **30+ tables** organized into logical modules.
+
+<Note>
+The complete database schema is located at `jshERP-boot/docs/jsh_erp.sql` (1001 lines) and can be used to initialize a new database.
+</Note>
+
+## Database Configuration
+
+### Connection Settings
+
+```properties title="application.properties"
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/jsh_erp?useUnicode=true&characterEncoding=utf8&useCursorFetch=true&defaultFetchSize=500&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=false
+spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+spring.datasource.username=root
+spring.datasource.password=123456
+```
+
+### Performance Optimizations
+
+- **useCursorFetch=true**: Enables server-side cursor for large result sets
+- **defaultFetchSize=500**: Fetches 500 rows at a time
+- **allowMultiQueries=true**: Allows multiple SQL statements
+- **rewriteBatchedStatements=true**: Optimizes batch inserts/updates
+
+## Table Naming Convention
+
+All tables follow the `jsh_` prefix pattern:
+
+- **jsh_account**: Financial accounts
+- **jsh_depot**: Warehouses
+- **jsh_material**: Products/materials
+- **jsh_user**: System users
+
+## Core Module Tables
+
+### Account & Finance Module
+
+#### jsh_account - Account Information
+
+Stores financial account details (bank accounts, cash, etc.).
+
+```sql
+CREATE TABLE `jsh_account` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `name` varchar(50) COMMENT '名称',
+  `serial_no` varchar(50) COMMENT '编号',
+  `initial_amount` decimal(24, 6) COMMENT '期初金额',
+  `current_amount` decimal(24, 6) COMMENT '当前余额',
+  `remark` varchar(100) COMMENT '备注',
+  `enabled` bit(1) COMMENT '启用',
+  `sort` varchar(10) COMMENT '排序',
+  `is_default` bit(1) COMMENT '是否默认',
+  `tenant_id` bigint COMMENT '租户id',
+  `delete_flag` varchar(1) DEFAULT '0' COMMENT '删除标记，0未删除，1删除',
+  PRIMARY KEY (`id`),
+  INDEX `tenant_id`(`tenant_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='账户信息';
+```
+
+**Key Fields**:
+- `initial_amount`: Opening balance
+- `current_amount`: Current balance (updated by transactions)
+- `is_default`: Default account flag
+- `tenant_id`: Multi-tenancy support
+
+#### jsh_account_head - Financial Transaction Headers
+
+Main table for financial transactions (income, expense, payments, receipts).
+
+```sql
+CREATE TABLE `jsh_account_head` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `type` varchar(50) COMMENT '类型(支出/收入/收款/付款/转账)',
+  `organ_id` bigint COMMENT '单位Id(收款/付款单位)',
+  `hands_person_id` bigint COMMENT '经手人id',
+  `creator` bigint COMMENT '操作员',
+  `change_amount` decimal(24, 6) COMMENT '变动金额(优惠/收款/付款/实付)',
+  `discount_money` decimal(24, 6) COMMENT '优惠金额',
+  `total_price` decimal(24, 6) COMMENT '合计金额',
+  `account_id` bigint COMMENT '账户(收款/付款)',
+  `bill_no` varchar(50) COMMENT '单据编号',
+  `bill_time` datetime COMMENT '单据日期',
+  `remark` varchar(1000) COMMENT '备注',
+  `file_name` varchar(500) COMMENT '附件名称',
+  `status` varchar(1) COMMENT '状态，0未审核、1已审核、9审核中',
+  `source` varchar(1) DEFAULT '0' COMMENT '单据来源，0-pc，1-手机',
+  `tenant_id` bigint COMMENT '租户id',
+  `delete_flag` varchar(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  INDEX `bill_no`(`bill_no`),
+  INDEX `tenant_id`(`tenant_id`)
+) ENGINE=InnoDB COMMENT='财务主表';
+```
+
+**Transaction Types**:
+- **支出** (Expense)
+- **收入** (Income)
+- **收款** (Receipt)
+- **付款** (Payment)
+- **转账** (Transfer)
+
+#### jsh_account_item - Financial Transaction Details
+
+```sql
+CREATE TABLE `jsh_account_item` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `header_id` bigint NOT NULL COMMENT '表头Id',
+  `account_id` bigint COMMENT '账户Id',
+  `in_out_item_id` bigint COMMENT '收支项目Id',
+  `bill_id` bigint COMMENT '单据id',
+  `need_debt` decimal(24, 6) COMMENT '应收欠款',
+  `finish_debt` decimal(24, 6) COMMENT '已收欠款',
+  `each_amount` decimal(24, 6) COMMENT '单项金额',
+  `remark` varchar(500) COMMENT '单据备注',
+  `tenant_id` bigint COMMENT '租户id',
+  `delete_flag` varchar(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  INDEX `bill_id`(`bill_id`),
+  INDEX `tenant_id`(`tenant_id`)
+) ENGINE=InnoDB COMMENT='财务子表';
+```
+
+### Warehouse Module
+
+#### jsh_depot - Warehouse Information
+
+```sql
+CREATE TABLE `jsh_depot` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `name` varchar(20) COMMENT '仓库名称',
+  `address` varchar(50) COMMENT '仓库地址',
+  `warehousing` decimal(24, 6) COMMENT '仓储费',
+  `truckage` decimal(24, 6) COMMENT '搬运费',
+  `type` int COMMENT '类型',
+  `sort` varchar(10) COMMENT '排序',
+  `remark` varchar(100) COMMENT '描述',
+  `principal` bigint COMMENT '负责人',
+  `enabled` bit(1) COMMENT '启用',
+  `tenant_id` bigint COMMENT '租户id',
+  `delete_Flag` varchar(1) DEFAULT '0',
+  `is_default` bit(1) COMMENT '是否默认',
+  PRIMARY KEY (`id`),
+  INDEX `tenant_id`(`tenant_id`)
+) ENGINE=InnoDB COMMENT='仓库表';
+```
+
+#### jsh_depot_head - Document Headers
+
+Main table for all inventory documents (purchase, sales, transfers).
+
+```sql
+CREATE TABLE `jsh_depot_head` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `type` varchar(50) COMMENT '类型(出库/入库)',
+  `sub_type` varchar(50) COMMENT '出入库分类',
+  `default_number` varchar(50) COMMENT '初始票据号',
+  `number` varchar(50) COMMENT '票据号',
+  `create_time` datetime COMMENT '创建时间',
+  `oper_time` datetime COMMENT '出入库时间',
+  `organ_id` bigint COMMENT '供应商id',
+  `creator` bigint COMMENT '操作员',
+  `account_id` bigint COMMENT '账户id',
+  `change_amount` decimal(24, 6) COMMENT '变动金额(收款/付款)',
+  `back_amount` decimal(24, 6) COMMENT '找零金额',
+  `total_price` decimal(24, 6) COMMENT '合计金额',
+  `pay_type` varchar(50) COMMENT '付款类型(现金、记账等)',
+  `bill_type` varchar(50) COMMENT '单据类型',
+  `remark` varchar(1000) COMMENT '备注',
+  `file_name` varchar(1000) COMMENT '附件名称',
+  `sales_man` varchar(50) COMMENT '销售员（可以多个）',
+  `account_id_list` varchar(50) COMMENT '多账户ID列表',
+  `account_money_list` varchar(200) COMMENT '多账户金额列表',
+  `discount` decimal(24, 6) COMMENT '优惠率',
+  `discount_money` decimal(24, 6) COMMENT '优惠金额',
+  `discount_last_money` decimal(24, 6) COMMENT '优惠后金额',
+  `other_money` decimal(24, 6) COMMENT '销售或采购费用合计',
+  `deposit` decimal(24, 6) COMMENT '订金',
+  `status` varchar(1) COMMENT '状态，0未审核、1已审核、2完成采购|销售、3部分采购|销售、9审核中',
+  `purchase_status` varchar(1) COMMENT '采购状态，0未采购、2完成采购、3部分采购',
+  `source` varchar(1) DEFAULT '0' COMMENT '单据来源，0-pc，1-手机',
+  `link_number` varchar(50) COMMENT '关联订单号',
+  `link_apply` varchar(50) COMMENT '关联请购单',
+  `tenant_id` bigint COMMENT '租户id',
+  `delete_flag` varchar(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  INDEX `number`(`number`),
+  INDEX `link_number`(`link_number`),
+  INDEX `creator`(`creator`),
+  INDEX `tenant_id`(`tenant_id`)
+) ENGINE=InnoDB COMMENT='单据主表';
+```
+
+**Document Types**:
+- **采购入库** (Purchase In)
+- **采购退货** (Purchase Return)
+- **销售出库** (Sales Out)
+- **销售退货** (Sales Return)
+- **调拨出库** (Transfer Out)
+- **其它入库** (Other In)
+- **其它出库** (Other Out)
+- **组装单** (Assembly)
+- **拆卸单** (Disassembly)
+
+**Status Values**:
+- `0`: Pending approval
+- `1`: Approved
+- `2`: Completed
+- `3`: Partially completed
+- `9`: Under review
+
+#### jsh_depot_item - Document Details
+
+```sql
+CREATE TABLE `jsh_depot_item` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `header_id` bigint NOT NULL COMMENT '表头Id',
+  `material_id` bigint NOT NULL COMMENT '商品Id',
+  `material_extend_id` bigint COMMENT '商品扩展id',
+  `material_unit` varchar(20) COMMENT '商品单位',
+  `sku` varchar(50) COMMENT '多属性',
+  `oper_number` decimal(24, 6) COMMENT '数量',
+  `basic_number` decimal(24, 6) COMMENT '基础数量，如kg、瓶',
+  `unit_price` decimal(24, 6) COMMENT '单价',
+  `purchase_unit_price` decimal(24, 6) COMMENT '采购单价',
+  `tax_unit_price` decimal(24, 6) COMMENT '含税单价',
+  `all_price` decimal(24, 6) COMMENT '金额',
+  `remark` varchar(500) COMMENT '备注',
+  `depot_id` bigint COMMENT '仓库ID',
+  `another_depot_id` bigint COMMENT '调拨时，对方仓库Id',
+  `tax_rate` decimal(24, 6) COMMENT '税率',
+  `tax_money` decimal(24, 6) COMMENT '税额',
+  `tax_last_money` decimal(24, 6) COMMENT '价税合计',
+  `material_type` varchar(20) COMMENT '商品类型',
+  `sn_list` varchar(2000) COMMENT '序列号列表',
+  `batch_number` varchar(100) COMMENT '批号',
+  `expiration_date` datetime COMMENT '有效日期',
+  `link_id` bigint COMMENT '关联明细id',
+  `tenant_id` bigint COMMENT '租户id',
+  `delete_flag` varchar(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  INDEX `material_id`(`material_id`),
+  INDEX `header_id`(`header_id`),
+  INDEX `depot_id`(`depot_id`),
+  INDEX `tenant_id`(`tenant_id`)
+) ENGINE=InnoDB COMMENT='单据子表';
+```
+
+<Warning>
+The `depot_item` table supports serial number tracking (`sn_list`) and batch number management (`batch_number`) for inventory control.
+</Warning>
+
+### Material/Product Module
+
+#### jsh_material - Material/Product Information
+
+This is a complex table managed through the MaterialService (75,310 lines of code).
+
+**Key Features**:
+- Multi-unit support (jsh_unit table)
+- Multi-attribute variants (jsh_material_attribute)
+- Category hierarchy (jsh_material_category)
+- Extended properties (jsh_material_extend)
+- Property templates (jsh_material_property)
+
+### System Module
+
+#### jsh_function - Function/Permission Table
+
+Defines menu structure and permissions.
+
+```sql
+CREATE TABLE `jsh_function` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `number` varchar(50) COMMENT '编号',
+  `name` varchar(50) COMMENT '名称',
+  `parent_number` varchar(50) COMMENT '上级编号',
+  `url` varchar(100) COMMENT '链接',
+  `component` varchar(100) COMMENT '组件',
+  `state` bit(1) COMMENT '收缩',
+  `sort` varchar(50) COMMENT '排序',
+  `enabled` bit(1) COMMENT '启用',
+  `type` varchar(50) COMMENT '类型',
+  `push_btn` varchar(50) COMMENT '功能按钮',
+  `icon` varchar(50) COMMENT '图标',
+  `delete_flag` varchar(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `url`(`url`)
+) ENGINE=InnoDB COMMENT='功能模块表';
+```
+
+**Sample Data**:
+```sql
+INSERT INTO `jsh_function` VALUES 
+  (1, '0001', '系统管理', '0', '/system', '/layouts/TabLayout', 1, '0910', 1, '电脑版', '', 'setting', '0'),
+  (13, '000102', '角色管理', '0001', '/system/role', '/system/RoleList', 0, '0130', 1, '电脑版', '1', 'profile', '0'),
+  (14, '000103', '用户管理', '0001', '/system/user', '/system/UserList', 0, '0140', 1, '电脑版', '1', 'profile', '0');
+```
+
+**Permission Buttons** (`push_btn`):
+- `1`: Add
+- `2`: Edit
+- `3`: Delete
+- `7`: Approve
+
+#### jsh_user - User Table
+
+Stores user authentication and profile information.
+
+#### jsh_role - Role Table
+
+Defines roles for RBAC (Role-Based Access Control).
+
+#### jsh_user_business - User-Business Relationship
+
+Links users to business entities (depots, accounts, etc.).
+
+## Common Table Patterns
+
+### Soft Delete Pattern
+
+All tables use soft delete:
+
+```sql
+`delete_flag` varchar(1) DEFAULT '0' COMMENT '删除标记，0未删除，1删除'
+```
+
+- `0`: Active record
+- `1`: Deleted record (hidden from queries)
+
+### Multi-Tenancy Pattern
+
+All business tables include tenant isolation:
+
+```sql
+`tenant_id` bigint COMMENT '租户id'
+INDEX `tenant_id`(`tenant_id`)
+```
+
+### Audit Trail Pattern
+
+Many tables track creation and modification:
+
+```sql
+`creator` bigint COMMENT '操作员'
+`create_time` datetime COMMENT '创建时间'
+`oper_time` datetime COMMENT '操作时间'
+```
+
+## Data Type Standards
+
+### Decimal Precision
+
+All monetary and quantity fields use:
+
+```sql
+decimal(24, 6)
+```
+
+This provides:
+- **18 digits** before decimal point
+- **6 digits** after decimal point
+- Suitable for precise financial calculations
+
+### Character Encoding
+
+```sql
+CHARACTER SET utf8 COLLATE utf8_general_ci
+```
+
+### Storage Engine
+
+```sql
+ENGINE = InnoDB
+```
+
+InnoDB provides:
+- Transaction support (ACID)
+- Foreign key constraints
+- Row-level locking
+
+## Index Strategy
+
+<Steps>
+
+### Primary Keys
+
+All tables use auto-increment bigint:
+```sql
+`id` bigint NOT NULL AUTO_INCREMENT
+```
+
+### Foreign Key Indexes
+
+Foreign key columns are indexed:
+```sql
+INDEX `FK9F4C0D8DB610FC06`(`organ_id`)
+```
+
+### Business Key Indexes
+
+Frequently queried columns:
+```sql
+INDEX `number`(`number`)
+INDEX `bill_no`(`bill_no`)
+```
+
+### Tenant Isolation
+
+Tenant queries are optimized:
+```sql
+INDEX `tenant_id`(`tenant_id`)
+```
+
+</Steps>
+
+## Database Initialization
+
+<CodeGroup>
+
+```bash title="MySQL Command Line"
+mysql -u root -p < jshERP-boot/docs/jsh_erp.sql
+```
+
+```bash title="Docker"
+docker exec -i mysql_container mysql -u root -p123456 < jsh_erp.sql
+```
+
+</CodeGroup>
+
+<Note>
+The SQL file includes table structure and sample data for the admin user (username: `jsh`, password: `123456`).
+</Note>
+
+## MyBatis Mapper Configuration
+
+### Entity Generation
+
+MyBatis Generator creates entity classes:
+
+```xml title="pom.xml"
+<plugin>
+    <groupId>org.mybatis.generator</groupId>
+    <artifactId>mybatis-generator-maven-plugin</artifactId>
+    <version>1.4.0</version>
+    <configuration>
+        <configurationFile>src/test/resources/generatorConfig.xml</configurationFile>
+        <verbose>true</verbose>
+        <overwrite>true</overwrite>
+    </configuration>
+</plugin>
+```
+
+### Mapper XML Location
+
+```properties title="application.properties"
+mybatis-plus.mapper-locations=classpath:./mapper_xml/*.xml
+```
+
+## Query Optimization Tips
+
+<Warning>
+Always include `tenant_id` in WHERE clauses for multi-tenant queries:
+
+```sql
+SELECT * FROM jsh_account WHERE tenant_id = ? AND delete_flag = '0'
+```
+</Warning>
+
+### Pagination
+
+Use PageHelper for efficient pagination:
+
+```java
+PageHelper.startPage(pageNum, pageSize);
+List<Account> accounts = accountMapper.selectByExample(example);
+PageInfo<Account> pageInfo = new PageInfo<>(accounts);
+```
+
+### Batch Operations
+
+Enable batch mode for bulk inserts:
+
+```properties
+spring.datasource.url=...&rewriteBatchedStatements=true
+```
+
+## Related Resources
+
+- [System Architecture](/development/architecture) - Technical overview
+- [Plugin System](/development/plugin-system) - Database extensibility
+- [API Reference](/api/introduction) - Database operations via API

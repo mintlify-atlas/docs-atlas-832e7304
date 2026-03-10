@@ -1,0 +1,955 @@
+---
+title: Customization Guide
+description: How to customize and extend jshERP for your specific business needs
+---
+
+## Overview
+
+jshERP is designed to be highly customizable without modifying core code. This guide covers various customization approaches from configuration changes to code extensions.
+
+<Note>
+Always prefer configuration and plugin-based customization over modifying core code to ensure easy upgrades.
+</Note>
+
+## Configuration Customization
+
+### Application Properties
+
+The main configuration file is `application.properties`:
+
+```properties title="application.properties"
+# Server Configuration
+server.port=9999
+server.servlet.session.timeout=36000
+server.servlet.context-path=/jshERP-boot
+
+# Database Configuration
+spring.datasource.url=jdbc:mysql://127.0.0.1:3306/jsh_erp?useUnicode=true&characterEncoding=utf8&useCursorFetch=true&defaultFetchSize=500&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=false
+spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+spring.datasource.username=root
+spring.datasource.password=123456
+
+# MyBatis Configuration
+mybatis-plus.mapper-locations=classpath:./mapper_xml/*.xml
+
+# Redis Configuration
+spring.redis.host=127.0.0.1
+spring.redis.port=6379
+spring.redis.password=1234abcd
+
+# Tenant Configuration
+manage.roleId=10
+tenant.userNumLimit=1000000
+tenant.tryDayLimit=3000
+
+# Plugin Configuration
+plugin.runMode=prod
+plugin.pluginPath=plugins
+plugin.pluginConfigFilePath=pluginConfig
+
+# File Upload Configuration
+file.uploadType=1
+file.path=/opt/jshERP/upload
+server.tomcat.basedir=/opt/tmp/tomcat
+spring.servlet.multipart.max-file-size=10485760
+spring.servlet.multipart.max-request-size=10485760
+```
+
+### Common Customizations
+
+<Steps>
+
+### Change Port and Context Path
+
+```properties
+server.port=8080
+server.servlet.context-path=/erp
+```
+
+Access URL becomes: `http://localhost:8080/erp/doc.html`
+
+### Configure Database
+
+```properties
+spring.datasource.url=jdbc:mysql://db.example.com:3306/jsh_erp_prod
+spring.datasource.username=erp_user
+spring.datasource.password=secure_password
+```
+
+### Adjust Session Timeout
+
+```properties
+# Session timeout in seconds (default: 10 hours)
+server.servlet.session.timeout=7200  # 2 hours
+```
+
+### Configure File Upload
+
+```properties
+# Upload type: 1=Local, 2=OSS
+file.uploadType=1
+file.path=/var/jshERP/uploads
+
+# Max file size (bytes)
+spring.servlet.multipart.max-file-size=52428800  # 50MB
+spring.servlet.multipart.max-request-size=52428800
+```
+
+### Tenant Limits
+
+```properties
+# Maximum users per tenant
+tenant.userNumLimit=100
+
+# Trial period in days
+tenant.tryDayLimit=30
+```
+
+</Steps>
+
+## Database Customization
+
+### Adding Custom Tables
+
+Create custom tables following jshERP conventions:
+
+```sql
+CREATE TABLE `jsh_custom_module` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `name` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '名称',
+  `code` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '编码',
+  `status` varchar(1) DEFAULT '1' COMMENT '状态',
+  `creator` bigint COMMENT '创建人',
+  `create_time` datetime COMMENT '创建时间',
+  `remark` varchar(500) COMMENT '备注',
+  `tenant_id` bigint COMMENT '租户id',
+  `delete_flag` varchar(1) DEFAULT '0' COMMENT '删除标记，0未删除，1删除',
+  PRIMARY KEY (`id`),
+  INDEX `tenant_id`(`tenant_id`),
+  INDEX `code`(`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='自定义模块';
+```
+
+<Warning>
+**Always include these standard fields**:
+- `id`: bigint auto_increment primary key
+- `tenant_id`: For multi-tenancy
+- `delete_flag`: For soft delete pattern
+- Indexes on `tenant_id` and frequently queried fields
+</Warning>
+
+### Generating Entity and Mapper
+
+Use MyBatis Generator to create entity classes:
+
+<CodeGroup>
+
+```xml title="generatorConfig.xml"
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+  <context id="MySqlContext" targetRuntime="MyBatis3">
+    <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                    connectionURL="jdbc:mysql://localhost:3306/jsh_erp"
+                    userId="root"
+                    password="123456"/>
+
+    <javaModelGenerator targetPackage="com.jsh.erp.datasource.entities"
+                        targetProject="src/main/java"/>
+
+    <sqlMapGenerator targetPackage="mapper_xml"
+                     targetProject="src/main/resources"/>
+
+    <javaClientGenerator type="XMLMAPPER"
+                         targetPackage="com.jsh.erp.datasource.mappers"
+                         targetProject="src/main/java"/>
+
+    <table tableName="jsh_custom_module"
+           enableCountByExample="true"
+           enableUpdateByExample="true"
+           enableDeleteByExample="true"
+           enableSelectByExample="true"
+           selectByExampleQueryId="true"/>
+  </context>
+</generatorConfiguration>
+```
+
+```bash title="Generate Code"
+mvn mybatis-generator:generate
+```
+
+</CodeGroup>
+
+## Backend Customization
+
+### Creating Custom Controller
+
+```java title="CustomModuleController.java"
+package com.jsh.erp.controller;
+
+import com.jsh.erp.datasource.entities.CustomModule;
+import com.jsh.erp.service.CustomModuleService;
+import com.jsh.erp.utils.BaseResponseInfo;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import java.util.List;
+
+@RestController
+@RequestMapping("/customModule")
+@Api(tags = {"自定义模块管理"})
+public class CustomModuleController {
+
+    @Resource
+    private CustomModuleService customModuleService;
+
+    /**
+     * Get list with pagination
+     */
+    @GetMapping("/list")
+    @ApiOperation(value = "获取列表")
+    public BaseResponseInfo getList(
+            @RequestParam("currentPage") Integer currentPage,
+            @RequestParam("pageSize") Integer pageSize,
+            @RequestParam(value = "name", required = false) String name) {
+        BaseResponseInfo res = new BaseResponseInfo();
+        try {
+            List<CustomModule> list = customModuleService.getList(
+                currentPage, pageSize, name);
+            res.code = 200;
+            res.data = list;
+        } catch (Exception e) {
+            res.code = 500;
+            res.data = "获取数据失败";
+        }
+        return res;
+    }
+
+    /**
+     * Add new record
+     */
+    @PostMapping("/add")
+    @ApiOperation(value = "新增")
+    public BaseResponseInfo add(@RequestBody CustomModule customModule) {
+        BaseResponseInfo res = new BaseResponseInfo();
+        try {
+            customModuleService.add(customModule);
+            res.code = 200;
+            res.data = "添加成功";
+        } catch (Exception e) {
+            res.code = 500;
+            res.data = "添加失败";
+        }
+        return res;
+    }
+
+    /**
+     * Update record
+     */
+    @PutMapping("/update")
+    @ApiOperation(value = "更新")
+    public BaseResponseInfo update(@RequestBody CustomModule customModule) {
+        BaseResponseInfo res = new BaseResponseInfo();
+        try {
+            customModuleService.update(customModule);
+            res.code = 200;
+            res.data = "更新成功";
+        } catch (Exception e) {
+            res.code = 500;
+            res.data = "更新失败";
+        }
+        return res;
+    }
+
+    /**
+     * Delete (soft delete)
+     */
+    @DeleteMapping("/delete")
+    @ApiOperation(value = "删除")
+    public BaseResponseInfo delete(@RequestParam("id") Long id) {
+        BaseResponseInfo res = new BaseResponseInfo();
+        try {
+            customModuleService.delete(id);
+            res.code = 200;
+            res.data = "删除成功";
+        } catch (Exception e) {
+            res.code = 500;
+            res.data = "删除失败";
+        }
+        return res;
+    }
+}
+```
+
+### Creating Custom Service
+
+```java title="CustomModuleService.java"
+package com.jsh.erp.service;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.jsh.erp.datasource.entities.CustomModule;
+import com.jsh.erp.datasource.entities.CustomModuleExample;
+import com.jsh.erp.datasource.entities.User;
+import com.jsh.erp.datasource.mappers.CustomModuleMapper;
+import com.jsh.erp.utils.StringUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.Date;
+import java.util.List;
+
+@Service
+public class CustomModuleService {
+
+    @Resource
+    private CustomModuleMapper customModuleMapper;
+
+    @Resource
+    private UserService userService;
+
+    /**
+     * Get paginated list
+     */
+    public List<CustomModule> getList(Integer currentPage, Integer pageSize, String name) {
+        PageHelper.startPage(currentPage, pageSize);
+        
+        CustomModuleExample example = new CustomModuleExample();
+        CustomModuleExample.Criteria criteria = example.createCriteria();
+        
+        // Tenant isolation
+        User user = userService.getCurrentUser();
+        criteria.andTenantIdEqualTo(user.getTenantId());
+        
+        // Soft delete filter
+        criteria.andDeleteFlagEqualTo("0");
+        
+        // Name filter
+        if (StringUtil.isNotEmpty(name)) {
+            criteria.andNameLike("%" + name + "%");
+        }
+        
+        List<CustomModule> list = customModuleMapper.selectByExample(example);
+        return list;
+    }
+
+    /**
+     * Add new record
+     */
+    @Transactional
+    public void add(CustomModule customModule) throws Exception {
+        User user = userService.getCurrentUser();
+        
+        customModule.setCreator(user.getId());
+        customModule.setCreateTime(new Date());
+        customModule.setTenantId(user.getTenantId());
+        customModule.setDeleteFlag("0");
+        
+        customModuleMapper.insert(customModule);
+    }
+
+    /**
+     * Update record
+     */
+    @Transactional
+    public void update(CustomModule customModule) throws Exception {
+        User user = userService.getCurrentUser();
+        
+        CustomModuleExample example = new CustomModuleExample();
+        example.createCriteria()
+            .andIdEqualTo(customModule.getId())
+            .andTenantIdEqualTo(user.getTenantId())
+            .andDeleteFlagEqualTo("0");
+        
+        customModuleMapper.updateByExampleSelective(customModule, example);
+    }
+
+    /**
+     * Delete (soft delete)
+     */
+    @Transactional
+    public void delete(Long id) throws Exception {
+        User user = userService.getCurrentUser();
+        
+        CustomModule record = new CustomModule();
+        record.setDeleteFlag("1");
+        
+        CustomModuleExample example = new CustomModuleExample();
+        example.createCriteria()
+            .andIdEqualTo(id)
+            .andTenantIdEqualTo(user.getTenantId());
+        
+        customModuleMapper.updateByExampleSelective(record, example);
+    }
+}
+```
+
+<Note>
+**Key Patterns**:
+- Always filter by `tenant_id` for multi-tenancy
+- Use `delete_flag = '0'` for active records
+- Wrap database operations in `@Transactional`
+- Use `PageHelper` for pagination
+</Note>
+
+## Frontend Customization
+
+### Creating Custom Page
+
+<Steps>
+
+### Create Vue Component
+
+```vue title="src/views/custom/CustomModuleList.vue"
+<template>
+  <div>
+    <a-card :bordered="false">
+      <!-- Search Form -->
+      <div class="table-page-search-wrapper">
+        <a-form layout="inline">
+          <a-row :gutter="24">
+            <a-col :md="6" :sm="24">
+              <a-form-item label="名称">
+                <a-input v-model="queryParam.name" placeholder="请输入名称" />
+              </a-form-item>
+            </a-col>
+            <a-col :md="6" :sm="24">
+              <span class="table-page-search-submitButtons">
+                <a-button type="primary" @click="searchQuery">查询</a-button>
+                <a-button style="margin-left: 8px" @click="searchReset">重置</a-button>
+              </span>
+            </a-col>
+          </a-row>
+        </a-form>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="table-operator">
+        <a-button type="primary" icon="plus" @click="handleAdd">新增</a-button>
+      </div>
+
+      <!-- Table -->
+      <a-table
+        ref="table"
+        :columns="columns"
+        :dataSource="dataSource"
+        :pagination="ipagination"
+        :loading="loading"
+        @change="handleTableChange"
+        rowKey="id"
+      >
+        <span slot="action" slot-scope="text, record">
+          <a @click="handleEdit(record)">编辑</a>
+          <a-divider type="vertical" />
+          <a-popconfirm title="确定删除吗?" @confirm="() => handleDelete(record.id)">
+            <a>删除</a>
+          </a-popconfirm>
+        </span>
+      </a-table>
+    </a-card>
+
+    <!-- Add/Edit Modal -->
+    <custom-module-modal ref="modalForm" @ok="modalFormOk" />
+  </div>
+</template>
+
+<script>
+import { getList, deleteRecord } from '@/api/customModule'
+import CustomModuleModal from './modules/CustomModuleModal'
+
+export default {
+  name: 'CustomModuleList',
+  components: {
+    CustomModuleModal
+  },
+  data() {
+    return {
+      queryParam: {
+        name: ''
+      },
+      columns: [
+        {
+          title: '名称',
+          dataIndex: 'name',
+          key: 'name'
+        },
+        {
+          title: '编码',
+          dataIndex: 'code',
+          key: 'code'
+        },
+        {
+          title: '状态',
+          dataIndex: 'status',
+          key: 'status'
+        },
+        {
+          title: '操作',
+          dataIndex: 'action',
+          scopedSlots: { customRender: 'action' },
+          width: 150
+        }
+      ],
+      dataSource: [],
+      ipagination: {
+        current: 1,
+        pageSize: 10,
+        total: 0
+      },
+      loading: false
+    }
+  },
+  created() {
+    this.loadData()
+  },
+  methods: {
+    loadData() {
+      this.loading = true
+      const params = {
+        currentPage: this.ipagination.current,
+        pageSize: this.ipagination.pageSize,
+        name: this.queryParam.name
+      }
+      
+      getList(params).then(res => {
+        if (res.code === 200) {
+          this.dataSource = res.data.rows
+          this.ipagination.total = res.data.total
+        }
+        this.loading = false
+      })
+    },
+    searchQuery() {
+      this.ipagination.current = 1
+      this.loadData()
+    },
+    searchReset() {
+      this.queryParam = { name: '' }
+      this.loadData()
+    },
+    handleAdd() {
+      this.$refs.modalForm.add()
+    },
+    handleEdit(record) {
+      this.$refs.modalForm.edit(record)
+    },
+    handleDelete(id) {
+      deleteRecord({ id }).then(res => {
+        if (res.code === 200) {
+          this.$message.success('删除成功')
+          this.loadData()
+        } else {
+          this.$message.error('删除失败')
+        }
+      })
+    },
+    handleTableChange(pagination) {
+      this.ipagination = pagination
+      this.loadData()
+    },
+    modalFormOk() {
+      this.loadData()
+    }
+  }
+}
+</script>
+```
+
+### Create API Service
+
+```javascript title="src/api/customModule.js"
+import { axios } from '@/utils/request'
+
+const api = {
+  list: '/customModule/list',
+  add: '/customModule/add',
+  update: '/customModule/update',
+  delete: '/customModule/delete'
+}
+
+export function getList(params) {
+  return axios({
+    url: api.list,
+    method: 'get',
+    params: params
+  })
+}
+
+export function addRecord(data) {
+  return axios({
+    url: api.add,
+    method: 'post',
+    data: data
+  })
+}
+
+export function updateRecord(data) {
+  return axios({
+    url: api.update,
+    method: 'put',
+    data: data
+  })
+}
+
+export function deleteRecord(params) {
+  return axios({
+    url: api.delete,
+    method: 'delete',
+    params: params
+  })
+}
+```
+
+### Add Route
+
+```javascript title="src/config/router.config.js"
+export const asyncRouterMap = [
+  {
+    path: '/custom',
+    name: 'custom',
+    component: TabLayout,
+    meta: { title: '自定义模块', icon: 'tool' },
+    children: [
+      {
+        path: '/custom/module',
+        name: 'CustomModule',
+        component: () => import('@/views/custom/CustomModuleList'),
+        meta: { title: '模块管理', keepAlive: true }
+      }
+    ]
+  }
+]
+```
+
+</Steps>
+
+## Customizing Existing Features
+
+### Extending Material Fields
+
+Add custom fields to material management:
+
+```sql
+ALTER TABLE jsh_material_extend 
+ADD COLUMN `custom_field1` varchar(100) COMMENT '自定义字段1',
+ADD COLUMN `custom_field2` decimal(24,6) COMMENT '自定义字段2';
+```
+
+Update the entity and mapper:
+
+```bash
+mvn mybatis-generator:generate
+```
+
+### Modifying Business Logic
+
+Override service methods by creating a custom service:
+
+```java
+@Service
+@Primary  // Takes precedence over original service
+public class CustomMaterialService extends MaterialService {
+
+    @Override
+    public void addMaterial(Material material) throws Exception {
+        // Add custom validation
+        if (material.getStock() < 0) {
+            throw new Exception("库存不能为负数");
+        }
+        
+        // Call parent method
+        super.addMaterial(material);
+        
+        // Add custom post-processing
+        sendNotification(material);
+    }
+    
+    private void sendNotification(Material material) {
+        // Custom notification logic
+    }
+}
+```
+
+## UI Customization
+
+### Custom Theme
+
+```less title="src/assets/less/theme.less"
+// Override Ant Design variables
+@primary-color: #1890ff;  // Primary color
+@link-color: #1890ff;     // Link color
+@success-color: #52c41a;  // Success color
+@warning-color: #faad14;  // Warning color
+@error-color: #f5222d;    // Error color
+@font-size-base: 14px;    // Base font size
+@heading-color: rgba(0, 0, 0, 0.85);  // Heading color
+@text-color: rgba(0, 0, 0, 0.65);     // Body text color
+@border-radius-base: 4px;  // Border radius
+```
+
+### Custom Logo
+
+Replace logo files:
+
+```bash
+# Replace logo in assets
+cp my-logo.png src/assets/logo.png
+
+# Update App.vue or layout component
+```
+
+### Custom Header/Footer
+
+Modify layout components:
+
+```vue title="src/components/layouts/BasicLayout.vue"
+<template>
+  <a-layout>
+    <a-layout-header>
+      <!-- Custom header -->
+      <div class="custom-header">
+        <img src="@/assets/logo.png" alt="Logo" />
+        <span class="title">我的ERP系统</span>
+      </div>
+    </a-layout-header>
+    
+    <a-layout-content>
+      <router-view />
+    </a-layout-content>
+    
+    <a-layout-footer>
+      <!-- Custom footer -->
+      <div class="custom-footer">
+        © 2024 My Company. All rights reserved.
+      </div>
+    </a-layout-footer>
+  </a-layout>
+</template>
+```
+
+## Adding Custom Reports
+
+### Backend Report API
+
+```java title="CustomReportController.java"
+@RestController
+@RequestMapping("/customReport")
+@Api(tags = {"自定义报表"})
+public class CustomReportController {
+
+    @Resource
+    private CustomReportService customReportService;
+
+    @GetMapping("/salesSummary")
+    @ApiOperation(value = "销售汇总报表")
+    public BaseResponseInfo getSalesSummary(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) {
+        BaseResponseInfo res = new BaseResponseInfo();
+        try {
+            List<Map<String, Object>> data = customReportService
+                .getSalesSummary(startDate, endDate);
+            res.code = 200;
+            res.data = data;
+        } catch (Exception e) {
+            res.code = 500;
+            res.data = "获取报表失败";
+        }
+        return res;
+    }
+
+    @GetMapping("/export")
+    @ApiOperation(value = "导出报表")
+    public void exportReport(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate,
+            HttpServletResponse response) throws Exception {
+        List<Map<String, Object>> data = customReportService
+            .getSalesSummary(startDate, endDate);
+        
+        // Export to Excel
+        customReportService.exportToExcel(data, response);
+    }
+}
+```
+
+### Frontend Report Page
+
+```vue title="src/views/report/CustomReport.vue"
+<template>
+  <div>
+    <a-card>
+      <a-form layout="inline">
+        <a-form-item label="开始日期">
+          <a-date-picker v-model="startDate" />
+        </a-form-item>
+        <a-form-item label="结束日期">
+          <a-date-picker v-model="endDate" />
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="loadData">查询</a-button>
+          <a-button @click="exportReport">导出</a-button>
+        </a-form-item>
+      </a-form>
+
+      <a-table :columns="columns" :dataSource="dataSource" />
+    </a-card>
+  </div>
+</template>
+
+<script>
+import { getSalesSummary } from '@/api/customReport'
+
+export default {
+  data() {
+    return {
+      startDate: null,
+      endDate: null,
+      columns: [
+        { title: '商品名称', dataIndex: 'materialName' },
+        { title: '销售数量', dataIndex: 'quantity' },
+        { title: '销售金额', dataIndex: 'amount' }
+      ],
+      dataSource: []
+    }
+  },
+  methods: {
+    loadData() {
+      const params = {
+        startDate: this.startDate,
+        endDate: this.endDate
+      }
+      getSalesSummary(params).then(res => {
+        if (res.code === 200) {
+          this.dataSource = res.data
+        }
+      })
+    },
+    exportReport() {
+      window.open(
+        `/jshERP-boot/customReport/export?startDate=${this.startDate}&endDate=${this.endDate}`
+      )
+    }
+  }
+}
+</script>
+```
+
+## Integration with External Systems
+
+### REST API Integration
+
+```java
+@Service
+public class ExternalIntegrationService {
+
+    private RestTemplate restTemplate = new RestTemplate();
+
+    public void syncToExternalSystem(DepotHead order) {
+        String apiUrl = "https://external-api.com/orders";
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + getApiToken());
+        
+        HttpEntity<DepotHead> request = new HttpEntity<>(order, headers);
+        
+        ResponseEntity<String> response = restTemplate.postForEntity(
+            apiUrl, request, String.class);
+        
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new RuntimeException("同步失败: " + response.getBody());
+        }
+    }
+}
+```
+
+### Message Queue Integration
+
+```java
+@Service
+public class MessageQueueService {
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    public void sendOrderMessage(DepotHead order) {
+        String message = JSONObject.toJSONString(order);
+        rabbitTemplate.convertAndSend("order.exchange", "order.created", message);
+    }
+
+    @RabbitListener(queues = "order.queue")
+    public void handleOrderMessage(String message) {
+        DepotHead order = JSONObject.parseObject(message, DepotHead.class);
+        // Process order
+    }
+}
+```
+
+## Best Practices
+
+<Warning>
+**Important Guidelines**:
+
+1. **Never modify core files directly** - Use inheritance, plugins, or configuration
+2. **Follow naming conventions** - Use `jsh_` prefix for tables, consistent package structure
+3. **Implement multi-tenancy** - Always filter by `tenant_id`
+4. **Use soft delete** - Never hard delete records
+5. **Add proper indexes** - Include `tenant_id` and foreign keys
+6. **Handle exceptions** - Use try-catch and return proper error messages
+7. **Write tests** - Unit tests for services, integration tests for APIs
+8. **Document changes** - Comment code and update documentation
+</Warning>
+
+## Version Control for Customizations
+
+Create a separate branch for customizations:
+
+```bash
+git checkout -b custom-features
+git add .
+git commit -m "Add custom module for XYZ"
+git push origin custom-features
+```
+
+## Upgrading with Customizations
+
+<Steps>
+
+### Backup Database
+
+```bash
+mysqldump -u root -p jsh_erp > backup_before_upgrade.sql
+```
+
+### Create Merge Branch
+
+```bash
+git checkout main
+git pull origin main
+git checkout custom-features
+git merge main
+```
+
+### Resolve Conflicts
+
+Review and resolve any merge conflicts
+
+### Test Thoroughly
+
+Test all custom features after merge
+
+</Steps>
+
+## Related Resources
+
+- [System Architecture](/development/architecture) - Understanding the system
+- [Database Schema](/development/database-schema) - Database structure
+- [Plugin System](/development/plugin-system) - Plugin-based extensions
+- [API Reference](/api/introduction) - REST API documentation

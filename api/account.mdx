@@ -1,0 +1,649 @@
+---
+title: 'Account/Financial API'
+description: 'API endpoints for managing financial accounts, transactions, and accounting records'
+---
+
+## Overview
+
+The Account API provides comprehensive endpoints for managing financial accounts, payment/receipt transactions, and account statements in jshERP. This includes account management, account heads (transaction headers), and account items (transaction details).
+
+## Account Management
+
+Manage financial settlement accounts including bank accounts, cash accounts, and other payment methods.
+
+### Get Account Info
+
+Retrieve detailed information about a specific account by ID.
+
+```bash
+GET /account/info?id={id}
+```
+
+<ParamField query="id" type="Long" required>
+  The unique identifier of the account
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code (200 for success)
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="Account object">
+    <ResponseField name="id" type="Long">Account ID</ResponseField>
+    <ResponseField name="name" type="string">Account name</ResponseField>
+    <ResponseField name="serialNo" type="string">Serial/Account number</ResponseField>
+    <ResponseField name="initialAmount" type="BigDecimal">Initial amount</ResponseField>
+    <ResponseField name="currentAmount" type="BigDecimal">Current balance</ResponseField>
+    <ResponseField name="enabled" type="boolean">Whether account is enabled</ResponseField>
+    <ResponseField name="isDefault" type="boolean">Whether this is the default account</ResponseField>
+    <ResponseField name="remark" type="string">Additional remarks</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### List Accounts
+
+Retrieve a paginated list of accounts with optional search filters.
+
+```bash
+GET /account/list?search={search}
+```
+
+<ParamField query="search" type="string">
+  JSON string containing search parameters:
+  - `name`: Account name filter
+  - `serialNo`: Serial number filter
+  - `remark`: Remark filter
+</ParamField>
+
+### Create Account
+
+Create a new financial account.
+
+```bash
+POST /account/add
+```
+
+<ParamField body="name" type="string" required>
+  Account name
+</ParamField>
+
+<ParamField body="serialNo" type="string">
+  Serial/Account number
+</ParamField>
+
+<ParamField body="initialAmount" type="BigDecimal">
+  Initial balance
+</ParamField>
+
+<ParamField body="enabled" type="boolean">
+  Enable status (default: true)
+</ParamField>
+
+<ParamField body="remark" type="string">
+  Additional remarks
+</ParamField>
+
+<CodeGroup>
+```bash cURL
+curl -X POST "http://localhost:8080/account/add" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "ICBC Main Account",
+    "serialNo": "6222021001012345678",
+    "initialAmount": 100000.00,
+    "enabled": true,
+    "remark": "Primary bank account"
+  }'
+```
+
+```json Response
+{
+  "code": 200,
+  "data": {
+    "message": "操作成功"
+  }
+}
+```
+</CodeGroup>
+
+### Update Account
+
+Update an existing account's information.
+
+```bash
+PUT /account/update
+```
+
+<ParamField body="id" type="Long" required>
+  Account ID to update
+</ParamField>
+
+<ParamField body="name" type="string">
+  Updated account name
+</ParamField>
+
+<ParamField body="serialNo" type="string">
+  Updated serial number
+</ParamField>
+
+### Delete Account
+
+Delete an account by ID.
+
+```bash
+DELETE /account/delete?id={id}
+```
+
+<ParamField query="id" type="Long" required>
+  Account ID to delete
+</ParamField>
+
+### Batch Delete Accounts
+
+Delete multiple accounts at once.
+
+```bash
+DELETE /account/deleteBatch?ids={ids}
+```
+
+<ParamField query="ids" type="string" required>
+  Comma-separated account IDs (e.g., "1,2,3")
+</ParamField>
+
+### Get All Accounts
+
+Retrieve all active accounts.
+
+```bash
+GET /account/getAccount
+```
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <ResponseField name="accountList" type="array">
+    Array of account objects
+  </ResponseField>
+</ResponseField>
+
+<CodeGroup>
+```bash cURL
+curl -X GET "http://localhost:8080/account/getAccount"
+```
+
+```json Response
+{
+  "code": 200,
+  "data": {
+    "accountList": [
+      {
+        "id": 1,
+        "name": "ICBC Main Account",
+        "serialNo": "6222021001012345678",
+        "currentAmount": 125000.00,
+        "enabled": true
+      },
+      {
+        "id": 2,
+        "name": "Cash Account",
+        "currentAmount": 5000.00,
+        "enabled": true
+      }
+    ]
+  }
+}
+```
+</CodeGroup>
+
+### Find by Select
+
+Get accounts for dropdown selection.
+
+```bash
+GET /account/findBySelect
+```
+
+<ResponseField name="data" type="array">
+  <Expandable title="Account items">
+    <ResponseField name="Id" type="Long">Account ID</ResponseField>
+    <ResponseField name="AccountName" type="string">Account name</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Update Default Account
+
+Set an account as the default account.
+
+```bash
+POST /account/updateIsDefault
+```
+
+<ParamField body="id" type="Long" required>
+  Account ID to set as default
+</ParamField>
+
+### Batch Set Status
+
+Enable or disable multiple accounts at once.
+
+```bash
+POST /account/batchSetStatus
+```
+
+<ParamField body="status" type="boolean" required>
+  true to enable, false to disable
+</ParamField>
+
+<ParamField body="ids" type="string" required>
+  Comma-separated account IDs
+</ParamField>
+
+## Account Statements & Reports
+
+### List with Balance
+
+Get accounts list with current balance information.
+
+```bash
+GET /account/listWithBalance
+```
+
+<ParamField query="name" type="string" required>
+  Account name filter (empty string for all)
+</ParamField>
+
+<ParamField query="serialNo" type="string" required>
+  Serial number filter (empty string for all)
+</ParamField>
+
+<ResponseField name="rows" type="array">
+  <Expandable title="Account with balance">
+    <ResponseField name="id" type="Long">Account ID</ResponseField>
+    <ResponseField name="name" type="string">Account name</ResponseField>
+    <ResponseField name="serialNo" type="string">Serial number</ResponseField>
+    <ResponseField name="initialAmount" type="BigDecimal">Initial amount</ResponseField>
+    <ResponseField name="currentAmount" type="BigDecimal">Current balance</ResponseField>
+    <ResponseField name="enabled" type="boolean">Enabled status</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Get Statistics
+
+Get aggregated statistics for accounts.
+
+```bash
+GET /account/getStatistics
+```
+
+<ParamField query="name" type="string" required>
+  Account name filter
+</ParamField>
+
+<ParamField query="serialNo" type="string" required>
+  Serial number filter
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="Statistics">
+    <ResponseField name="totalInitial" type="BigDecimal">Total initial amount</ResponseField>
+    <ResponseField name="totalCurrent" type="BigDecimal">Total current balance</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Find Account In/Out List
+
+Get detailed transaction history for an account.
+
+```bash
+GET /account/findAccountInOutList
+```
+
+<ParamField query="currentPage" type="integer" required>
+  Current page number
+</ParamField>
+
+<ParamField query="pageSize" type="integer" required>
+  Records per page
+</ParamField>
+
+<ParamField query="accountId" type="Long" required>
+  Account ID
+</ParamField>
+
+<ParamField query="initialAmount" type="BigDecimal" required>
+  Initial amount for balance calculation
+</ParamField>
+
+<ParamField query="number" type="string">
+  Bill number filter
+</ParamField>
+
+<ParamField query="beginTime" type="string">
+  Start date (YYYY-MM-DD HH:mm:ss)
+</ParamField>
+
+<ParamField query="endTime" type="string">
+  End date (YYYY-MM-DD HH:mm:ss)
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="Transaction data">
+    <ResponseField name="rows" type="array">
+      <Expandable title="Transaction record">
+        <ResponseField name="billNo" type="string">Bill number</ResponseField>
+        <ResponseField name="type" type="string">Transaction type</ResponseField>
+        <ResponseField name="organName" type="string">Organization name</ResponseField>
+        <ResponseField name="handsPersonName" type="string">Handler name</ResponseField>
+        <ResponseField name="changeAmount" type="BigDecimal">Change amount</ResponseField>
+        <ResponseField name="balance" type="BigDecimal">Balance after transaction</ResponseField>
+        <ResponseField name="operTime" type="string">Operation time</ResponseField>
+        <ResponseField name="remark" type="string">Remark</ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="total" type="integer">Total record count</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```bash cURL
+curl -X GET "http://localhost:8080/account/findAccountInOutList?currentPage=1&pageSize=20&accountId=1&initialAmount=100000"
+```
+
+```json Response
+{
+  "code": 200,
+  "data": {
+    "total": 150,
+    "rows": [
+      {
+        "billNo": "FKD20240315001",
+        "type": "付款",
+        "organName": "ABC Supplier",
+        "handsPersonName": "张三",
+        "changeAmount": -5000.00,
+        "balance": 120000.00,
+        "operTime": "2024-03-15 10:30:00",
+        "remark": "采购付款"
+      },
+      {
+        "billNo": "SKD20240315002",
+        "type": "收款",
+        "organName": "XYZ Customer",
+        "handsPersonName": "李四",
+        "changeAmount": 8000.00,
+        "balance": 128000.00,
+        "operTime": "2024-03-15 14:20:00",
+        "remark": "销售收款"
+      }
+    ]
+  }
+}
+```
+</CodeGroup>
+
+## Validation
+
+### Check Name Exists
+
+Check if an account name already exists.
+
+```bash
+GET /account/checkIsNameExist
+```
+
+<ParamField query="id" type="Long" required>
+  Account ID (use 0 for new account)
+</ParamField>
+
+<ParamField query="name" type="string" required>
+  Account name to check
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <ResponseField name="status" type="boolean">
+    true if name exists, false otherwise
+  </ResponseField>
+</ResponseField>
+
+## Account Head (Financial Transactions)
+
+Manage financial transaction headers including payments, receipts, transfers, and other accounting entries.
+
+### Get Account Head Info
+
+```bash
+GET /accountHead/info?id={id}
+```
+
+<ParamField query="id" type="Long" required>
+  Account head ID
+</ParamField>
+
+### List Account Heads
+
+Retrieve financial transaction headers with advanced filtering.
+
+```bash
+GET /accountHead/list?search={search}
+```
+
+<ParamField query="search" type="string">
+  JSON string containing search parameters:
+  - `type`: Transaction type (收入/支出/收款/付款/转账)
+  - `billNo`: Bill number
+  - `beginTime`: Start date
+  - `endTime`: End date
+  - `organId`: Organization ID
+  - `accountId`: Account ID
+  - `status`: Status filter
+  - `number`: Reference number
+</ParamField>
+
+### Create Account Head and Details
+
+Create a new financial transaction with header and line items.
+
+```bash
+POST /accountHead/addAccountHeadAndDetail
+```
+
+<ParamField body="info" type="string" required>
+  JSON string of account head information
+</ParamField>
+
+<ParamField body="rows" type="string" required>
+  JSON string of account item rows
+</ParamField>
+
+<CodeGroup>
+```bash cURL
+curl -X POST "http://localhost:8080/accountHead/addAccountHeadAndDetail" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "info": "{\"type\":\"付款\",\"organId\":5,\"totalPrice\":5000,\"operTime\":\"2024-03-15 10:00:00\"}",
+    "rows": "[{\"accountId\":1,\"eachAmount\":5000,\"remark\":\"采购货款\"}]"
+  }'
+```
+
+```json Response
+{
+  "code": 200,
+  "data": {
+    "message": "操作成功"
+  }
+}
+```
+</CodeGroup>
+
+### Update Account Head and Details
+
+Update an existing financial transaction.
+
+```bash
+PUT /accountHead/updateAccountHeadAndDetail
+```
+
+<ParamField body="info" type="string" required>
+  JSON string of updated account head information (must include id)
+</ParamField>
+
+<ParamField body="rows" type="string" required>
+  JSON string of updated account item rows
+</ParamField>
+
+### Delete Account Head
+
+```bash
+DELETE /accountHead/delete?id={id}
+```
+
+<ParamField query="id" type="Long" required>
+  Account head ID to delete
+</ParamField>
+
+### Batch Delete Account Heads
+
+```bash
+DELETE /accountHead/deleteBatch?ids={ids}
+```
+
+<ParamField query="ids" type="string" required>
+  Comma-separated account head IDs
+</ParamField>
+
+### Batch Set Status
+
+Approve or reverse approval for financial transactions.
+
+```bash
+POST /accountHead/batchSetStatus
+```
+
+<ParamField body="status" type="string" required>
+  Status value ("0" for pending, "1" for approved)
+</ParamField>
+
+<ParamField body="ids" type="string" required>
+  Comma-separated account head IDs
+</ParamField>
+
+### Get Detail by Number
+
+Retrieve financial transaction details by bill number.
+
+```bash
+GET /accountHead/getDetailByNumber?billNo={billNo}
+```
+
+<ParamField query="billNo" type="string" required>
+  Bill number
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Complete account head object with details
+</ResponseField>
+
+### Get Financial Bill by Bill ID
+
+Get payment/receipt records associated with a depot transaction.
+
+```bash
+GET /accountHead/getFinancialBillNoByBillId?billId={billId}
+```
+
+<ParamField query="billId" type="Long" required>
+  Depot head (purchase/sale) bill ID
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  Array of associated financial transaction records
+</ResponseField>
+
+## Account Item (Transaction Details)
+
+Manage individual line items within financial transactions.
+
+### Get Detail List
+
+Retrieve line items for a specific financial transaction.
+
+```bash
+GET /accountItem/getDetailList?headerId={headerId}
+```
+
+<ParamField query="headerId" type="Long" required>
+  Account head ID
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="Detail data">
+    <ResponseField name="total" type="integer">Total items</ResponseField>
+    <ResponseField name="rows" type="array">
+      <Expandable title="Account item">
+        <ResponseField name="accountId" type="Long">Account ID</ResponseField>
+        <ResponseField name="accountName" type="string">Account name</ResponseField>
+        <ResponseField name="inOutItemId" type="Long">Income/Expense category ID</ResponseField>
+        <ResponseField name="inOutItemName" type="string">Category name</ResponseField>
+        <ResponseField name="billNumber" type="string">Referenced bill number</ResponseField>
+        <ResponseField name="eachAmount" type="BigDecimal">Amount</ResponseField>
+        <ResponseField name="needDebt" type="BigDecimal">Original debt amount</ResponseField>
+        <ResponseField name="finishDebt" type="BigDecimal">Settled amount</ResponseField>
+        <ResponseField name="remark" type="string">Remark</ResponseField>
+      </Expandable>
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```bash cURL
+curl -X GET "http://localhost:8080/accountItem/getDetailList?headerId=123"
+```
+
+```json Response
+{
+  "code": 200,
+  "data": {
+    "total": 2,
+    "rows": [
+      {
+        "accountId": 1,
+        "accountName": "ICBC Main Account",
+        "inOutItemId": 10,
+        "inOutItemName": "货款",
+        "billNumber": "CGDD20240315001",
+        "eachAmount": 5000.00,
+        "needDebt": 5000.00,
+        "finishDebt": 5000.00,
+        "remark": "采购付款"
+      }
+    ]
+  }
+}
+```
+</CodeGroup>

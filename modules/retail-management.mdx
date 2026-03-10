@@ -1,0 +1,239 @@
+---
+title: 'Retail Management'
+description: 'Point of sale and retail operations for walk-in customers'
+icon: 'cash-register'
+---
+
+The Retail Management module handles point-of-sale transactions for walk-in customers and members. It's designed for quick sales processing without complex credit management.
+
+## Overview
+
+Retail operations in jshERP are optimized for fast checkout experiences, supporting both member and non-member transactions with immediate payment settlement.
+
+<Note>
+Retail transactions are designed for immediate payment - credit/debt management is not available in retail mode. For credit sales, use the Sales Management module instead.
+</Note>
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Retail Sales (零售出库)" icon="shopping-cart">
+    Process point-of-sale transactions with instant payment and change calculation
+  </Card>
+  <Card title="Retail Returns (零售退货)" icon="undo">
+    Handle customer returns and refunds for retail transactions
+  </Card>
+  <Card title="Member Management" icon="id-card">
+    Support member card integration for loyalty programs and tracking
+  </Card>
+  <Card title="Multi-Payment Methods" icon="credit-card">
+    Accept cash, card, and other payment types with change calculation
+  </Card>
+</CardGroup>
+
+## Retail Sales Process
+
+<Steps>
+  <Step title="Create Retail Sale">
+    Navigate to **Bills > Retail Sales** and click **New** to create a retail transaction.
+    
+    Select the warehouse (depot) from which inventory will be deducted. The system only displays warehouses you have permission to access.
+  </Step>
+  
+  <Step title="Add Products">
+    Search and add products using:
+    - Barcode scanning
+    - Product name
+    - Mnemonic code
+    - Specification or model number
+    
+    Enter quantities and the system calculates totals automatically.
+  </Step>
+  
+  <Step title="Select Member (Optional)">
+    Choose a member card number if the customer is a registered member. This helps:
+    - Apply member pricing
+    - Track purchase history
+    - Accumulate loyalty points
+    
+    Non-member sales are also fully supported.
+  </Step>
+  
+  <Step title="Process Payment">
+    1. Review the total amount
+    2. Select payment account (cash register, bank account, etc.)
+    3. Enter amount received
+    4. System automatically calculates change to return
+    5. Add payment remarks if needed
+  </Step>
+  
+  <Step title="Complete & Print">
+    Save the transaction and print receipt if needed. The sale updates inventory immediately after audit approval.
+  </Step>
+</Steps>
+
+## Retail Returns
+
+Handle product returns from retail customers:
+
+1. **Access Returns**: Go to **Bills > Retail Returns**
+2. **Create from Original Sale**: Use "Convert to Retail Return" from the original sale record
+3. **Select Return Items**: Choose which products and quantities are being returned
+4. **Process Refund**: Select refund account and complete the transaction
+5. **Audit**: Returns must be audited to restore inventory
+
+<Note>
+Returned items are marked with a **[退]** indicator on the original sale record.
+</Note>
+
+## Search and Filtering
+
+The retail sales list supports comprehensive filtering:
+
+**Basic Filters:**
+- Document number
+- Product information (barcode, name, specs)
+- Date range
+
+**Advanced Filters:**
+- Member card number
+- Warehouse location
+- Operator/cashier
+- Settlement account
+- Document status (unapproved, under review, approved)
+- Remarks
+
+## Document Management
+
+### Document Actions
+
+| Action | Description |
+|--------|-------------|
+| **View** | Display transaction details including all line items |
+| **Edit** | Modify unapproved transactions |
+| **Copy** | Create a new sale based on existing transaction |
+| **Delete** | Remove unapproved documents |
+| **Audit** | Approve transaction to update inventory and accounts |
+| **Reverse Audit** | Unapprove to allow modifications |
+
+### Document Status
+
+<Tabs>
+  <Tab title="Unapproved">
+    - Red tag indicator
+    - Can be edited or deleted
+    - Does not affect inventory
+    - Does not affect financial accounts
+  </Tab>
+  
+  <Tab title="Under Review">
+    - Orange tag indicator
+    - Pending approval in multi-level approval workflows
+    - Cannot be modified
+  </Tab>
+  
+  <Tab title="Approved">
+    - Green tag indicator
+    - Inventory deducted
+    - Payment recorded in accounts
+    - Can only be reversed through formal reverse-audit process
+  </Tab>
+</Tabs>
+
+## Batch Operations
+
+Perform bulk actions on multiple retail transactions:
+
+- **Batch Delete**: Remove multiple unapproved documents
+- **Batch Audit**: Approve multiple transactions at once
+- **Batch Reverse Audit**: Unapprove multiple approved documents
+- **Export**: Download transaction data to Excel
+
+<Note>
+Batch operations are only available for transactions in compatible states (e.g., you cannot delete approved documents).
+</Note>
+
+## Payment Management
+
+### Payment Types
+
+- **Cash**: Physical currency
+- **Bank Transfer**: Electronic payment
+- **Credit Card**: Card payment
+- **Mobile Payment**: Digital wallets
+- **Multiple Accounts**: Split payment across different methods
+
+### Change Calculation
+
+The system automatically calculates change:
+
+```
+Total Amount: $100.00
+Amount Received: $120.00
+Change: $20.00
+```
+
+Both the received amount and change are tracked in the transaction record.
+
+## Column Customization
+
+Customize the display columns in the retail sales list:
+
+1. Click the **Column Settings** button
+2. Check/uncheck columns to show/hide:
+   - Member name
+   - Document number
+   - Product information
+   - Date and operator
+   - Quantities and amounts
+   - Payment details
+   - Status
+3. Click **Restore Default** to reset to original configuration
+
+## Reports and Analysis
+
+Retail data integrates with:
+
+- **Retail Sales Report**: Analyze retail performance over time
+- **Cashier Performance**: Track sales by operator
+- **Member Purchase History**: View member buying patterns
+- **Inventory Reports**: Monitor product movement
+- **Financial Statements**: Reconcile cash accounts
+
+## Best Practices
+
+<CardGroup cols={1}>
+  <Card title="Fast Checkout" icon="bolt">
+    Use barcode scanners for quick product lookup. Set up hotkeys and shortcuts for common operations.
+  </Card>
+  
+  <Card title="Daily Reconciliation" icon="calculator">
+    Audit retail sales daily and reconcile cash register totals with system records.
+  </Card>
+  
+  <Card title="Member Encouragement" icon="users">
+    Encourage customer registration to build a member database for marketing and loyalty programs.
+  </Card>
+  
+  <Card title="Return Policy" icon="shield-check">
+    Establish clear return policies and train staff on the return process to maintain consistency.
+  </Card>
+</CardGroup>
+
+## Permissions
+
+Retail module operations are controlled by user permissions:
+
+- **View**: See retail sales and returns
+- **Add/Edit**: Create and modify transactions
+- **Delete**: Remove unapproved documents
+- **Audit**: Approve/unapprove transactions
+- **Export**: Download data to Excel
+- **Warehouse Access**: Control which warehouses users can sell from
+
+## Integration Points
+
+- **Inventory**: Automatic stock deduction on audit
+- **Accounts**: Payment recorded in selected accounts
+- **Members**: Purchase history and loyalty tracking
+- **Reports**: Data flows to reporting and analytics modules

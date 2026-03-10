@@ -1,0 +1,639 @@
+---
+title: 'Material Management'
+description: 'Product catalog, categories, attributes, and master data management'
+icon: 'boxes-stacked'
+---
+
+The Material Management module (also called Product Management) handles your product catalog including product information, categories, attributes, and pricing.
+
+## Overview
+
+Maintain comprehensive product master data with support for categories, attributes, multiple units of measure, images, and serial/batch tracking configuration.
+
+<Note>
+jshERP uses the term "Material" (商品) for products. These terms are interchangeable throughout the system.
+</Note>
+
+## Module Components
+
+<CardGroup cols={2}>
+  <Card title="Product Catalog" icon="book">
+    Complete product database with specifications, pricing, and images
+  </Card>
+  <Card title="Categories" icon="folder-tree">
+    Hierarchical product categorization system
+  </Card>
+  <Card title="Attributes" icon="tags">
+    Custom product attributes and extended properties
+  </Card>
+  <Card title="Product Properties" icon="sliders">
+    Define custom fields for product variations
+  </Card>
+</CardGroup>
+
+## Product Catalog Management
+
+### Accessing Products
+
+**Navigate**: **Basic Data > Products**
+
+The product list provides comprehensive search and management capabilities.
+
+### Creating Products
+
+<Steps>
+  <Step title="Open Product Form">
+    Click **New** to open the product creation form.
+  </Step>
+  
+  <Step title="Enter Basic Information">
+    **Required Fields:**
+    - Product Name
+    - Category
+    - Base Unit (pieces, kg, box, etc.)
+    
+    **Optional Fields:**
+    - Barcode (auto-generated or manual)
+    - Model number
+    - Specification
+    - Mnemonic code (search shortcut)
+    - Brand
+    - Manufacturer
+    - Color
+  </Step>
+  
+  <Step title="Configure Units">
+    Set up multiple units of measure if needed:
+    - Base unit (smallest unit)
+    - Multiple unit (larger unit)
+    - Conversion ratio
+    
+    **Example:**
+    - Base unit: Piece
+    - Multiple unit: Box
+    - Ratio: 1 Box = 12 Pieces
+  </Step>
+  
+  <Step title="Set Pricing">
+    Configure price information:
+    - Purchase price
+    - Retail price
+    - Wholesale price
+    - Low selling price (minimum)
+    - Other price levels (Price1, Price2, Price3)
+  </Step>
+  
+  <Step title="Add Extended Information">
+    Complete additional details:
+    - Warehouse position/shelf location
+    - Weight (for shipping calculations)
+    - Expiry days (for batch management)
+    - Custom properties (自定义属性1-3)
+    - Product images
+    - Remarks
+  </Step>
+  
+  <Step title="Configure Tracking">
+    Enable tracking features:
+    - **Enable Serial Number**: Track individual units
+    - **Enable Batch Number**: Track production lots
+    
+    <Note>
+    Serial and batch tracking cannot be changed after inventory transactions exist.
+    </Note>
+  </Step>
+  
+  <Step title="Set Initial Stock">
+    Optionally set opening inventory:
+    - Initial stock quantity
+    - Initial cost price
+    - System calculates initial stock value
+  </Step>
+  
+  <Step title="Save Product">
+    Save to add product to catalog. Status defaults to **Enabled**.
+  </Step>
+</Steps>
+
+## Product Search and Filtering
+
+Find products efficiently using multiple criteria:
+
+**Basic Search:**
+- Category (tree selection)
+- Keywords (barcode, name, mnemonic)
+- Specification
+
+**Advanced Filters:**
+- Model number
+- Color
+- Brand
+- Manufacturer
+- Custom properties (1-3)
+- Status (enabled/disabled)
+- Serial number enabled (yes/no)
+- Batch number enabled (yes/no)
+- Warehouse position
+- Weight
+- Expiry days
+- Remarks
+
+## Product Display Features
+
+### Product Images
+
+Manage product photos:
+
+1. **Upload Image**: Add product photo during creation/editing
+2. **Thumbnail View**: Small preview in product list
+3. **Large View**: Click thumbnail to see full-size image
+4. **Image Formats**: Support JPEG, PNG, GIF
+
+### Product Names with Indicators
+
+Product names display tracking status:
+
+- **序 (Orange tag)**: Serial number tracking enabled
+- **批 (Orange tag)**: Batch number tracking enabled
+
+These visual indicators help quickly identify tracked products.
+
+## Product Categories
+
+### Category Structure
+
+Organize products hierarchically:
+
+**Navigate**: **Basic Data > Product Categories**
+
+**Example Structure:**
+```
+Electronics
+  ├─ Computers
+  │   ├─ Laptops
+  │   ├─ Desktops
+  │   └─ Tablets
+  ├─ Mobile Phones
+  │   ├─ Smartphones
+  │   └─ Feature Phones
+  └─ Accessories
+      ├─ Cables
+      ├─ Cases
+      └─ Chargers
+```
+
+### Creating Categories
+
+<Steps>
+  <Step title="Create Root Category">
+    Navigate to **Product Categories** and click **New**.
+    
+    Enter:
+    - Category name
+    - Category number (code)
+    - Remarks
+  </Step>
+  
+  <Step title="Add Sub-Categories">
+    Select parent category and create child:
+    - Choose parent in dropdown
+    - Enter sub-category name
+    - Save
+  </Step>
+  
+  <Step title="Build Hierarchy">
+    Continue adding levels as needed. System supports unlimited depth.
+  </Step>
+</Steps>
+
+### Category Management
+
+**Actions Available:**
+- Edit category details
+- Move categories (change parent)
+- Delete empty categories
+- View products in category
+
+<Note>
+Categories with products cannot be deleted. Move or delete products first.
+</Note>
+
+## Product Attributes
+
+Define attribute sets for product variations:
+
+**Navigate**: **Basic Data > Product Attributes**
+
+### Attribute Concept
+
+Attributes define product variations:
+
+**Example - Clothing:**
+- Attribute: Size
+  - Values: S, M, L, XL, XXL
+- Attribute: Color
+  - Values: Red, Blue, Green, Black, White
+
+**Example - Electronics:**
+- Attribute: Storage
+  - Values: 64GB, 128GB, 256GB, 512GB
+- Attribute: Color
+  - Values: Space Gray, Silver, Gold, Rose Gold
+
+### Creating Attributes
+
+<Steps>
+  <Step title="Create Attribute">
+    Click **New** in Product Attributes.
+    
+    Enter:
+    - Attribute name (e.g., "Size")
+    - Attribute values (e.g., "S, M, L, XL")
+    - Sort order
+  </Step>
+  
+  <Step title="Define Values">
+    Add possible values for the attribute:
+    - One value per line, or
+    - Comma-separated values
+  </Step>
+  
+  <Step title="Assign to Products">
+    When creating/editing products:
+    - Select applicable attributes
+    - Choose specific values
+    - System generates SKU variants
+  </Step>
+</Steps>
+
+### Attribute Sets
+
+Group related attributes:
+
+- Size + Color (Apparel)
+- Capacity + Color (Electronics)
+- Flavor + Size (Food & Beverage)
+- Material + Finish (Furniture)
+
+## Product Properties
+
+Custom fields for additional product information:
+
+**Navigate**: **Basic Data > Product Properties**
+
+### Default Custom Properties
+
+jshERP includes 3 configurable custom properties:
+
+1. **自定义属性1** (Custom Property 1)
+2. **自定义属性2** (Custom Property 2)
+3. **自定义属性3** (Custom Property 3)
+
+### Configuring Properties
+
+<Steps>
+  <Step title="Define Property Names">
+    Navigate to Product Properties and rename default properties:
+    - Custom Property 1 → "Country of Origin"
+    - Custom Property 2 → "Warranty Period"
+    - Custom Property 3 → "Certifications"
+  </Step>
+  
+  <Step title="Set Property Values">
+    Define allowed values for each property:
+    - Country of Origin: USA, China, Japan, Germany
+    - Warranty Period: 1 Year, 2 Years, 3 Years, Lifetime
+    - Certifications: CE, UL, FCC, RoHS
+  </Step>
+  
+  <Step title="Use in Products">
+    When editing products:
+    - Select values from dropdowns
+    - Properties appear in product details
+    - Searchable and filterable
+  </Step>
+</Steps>
+
+## Multiple Units of Measure
+
+Support products sold in different units:
+
+### Unit Configuration
+
+**Base Unit (基础单位):**
+- Smallest unit for inventory tracking
+- All stock quantities stored in base units
+- Examples: Piece, Kg, Liter
+
+**Multiple Unit (多单位):**
+- Larger unit for sales/purchase convenience
+- Automatically converts to base units
+- Examples: Box, Carton, Pallet
+
+### Conversion Example
+
+**Product: Widget A**
+- Base unit: Piece
+- Multiple unit: Box
+- Conversion: 1 Box = 24 Pieces
+
+**In Practice:**
+- Purchase: 10 Boxes
+- System records: 240 Pieces (10 × 24)
+- Sell: 5 Boxes + 12 Pieces
+- System deducts: 132 Pieces (5 × 24 + 12)
+
+### Initial Stock Display
+
+Product list shows stock in both units:
+
+```
+Current Stock: 240 pieces
+Tooltip: 10 boxes (hovering over quantity)
+```
+
+This dual display helps users understand inventory in familiar terms.
+
+## Product Pricing
+
+### Price Types
+
+jshERP supports multiple price levels:
+
+| Price Type | Purpose | Usage |
+|------------|---------|-------|
+| **Purchase Price** | Supplier cost | Default on purchase documents |
+| **Retail Price** | Standard consumer price | Retail sales, POS |
+| **Wholesale Price** | Bulk/distributor price | Wholesale customers |
+| **Low Selling Price** | Minimum allowed price | Prevent selling below cost |
+| **Price 1** | Custom price level | Volume pricing tier 1 |
+| **Price 2** | Custom price level | Volume pricing tier 2 |
+| **Price 3** | Custom price level | Volume pricing tier 3 |
+
+### Price Configuration
+
+Set prices in product form:
+
+1. Enter standard prices
+2. System validates low price ≥ cost
+3. Warning if selling below minimum
+4. Prices default on sales documents
+5. Users can override if authorized
+
+## Serial Number Management
+
+### When to Use Serial Numbers
+
+Enable serial tracking for:
+- Electronics with warranties
+- High-value equipment
+- Assets requiring maintenance tracking
+- Products subject to recalls
+- Items with individual certification
+
+### Serial Number Workflow
+
+<Tabs>
+  <Tab title="Receipt">
+    When receiving inventory:
+    1. Enable serial tracking on product
+    2. During receipt, enter/scan serial numbers
+    3. System records each serial with location
+    4. Serials cannot be duplicated
+  </Tab>
+  
+  <Tab title="Storage">
+    System tracks for each serial:
+    - Current warehouse location
+    - Current status (in stock, sold, returned)
+    - Receipt date and source
+    - Cost price
+  </Tab>
+  
+  <Tab title="Shipment">
+    When shipping:
+    1. Select specific serial numbers
+    2. System validates availability
+    3. Serials marked as sold
+    4. Cannot sell same serial twice
+  </Tab>
+  
+  <Tab title="Returns">
+    When processing returns:
+    1. System checks serial was previously sold
+    2. Serial returned to inventory
+    3. Serial history maintained
+  </Tab>
+</Tabs>
+
+## Batch Number Management
+
+### When to Use Batch Numbers
+
+Enable batch tracking for:
+- Food products with expiry dates
+- Pharmaceuticals
+- Cosmetics
+- Chemicals
+- Any product with production lots
+
+### Batch Number Workflow
+
+<Steps>
+  <Step title="Configure Product">
+    Enable batch tracking and set expiry days:
+    - Enable Batch Number: Yes
+    - Expiry Days: 365 (for example)
+  </Step>
+  
+  <Step title="Receipt with Batch">
+    When receiving inventory:
+    - Enter batch/lot number
+    - Record production date
+    - System calculates expiry date
+    - System tracks quantity per batch
+  </Step>
+  
+  <Step title="Stock Management">
+    System maintains:
+    - Quantity per batch
+    - Production and expiry dates
+    - Warehouse locations
+    - FIFO/FEFO order
+  </Step>
+  
+  <Step title="Shipment by Batch">
+    When shipping:
+    - Select batch(es) to ship from
+    - System suggests FIFO or FEFO
+    - Validates expiry dates
+    - Tracks batch quantities
+  </Step>
+  
+  <Step title="Expiry Monitoring">
+    Use stock warning reports to:
+    - Identify expiring batches
+    - Plan promotions/clearance
+    - Prevent expired sales
+  </Step>
+</Steps>
+
+## Batch Operations
+
+Perform bulk actions on products:
+
+<CardGroup cols={2}>
+  <Card title="Batch Enable/Disable" icon="toggle-on">
+    Enable or disable multiple products simultaneously
+  </Card>
+  <Card title="Batch Edit" icon="pen-to-square">
+    Update common fields across multiple products
+  </Card>
+  <Card title="Import Products" icon="file-import">
+    Bulk upload products via Excel template
+  </Card>
+  <Card title="Export Products" icon="file-export">
+    Download product data to Excel
+  </Card>
+  <Card title="Correct Stock" icon="wrench">
+    Adjust current stock levels for multiple products
+  </Card>
+  <Card title="Correct Cost" icon="dollar-sign">
+    Update unit cost prices in bulk
+  </Card>
+</CardGroup>
+
+### Import/Export Process
+
+**Importing Products:**
+
+<Steps>
+  <Step title="Download Template">
+    Click **Import** and download the Excel template.
+  </Step>
+  
+  <Step title="Fill Template">
+    Complete the template with product data:
+    - Follow column headers exactly
+    - Respect data types and formats
+    - Leave optional fields blank if not applicable
+  </Step>
+  
+  <Step title="Upload File">
+    Click **Import**, select your file, and upload.
+  </Step>
+  
+  <Step title="Review Results">
+    System reports:
+    - Successfully imported products
+    - Errors with row numbers
+    - Validation failures
+  </Step>
+  
+  <Step title="Verify Data">
+    Check imported products in the list and make corrections as needed.
+  </Step>
+</Steps>
+
+**Exporting Products:**
+
+1. Apply filters to select products
+2. Click **Export**
+3. System generates Excel file
+4. Download and open in Excel
+5. Use for reporting, analysis, or re-import
+
+## Column Customization
+
+Customize product list display:
+
+**Available Columns:**
+- Product image
+- Barcode
+- Product name (with serial/batch indicators)
+- Category
+- Specifications (model, standard, color, brand, etc.)
+- Units (base and multiple)
+- Initial stock
+- Current stock
+- Prices (purchase, retail, wholesale, low, custom)
+- Warehouse position
+- Weight
+- Expiry days
+- Status
+
+**Customization:**
+1. Click **Column Settings**
+2. Check/uncheck columns
+3. Click **Restore Default** to reset
+
+## Best Practices
+
+<CardGroup cols={1}>
+  <Card title="Consistent Naming" icon="spell-check">
+    Use consistent product naming conventions for easy searching and sorting.
+  </Card>
+  
+  <Card title="Complete Information" icon="clipboard-check">
+    Fill in all relevant fields including specifications, brand, model for better searchability.
+  </Card>
+  
+  <Card title="Category Structure" icon="sitemap">
+    Design logical category hierarchy before adding products. Keep depth reasonable (3-5 levels max).
+  </Card>
+  
+  <Card title="Mnemonic Codes" icon="keyboard">
+    Use mnemonic codes (助记码) for frequently accessed products - enables lightning-fast search.
+  </Card>
+  
+  <Card title="Product Images" icon="image">
+    Add clear product images to reduce errors during sales and receiving.
+  </Card>
+  
+  <Card title="Price Maintenance" icon="money-bill-wave">
+    Review and update prices regularly. Use low selling price to prevent below-cost sales.
+  </Card>
+  
+  <Card title="Tracking Strategy" icon="route">
+    Enable serial/batch tracking at product creation. Cannot change after transactions exist.
+  </Card>
+  
+  <Card title="Regular Audits" icon="magnifying-glass">
+    Periodically review product catalog for duplicates, inactive items, and data quality.
+  </Card>
+</CardGroup>
+
+## Integration Points
+
+<CardGroup cols={1}>
+  <Card title="Inventory Management" icon="warehouse">
+    Product configuration drives inventory tracking behavior (serials, batches, units).
+  </Card>
+  
+  <Card title="Sales & Purchase" icon="handshake">
+    Product prices default on sales and purchase documents. Specifications aid selection.
+  </Card>
+  
+  <Card title="Reporting" icon="chart-simple">
+    Category structure enables aggregated reporting and analysis.
+  </Card>
+  
+  <Card title="POS/Retail" icon="cash-register">
+    Barcodes and mnemonic codes enable fast product lookup at point of sale.
+  </Card>
+</CardGroup>
+
+## Permissions
+
+Control product management access:
+
+- **View Products**: See product catalog
+- **Add/Edit Products**: Create and modify products
+- **Delete Products**: Remove products (only if no transactions)
+- **Import/Export**: Bulk data operations
+- **Batch Edit**: Mass update products
+- **Enable/Disable**: Change product status
+- **Price Access**: View and modify prices
+- **Stock Correction**: Adjust stock levels and costs
+- **Manage Categories**: Create and organize categories
+- **Manage Attributes**: Define product attributes

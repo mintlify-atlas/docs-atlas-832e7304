@@ -1,0 +1,921 @@
+---
+title: Installation Guide
+description: Complete instructions for self-hosted jshERP deployment
+---
+
+# Installation Guide
+
+This guide covers the complete installation process for deploying jshERP on your own infrastructure. Follow these instructions to set up a production-ready jshERP instance.
+
+## System Requirements
+
+Before beginning installation, ensure your system meets these requirements:
+
+### Hardware Requirements
+
+**Minimum Specifications:**
+- CPU: 2 cores
+- RAM: 4 GB
+- Storage: 20 GB available space
+- Network: Stable internet connection
+
+**Recommended Specifications:**
+- CPU: 4+ cores
+- RAM: 8+ GB
+- Storage: 50+ GB SSD
+- Network: 10 Mbps+ bandwidth
+
+### Software Requirements
+
+<CardGroup cols={2}>
+  <Card title="Java Runtime" icon="coffee">
+    **JRE 1.8** or higher
+  </Card>
+  
+  <Card title="Database" icon="database">
+    **MySQL 8.0.24** or higher
+  </Card>
+  
+  <Card title="Cache Server" icon="bolt">
+    **Redis 6.2.1** or higher
+  </Card>
+  
+  <Card title="Web Server" icon="globe">
+    **Nginx 1.12.2** or higher (optional but recommended)
+  </Card>
+</CardGroup>
+
+### Supported Operating Systems
+
+- Linux (Ubuntu 20.04+, CentOS 7+, Debian 10+)
+- Windows Server 2016+
+- macOS 10.14+ (for development)
+
+<Warning>
+For production deployments, Linux is strongly recommended for better performance and stability.
+</Warning>
+
+## Development Environment Setup
+
+If you're planning to develop or build jshERP from source:
+
+### Development Tools
+
+- **IDE**: IntelliJ IDEA 2025.1.4.1 or later
+- **JDK**: Java Development Kit 1.8
+- **Maven**: Maven 3.3.9 or higher
+- **Node.js**: Node 20.17.0 or higher
+- **Database**: MySQL 8.0.24
+- **Redis**: Redis 6.2.1
+- **Nginx**: Nginx 1.12.2
+
+## Installation Methods
+
+Choose the installation method that best fits your needs:
+
+<Tabs>
+  <Tab title="Pre-built Package (Recommended)">
+    Fastest way to deploy - use pre-compiled binaries.
+  </Tab>
+  <Tab title="Docker Deployment">
+    Containerized deployment for easy management.
+  </Tab>
+  <Tab title="Build from Source">
+    Compile from source code for customization.
+  </Tab>
+</Tabs>
+
+## Method 1: Pre-built Package Installation
+
+This is the recommended method for most users.
+
+### Step 1: Install Prerequisites
+
+<Steps>
+  <Step title="Install Java 8">
+    **On Ubuntu/Debian:**
+    ```bash
+    sudo apt update
+    sudo apt install openjdk-8-jre-headless
+    java -version
+    ```
+    
+    **On CentOS/RHEL:**
+    ```bash
+    sudo yum install java-1.8.0-openjdk
+    java -version
+    ```
+    
+    **On Windows:**
+    Download and install JRE 8 from the Oracle website or AdoptOpenJDK.
+  </Step>
+  
+  <Step title="Install MySQL 8">
+    **On Ubuntu/Debian:**
+    ```bash
+    sudo apt install mysql-server-8.0
+    sudo systemctl start mysql
+    sudo systemctl enable mysql
+    ```
+    
+    **On CentOS/RHEL:**
+    ```bash
+    sudo yum install mysql-server
+    sudo systemctl start mysqld
+    sudo systemctl enable mysqld
+    ```
+    
+    Secure your MySQL installation:
+    ```bash
+    sudo mysql_secure_installation
+    ```
+  </Step>
+  
+  <Step title="Install Redis">
+    **On Ubuntu/Debian:**
+    ```bash
+    sudo apt install redis-server
+    sudo systemctl start redis
+    sudo systemctl enable redis
+    ```
+    
+    **On CentOS/RHEL:**
+    ```bash
+    sudo yum install redis
+    sudo systemctl start redis
+    sudo systemctl enable redis
+    ```
+    
+    Set a Redis password:
+    ```bash
+    sudo nano /etc/redis/redis.conf
+    ```
+    Find and uncomment the line:
+    ```
+    requirepass 1234abcd
+    ```
+    Restart Redis:
+    ```bash
+    sudo systemctl restart redis
+    ```
+  </Step>
+  
+  <Step title="Install Nginx (Optional)">
+    **On Ubuntu/Debian:**
+    ```bash
+    sudo apt install nginx
+    sudo systemctl start nginx
+    sudo systemctl enable nginx
+    ```
+    
+    **On CentOS/RHEL:**
+    ```bash
+    sudo yum install nginx
+    sudo systemctl start nginx
+    sudo systemctl enable nginx
+    ```
+  </Step>
+</Steps>
+
+### Step 2: Create Database
+
+<Steps>
+  <Step title="Connect to MySQL">
+    ```bash
+    mysql -u root -p
+    ```
+    Enter your MySQL root password when prompted.
+  </Step>
+  
+  <Step title="Create Database and User">
+    ```sql
+    CREATE DATABASE jsh_erp DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    
+    CREATE USER 'jsh_user'@'localhost' IDENTIFIED BY 'your_secure_password';
+    
+    GRANT ALL PRIVILEGES ON jsh_erp.* TO 'jsh_user'@'localhost';
+    
+    FLUSH PRIVILEGES;
+    
+    EXIT;
+    ```
+  </Step>
+  
+  <Step title="Import Database Schema">
+    Download the SQL schema file and import it:
+    ```bash
+    mysql -u jsh_user -p jsh_erp < jsh_erp.sql
+    ```
+    
+    The schema file is located in the source code at:
+    ```
+    jshERP-boot/docs/jsh_erp.sql
+    ```
+  </Step>
+</Steps>
+
+<Note>
+Replace `your_secure_password` with a strong password. Store it securely as you'll need it for application configuration.
+</Note>
+
+### Step 3: Download and Extract jshERP
+
+<Steps>
+  <Step title="Download Package">
+    Download the pre-built package from:
+    - **Official Download**: https://share.weiyun.com/NDJNLhry (Password: vd3aig)
+    - Or build from source (see Method 3)
+  </Step>
+  
+  <Step title="Extract Package">
+    ```bash
+    # Create installation directory
+    sudo mkdir -p /opt/jshERP
+    
+    # Extract package
+    sudo unzip jshERP-package.zip -d /opt/jshERP
+    
+    # Set permissions
+    sudo chown -R $USER:$USER /opt/jshERP
+    ```
+  </Step>
+  
+  <Step title="Create Upload Directory">
+    ```bash
+    sudo mkdir -p /opt/jshERP/upload
+    sudo mkdir -p /opt/tmp/tomcat
+    sudo chown -R $USER:$USER /opt/jshERP/upload
+    sudo chown -R $USER:$USER /opt/tmp/tomcat
+    ```
+  </Step>
+</Steps>
+
+### Step 4: Configure Application
+
+<Steps>
+  <Step title="Edit Configuration File">
+    Navigate to the configuration file:
+    ```bash
+    cd /opt/jshERP
+    nano application.properties
+    ```
+  </Step>
+  
+  <Step title="Update Database Settings">
+    Modify the following settings in `application.properties`:
+    
+    ```properties
+    # Server Port
+    server.port=9999
+    
+    # Session Timeout (seconds)
+    server.servlet.session.timeout=36000
+    
+    # Context Path
+    server.servlet.context-path=/jshERP-boot
+    
+    # Database Configuration
+    spring.datasource.url=jdbc:mysql://127.0.0.1:3306/jsh_erp?useUnicode=true&characterEncoding=utf8&useCursorFetch=true&defaultFetchSize=500&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=false
+    spring.datasource.driverClassName=com.mysql.cj.jdbc.Driver
+    spring.datasource.username=jsh_user
+    spring.datasource.password=your_secure_password
+    
+    # Redis Configuration
+    spring.redis.host=127.0.0.1
+    spring.redis.port=6379
+    spring.redis.password=1234abcd
+    
+    # File Upload Configuration
+    file.uploadType=1
+    file.path=/opt/jshERP/upload
+    server.tomcat.basedir=/opt/tmp/tomcat
+    
+    # File Size Limits (10MB)
+    spring.servlet.multipart.max-file-size=10485760
+    spring.servlet.multipart.max-request-size=10485760
+    
+    # Tenant Configuration
+    manage.roleId=10
+    tenant.userNumLimit=1000000
+    tenant.tryDayLimit=3000
+    
+    # Plugin Configuration
+    plugin.runMode=prod
+    plugin.pluginPath=plugins
+    plugin.pluginConfigFilePath=pluginConfig
+    ```
+  </Step>
+  
+  <Step title="Save Configuration">
+    Save the file and exit the editor (Ctrl+O, Enter, Ctrl+X in nano).
+  </Step>
+</Steps>
+
+<Warning>
+**Security Important**:
+- Change all default passwords
+- Use strong database passwords
+- Enable firewall rules to restrict access
+- Consider using SSL/TLS for database connections in production
+</Warning>
+
+### Step 5: Start the Application
+
+<Steps>
+  <Step title="Start Backend Service">
+    ```bash
+    cd /opt/jshERP
+    java -jar jshERP.jar
+    ```
+    
+    For production, run as a background service:
+    ```bash
+    nohup java -jar jshERP.jar > /opt/jshERP/logs/app.log 2>&1 &
+    ```
+  </Step>
+  
+  <Step title="Verify Backend is Running">
+    Check if the service is running:
+    ```bash
+    curl http://localhost:9999/jshERP-boot
+    ```
+    
+    Or check the logs:
+    ```bash
+    tail -f /opt/jshERP/logs/app.log
+    ```
+  </Step>
+  
+  <Step title="Deploy Frontend">
+    If you have the frontend build:
+    ```bash
+    # Copy frontend files to web server directory
+    sudo cp -r jshERP-web/dist/* /var/www/html/jshERP/
+    ```
+  </Step>
+</Steps>
+
+### Step 6: Configure Nginx (Recommended)
+
+Set up Nginx as a reverse proxy for better performance:
+
+<Steps>
+  <Step title="Create Nginx Configuration">
+    ```bash
+    sudo nano /etc/nginx/sites-available/jsherp
+    ```
+  </Step>
+  
+  <Step title="Add Configuration">
+    ```nginx
+    server {
+        listen 80;
+        server_name your-domain.com;  # Replace with your domain
+        
+        # Frontend
+        location / {
+            root /var/www/html/jshERP;
+            index index.html;
+            try_files $uri $uri/ /index.html;
+        }
+        
+        # Backend API
+        location /jshERP-boot {
+            proxy_pass http://localhost:9999;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            # WebSocket support
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            
+            # Timeouts
+            proxy_connect_timeout 600;
+            proxy_send_timeout 600;
+            proxy_read_timeout 600;
+            send_timeout 600;
+        }
+        
+        # Static files and uploads
+        location /jshERP-boot/upload {
+            alias /opt/jshERP/upload;
+        }
+        
+        # File upload size limit
+        client_max_body_size 10M;
+    }
+    ```
+  </Step>
+  
+  <Step title="Enable Site and Restart Nginx">
+    ```bash
+    sudo ln -s /etc/nginx/sites-available/jsherp /etc/nginx/sites-enabled/
+    sudo nginx -t
+    sudo systemctl restart nginx
+    ```
+  </Step>
+</Steps>
+
+<Info>
+For production deployments, configure SSL/TLS using Let's Encrypt or your SSL certificate.
+</Info>
+
+### Step 7: Access jshERP
+
+Your jshERP installation is now ready!
+
+```
+http://your-domain.com
+```
+
+Or if accessing directly:
+```
+http://your-server-ip:9999/jshERP-boot
+```
+
+**Default Login Credentials:**
+- Tenant: `jsh`
+- Username: `admin`
+- Password: `123456`
+
+<Warning>
+**IMPORTANT**: Change the default password immediately after first login!
+</Warning>
+
+## Method 2: Docker Deployment
+
+Deploy jshERP using Docker containers for easier management.
+
+### Prerequisites
+
+Install Docker and Docker Compose:
+
+```bash
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# Install Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+### Create Docker Compose Configuration
+
+<Steps>
+  <Step title="Create Project Directory">
+    ```bash
+    mkdir -p ~/jshERP-docker
+    cd ~/jshERP-docker
+    ```
+  </Step>
+  
+  <Step title="Create docker-compose.yml">
+    ```yaml
+    version: '3.8'
+    
+    services:
+      mysql:
+        image: mysql:8.0.24
+        container_name: jsherp-mysql
+        environment:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: jsh_erp
+          MYSQL_USER: jsh_user
+          MYSQL_PASSWORD: jsh_password
+        volumes:
+          - mysql-data:/var/lib/mysql
+          - ./jsh_erp.sql:/docker-entrypoint-initdb.d/jsh_erp.sql
+        ports:
+          - "3306:3306"
+        networks:
+          - jsherp-network
+        command: --default-authentication-plugin=mysql_native_password
+      
+      redis:
+        image: redis:6.2.1-alpine
+        container_name: jsherp-redis
+        command: redis-server --requirepass 1234abcd
+        ports:
+          - "6379:6379"
+        volumes:
+          - redis-data:/data
+        networks:
+          - jsherp-network
+      
+      jsherp-backend:
+        image: openjdk:8-jre-alpine
+        container_name: jsherp-backend
+        volumes:
+          - ./jshERP.jar:/app/jshERP.jar
+          - ./application.properties:/app/application.properties
+          - jsherp-upload:/opt/jshERP/upload
+        working_dir: /app
+        command: java -jar jshERP.jar
+        ports:
+          - "9999:9999"
+        depends_on:
+          - mysql
+          - redis
+        networks:
+          - jsherp-network
+        environment:
+          - JAVA_OPTS=-Xmx2g -Xms512m
+      
+      nginx:
+        image: nginx:1.21-alpine
+        container_name: jsherp-nginx
+        ports:
+          - "80:80"
+          - "443:443"
+        volumes:
+          - ./nginx.conf:/etc/nginx/conf.d/default.conf
+          - ./frontend:/usr/share/nginx/html
+        depends_on:
+          - jsherp-backend
+        networks:
+          - jsherp-network
+    
+    networks:
+      jsherp-network:
+        driver: bridge
+    
+    volumes:
+      mysql-data:
+      redis-data:
+      jsherp-upload:
+    ```
+  </Step>
+  
+  <Step title="Place Required Files">
+    Place these files in the `~/jshERP-docker` directory:
+    - `jshERP.jar` - Backend JAR file
+    - `application.properties` - Configuration file (update database hosts to service names)
+    - `jsh_erp.sql` - Database schema
+    - `frontend/` - Frontend build files
+  </Step>
+  
+  <Step title="Update application.properties for Docker">
+    ```properties
+    spring.datasource.url=jdbc:mysql://mysql:3306/jsh_erp?useUnicode=true&characterEncoding=utf8&useCursorFetch=true&defaultFetchSize=500&allowMultiQueries=true&rewriteBatchedStatements=true&useSSL=false
+    spring.datasource.username=jsh_user
+    spring.datasource.password=jsh_password
+    
+    spring.redis.host=redis
+    spring.redis.port=6379
+    spring.redis.password=1234abcd
+    ```
+  </Step>
+  
+  <Step title="Start Containers">
+    ```bash
+    docker-compose up -d
+    ```
+    
+    Check status:
+    ```bash
+    docker-compose ps
+    ```
+    
+    View logs:
+    ```bash
+    docker-compose logs -f jsherp-backend
+    ```
+  </Step>
+</Steps>
+
+### Docker Management Commands
+
+```bash
+# Stop all containers
+docker-compose down
+
+# Restart specific service
+docker-compose restart jsherp-backend
+
+# View logs
+docker-compose logs -f
+
+# Execute command in container
+docker-compose exec jsherp-backend sh
+
+# Update and restart
+docker-compose pull
+docker-compose up -d
+```
+
+## Method 3: Build from Source
+
+Build jshERP from source code for customization or the latest features.
+
+### Clone Repository
+
+```bash
+git clone https://gitee.com/jishenghua/jshERP.git
+cd jshERP
+```
+
+### Build Backend
+
+<Steps>
+  <Step title="Navigate to Backend Directory">
+    ```bash
+    cd jshERP-boot
+    ```
+  </Step>
+  
+  <Step title="Update Configuration">
+    Edit `src/main/resources/application.properties` with your database and Redis settings.
+  </Step>
+  
+  <Step title="Build with Maven">
+    ```bash
+    mvn clean package -DskipTests
+    ```
+    
+    The compiled JAR will be in:
+    ```
+    target/jshERP.jar
+    ```
+  </Step>
+</Steps>
+
+### Build Frontend
+
+<Steps>
+  <Step title="Navigate to Frontend Directory">
+    ```bash
+    cd ../jshERP-web
+    ```
+  </Step>
+  
+  <Step title="Install Dependencies">
+    ```bash
+    npm install
+    ```
+  </Step>
+  
+  <Step title="Build for Production">
+    ```bash
+    npm run build
+    ```
+    
+    The build output will be in:
+    ```
+    dist/
+    ```
+  </Step>
+</Steps>
+
+### Deploy Built Files
+
+Follow the same deployment steps as Method 1, using your built `jshERP.jar` and `dist/` files.
+
+## Post-Installation
+
+### Create Systemd Service (Linux)
+
+Create a systemd service for automatic startup:
+
+```bash
+sudo nano /etc/systemd/system/jsherp.service
+```
+
+Add the following content:
+
+```ini
+[Unit]
+Description=jshERP Application
+After=mysql.service redis.service
+
+[Service]
+Type=simple
+User=jsherp
+WorkingDirectory=/opt/jshERP
+ExecStart=/usr/bin/java -Xmx2g -Xms512m -jar /opt/jshERP/jshERP.jar
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start the service:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable jsherp
+sudo systemctl start jsherp
+sudo systemctl status jsherp
+```
+
+### Firewall Configuration
+
+Configure firewall to allow necessary ports:
+
+```bash
+# UFW (Ubuntu/Debian)
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw allow 9999/tcp
+sudo ufw enable
+
+# Firewalld (CentOS/RHEL)
+sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --permanent --add-port=443/tcp
+sudo firewall-cmd --permanent --add-port=9999/tcp
+sudo firewall-cmd --reload
+```
+
+### Backup Configuration
+
+Set up automated database backups:
+
+```bash
+#!/bin/bash
+# Save as /opt/jshERP/backup.sh
+
+BACKUP_DIR="/opt/jshERP/backups"
+DATE=$(date +%Y%m%d_%H%M%S)
+
+mkdir -p $BACKUP_DIR
+
+# Database backup
+mysqldump -u jsh_user -p'your_password' jsh_erp > $BACKUP_DIR/jsh_erp_$DATE.sql
+
+# Compress
+gzip $BACKUP_DIR/jsh_erp_$DATE.sql
+
+# Keep only last 30 days
+find $BACKUP_DIR -name "*.sql.gz" -mtime +30 -delete
+```
+
+Add to crontab for daily backups:
+
+```bash
+crontab -e
+```
+
+Add:
+```
+0 2 * * * /opt/jshERP/backup.sh
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Application won't start">
+    **Check logs:**
+    ```bash
+    tail -f /opt/jshERP/logs/app.log
+    ```
+    
+    **Common issues:**
+    - Database connection failed: Verify MySQL is running and credentials are correct
+    - Port already in use: Check if another application is using port 9999
+    - Redis connection failed: Verify Redis is running and password is correct
+    - Insufficient memory: Increase JVM memory with `-Xmx` parameter
+  </Accordion>
+  
+  <Accordion title="Cannot connect to database">
+    **Verify MySQL is running:**
+    ```bash
+    sudo systemctl status mysql
+    ```
+    
+    **Test connection:**
+    ```bash
+    mysql -u jsh_user -p -h localhost jsh_erp
+    ```
+    
+    **Check firewall:**
+    ```bash
+    sudo ufw status
+    ```
+    
+    **Verify user permissions:**
+    ```sql
+    SHOW GRANTS FOR 'jsh_user'@'localhost';
+    ```
+  </Accordion>
+  
+  <Accordion title="Frontend shows 404 or blank page">
+    - Verify frontend files are in the correct directory
+    - Check Nginx configuration and restart Nginx
+    - Clear browser cache
+    - Check browser console for JavaScript errors
+    - Verify API endpoint in frontend configuration
+  </Accordion>
+  
+  <Accordion title="File upload fails">
+    - Check upload directory permissions:
+      ```bash
+      ls -la /opt/jshERP/upload
+      ```
+    - Verify directory exists and is writable
+    - Check file size limits in application.properties and Nginx
+    - Review application logs for errors
+  </Accordion>
+  
+  <Accordion title="Slow performance">
+    - Check system resources: `htop` or `top`
+    - Verify Redis is running and caching is working
+    - Optimize MySQL queries and add indexes
+    - Increase JVM memory allocation
+    - Enable Nginx caching
+    - Consider upgrading hardware
+  </Accordion>
+</AccordionGroup>
+
+## Security Hardening
+
+For production deployments:
+
+<Steps>
+  <Step title="Change All Default Passwords">
+    - Application admin password
+    - Database passwords
+    - Redis password
+  </Step>
+  
+  <Step title="Enable HTTPS">
+    Use Let's Encrypt for free SSL certificates:
+    ```bash
+    sudo apt install certbot python3-certbot-nginx
+    sudo certbot --nginx -d your-domain.com
+    ```
+  </Step>
+  
+  <Step title="Restrict Database Access">
+    Only allow localhost connections or specific IPs in MySQL configuration.
+  </Step>
+  
+  <Step title="Enable Firewall">
+    Only open necessary ports and restrict access by IP when possible.
+  </Step>
+  
+  <Step title="Regular Updates">
+    Keep all software components updated with security patches.
+  </Step>
+  
+  <Step title="Configure Backups">
+    Set up automated database and file backups to a secure location.
+  </Step>
+</Steps>
+
+## Performance Tuning
+
+### JVM Optimization
+
+```bash
+java -Xmx4g -Xms1g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -jar jshERP.jar
+```
+
+### MySQL Optimization
+
+Edit `/etc/mysql/mysql.conf.d/mysqld.cnf`:
+
+```ini
+[mysqld]
+innodb_buffer_pool_size = 2G
+innodb_log_file_size = 512M
+max_connections = 500
+query_cache_size = 0
+query_cache_type = 0
+```
+
+### Redis Optimization
+
+Edit `/etc/redis/redis.conf`:
+
+```ini
+maxmemory 1gb
+maxmemory-policy allkeys-lru
+```
+
+## Getting Help
+
+If you encounter issues during installation:
+
+- **Deployment Tutorial**: https://www.gyjerp.com/doc/archive/deploy.html
+- **Environment Setup Resources**: https://pan.baidu.com/s/1jlild9uyGdQ7H2yaMx76zw (Code: 814g)
+- **Video Tutorials**: https://space.bilibili.com/540003552/channel/series
+- **Technical Support**: QQ 752718920 | WeChat shenhua861584
+
+<Info>
+For the latest installation instructions and updates, always check the official documentation at [www.gyjerp.com](http://www.gyjerp.com).
+</Info>
+
+## Next Steps
+
+After successful installation:
+
+1. Follow the [Quick Start Guide](/quickstart) to configure your system
+2. Review the [Features Overview](/features) to understand capabilities
+3. Explore the user manual for detailed operational procedures
+4. Set up regular backups and monitoring
+
+Congratulations! Your jshERP installation is complete.

@@ -1,0 +1,579 @@
+---
+title: 'Supplier/Vendor API'
+description: 'API endpoints for managing suppliers, customers, vendors, and business partners'
+---
+
+## Overview
+
+The Supplier API provides comprehensive endpoints for managing business partners including suppliers/vendors, customers, and members. It handles contact information, financial relationships, and permissions.
+
+## Supplier Management
+
+### Get Supplier Info
+
+Retrieve detailed information about a specific supplier by ID.
+
+```bash
+GET /supplier/info?id={id}
+```
+
+<ParamField query="id" type="Long" required>
+  The unique identifier of the supplier
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code (200 for success)
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="Supplier object">
+    <ResponseField name="id" type="Long">Supplier ID</ResponseField>
+    <ResponseField name="supplier" type="string">Supplier/Company name</ResponseField>
+    <ResponseField name="type" type="string">Type (供应商=Vendor, 客户=Customer, 会员=Member)</ResponseField>
+    <ResponseField name="contacts" type="string">Contact person name</ResponseField>
+    <ResponseField name="phoneNum" type="string">Mobile phone number</ResponseField>
+    <ResponseField name="telephone" type="string">Landline telephone</ResponseField>
+    <ResponseField name="email" type="string">Email address</ResponseField>
+    <ResponseField name="fax" type="string">Fax number</ResponseField>
+    <ResponseField name="address" type="string">Physical address</ResponseField>
+    <ResponseField name="taxNum" type="string">Tax registration number</ResponseField>
+    <ResponseField name="bankName" type="string">Bank name</ResponseField>
+    <ResponseField name="accountNumber" type="string">Bank account number</ResponseField>
+    <ResponseField name="taxRate" type="BigDecimal">Tax rate</ResponseField>
+    <ResponseField name="enabled" type="boolean">Whether supplier is enabled</ResponseField>
+    <ResponseField name="advanceIn" type="BigDecimal">Advance payment (for members)</ResponseField>
+    <ResponseField name="beginNeedGet" type="BigDecimal">Beginning receivables</ResponseField>
+    <ResponseField name="beginNeedPay" type="BigDecimal">Beginning payables</ResponseField>
+    <ResponseField name="allNeedGet" type="BigDecimal">Total receivables</ResponseField>
+    <ResponseField name="allNeedPay" type="BigDecimal">Total payables</ResponseField>
+    <ResponseField name="description" type="string">Description</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### List Suppliers
+
+Retrieve a paginated list of suppliers with optional search filters.
+
+```bash
+GET /supplier/list?search={search}
+```
+
+<ParamField query="search" type="string">
+  JSON string containing search parameters:
+  - `supplier`: Supplier name filter
+  - `type`: Type filter (供应商/客户/会员)
+  - `contacts`: Contact person filter
+  - `phonenum`: Phone number filter
+  - `telephone`: Telephone filter
+</ParamField>
+
+### Create Supplier
+
+Create a new supplier, customer, or member.
+
+```bash
+POST /supplier/add
+```
+
+<ParamField body="supplier" type="string" required>
+  Supplier/Company name
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  Type: "供应商" (Vendor), "客户" (Customer), or "会员" (Member)
+</ParamField>
+
+<ParamField body="contacts" type="string">
+  Contact person name
+</ParamField>
+
+<ParamField body="phoneNum" type="string">
+  Mobile phone number
+</ParamField>
+
+<ParamField body="telephone" type="string">
+  Landline telephone
+</ParamField>
+
+<ParamField body="email" type="string">
+  Email address
+</ParamField>
+
+<ParamField body="address" type="string">
+  Physical address
+</ParamField>
+
+<ParamField body="taxNum" type="string">
+  Tax registration number
+</ParamField>
+
+<ParamField body="bankName" type="string">
+  Bank name
+</ParamField>
+
+<ParamField body="accountNumber" type="string">
+  Bank account number
+</ParamField>
+
+<ParamField body="enabled" type="boolean">
+  Enable status (default: true)
+</ParamField>
+
+<CodeGroup>
+```bash cURL
+curl -X POST "http://localhost:8080/supplier/add" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "supplier": "ABC Trading Co.",
+    "type": "供应商",
+    "contacts": "John Smith",
+    "phoneNum": "13800138000",
+    "email": "john@abctrading.com",
+    "address": "123 Business St, Shanghai",
+    "enabled": true
+  }'
+```
+
+```json Response
+{
+  "code": 200,
+  "data": {
+    "message": "操作成功"
+  }
+}
+```
+</CodeGroup>
+
+### Update Supplier
+
+Update an existing supplier's information.
+
+```bash
+PUT /supplier/update
+```
+
+<ParamField body="id" type="Long" required>
+  Supplier ID to update
+</ParamField>
+
+<ParamField body="supplier" type="string">
+  Updated supplier name
+</ParamField>
+
+<ParamField body="contacts" type="string">
+  Updated contact person
+</ParamField>
+
+<ParamField body="phoneNum" type="string">
+  Updated phone number
+</ParamField>
+
+### Delete Supplier
+
+Delete a supplier by ID.
+
+```bash
+DELETE /supplier/delete?id={id}
+```
+
+<ParamField query="id" type="Long" required>
+  Supplier ID to delete
+</ParamField>
+
+### Batch Delete Suppliers
+
+Delete multiple suppliers at once.
+
+```bash
+DELETE /supplier/deleteBatch?ids={ids}
+```
+
+<ParamField query="ids" type="string" required>
+  Comma-separated supplier IDs (e.g., "1,2,3")
+</ParamField>
+
+### Batch Set Status
+
+Enable or disable multiple suppliers at once.
+
+```bash
+POST /supplier/batchSetStatus
+```
+
+<ParamField body="status" type="boolean" required>
+  true to enable, false to disable
+</ParamField>
+
+<ParamField body="ids" type="string" required>
+  Comma-separated supplier IDs
+</ParamField>
+
+## Supplier Selection
+
+### Find Customers by Select
+
+Search for customers (type="客户") for dropdown selection.
+
+```bash
+POST /supplier/findBySelect_cus
+```
+
+<ParamField body="key" type="string">
+  Search keyword
+</ParamField>
+
+<ParamField body="organId" type="Long">
+  Filter by organization ID
+</ParamField>
+
+<ParamField body="limit" type="integer">
+  Maximum number of results
+</ParamField>
+
+<ResponseField name="data" type="array">
+  <Expandable title="Customer items">
+    <ResponseField name="id" type="Long">Customer ID</ResponseField>
+    <ResponseField name="supplier" type="string">Customer name</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```bash cURL
+curl -X POST "http://localhost:8080/supplier/findBySelect_cus" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "key": "ABC",
+    "limit": 20
+  }'
+```
+
+```json Response
+[
+  {
+    "id": 5,
+    "supplier": "ABC Corp"
+  },
+  {
+    "id": 12,
+    "supplier": "ABC Trading"
+  }
+]
+```
+</CodeGroup>
+
+### Find Suppliers by Select
+
+Search for suppliers/vendors (type="供应商") for dropdown selection.
+
+```bash
+POST /supplier/findBySelect_sup
+```
+
+<ParamField body="key" type="string">
+  Search keyword
+</ParamField>
+
+<ParamField body="organId" type="Long">
+  Filter by organization ID
+</ParamField>
+
+<ParamField body="limit" type="integer">
+  Maximum number of results
+</ParamField>
+
+### Find Organizations by Select
+
+Search for all business partners (both suppliers and customers).
+
+```bash
+POST /supplier/findBySelect_organ
+```
+
+<ParamField body="key" type="string">
+  Search keyword
+</ParamField>
+
+<ParamField body="organId" type="Long">
+  Filter by specific organization
+</ParamField>
+
+<ParamField body="limit" type="integer">
+  Maximum number of results
+</ParamField>
+
+<ResponseField name="data" type="array">
+  <Expandable title="Organization items">
+    <ResponseField name="id" type="Long">Organization ID</ResponseField>
+    <ResponseField name="supplier" type="string">
+      Organization name with type suffix (e.g., "ABC Corp[供应商]" or "XYZ Inc[客户]")
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Find Members by Select
+
+Search for members (type="会员") for retail operations.
+
+```bash
+POST /supplier/findBySelect_retail
+```
+
+<ParamField body="key" type="string">
+  Search keyword
+</ParamField>
+
+<ParamField body="organId" type="Long">
+  Filter by organization ID
+</ParamField>
+
+<ParamField body="limit" type="integer">
+  Maximum number of results
+</ParamField>
+
+<ResponseField name="data" type="array">
+  <Expandable title="Member items">
+    <ResponseField name="id" type="Long">Member ID</ResponseField>
+    <ResponseField name="supplier" type="string">Member name</ResponseField>
+    <ResponseField name="advanceIn" type="BigDecimal">Advance payment balance</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Validation
+
+### Check Name Exists
+
+Check if a supplier name already exists.
+
+```bash
+GET /supplier/checkIsNameExist
+```
+
+<ParamField query="id" type="Long" required>
+  Supplier ID (use 0 for new supplier)
+</ParamField>
+
+<ParamField query="name" type="string" required>
+  Supplier name to check
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <ResponseField name="status" type="boolean">
+    true if name exists, false otherwise
+  </ResponseField>
+</ResponseField>
+
+### Check Name and Type Exist
+
+Check if a supplier name exists with a specific type.
+
+```bash
+GET /supplier/checkIsNameAndTypeExist
+```
+
+<ParamField query="id" type="Long" required>
+  Supplier ID (use 0 for new)
+</ParamField>
+
+<ParamField query="name" type="string" required>
+  Supplier name
+</ParamField>
+
+<ParamField query="type" type="string" required>
+  Supplier type (供应商/客户/会员)
+</ParamField>
+
+## Financial Information
+
+### Get Begin Need by Organization
+
+Get beginning balance and financial information for a supplier/customer.
+
+```bash
+GET /supplier/getBeginNeedByOrganId?organId={organId}
+```
+
+<ParamField query="organId" type="Long" required>
+  Organization/Supplier ID
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="Financial info">
+    <ResponseField name="beginNeedGet" type="BigDecimal">Beginning receivables</ResponseField>
+    <ResponseField name="beginNeedPay" type="BigDecimal">Beginning payables</ResponseField>
+    <ResponseField name="allNeedGet" type="BigDecimal">Total receivables</ResponseField>
+    <ResponseField name="allNeedPay" type="BigDecimal">Total payables</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Batch Set Advance In
+
+Recalculate advance payment balances for members.
+
+```bash
+POST /supplier/batchSetAdvanceIn
+```
+
+<ParamField body="ids" type="string" required>
+  Comma-separated member IDs
+</ParamField>
+
+## Customer Permissions
+
+### Get All Customers
+
+Get list of all customers (for permission management).
+
+```bash
+GET /supplier/getAllCustomer
+```
+
+<ResponseField name="rows" type="array">
+  <Expandable title="Customer records">
+    <ResponseField name="id" type="Long">Customer ID</ResponseField>
+    <ResponseField name="supplier" type="string">Customer name</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Get User Customer Value
+
+Get customer IDs accessible by a user.
+
+```bash
+GET /supplier/getUserCustomerValue
+```
+
+<ParamField query="UBType" type="string" required>
+  User business type (e.g., "UserCustomer")
+</ParamField>
+
+<ParamField query="UBKeyId" type="string" required>
+  User ID
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  Array of customer IDs accessible by the user
+</ResponseField>
+
+## Import & Export
+
+### Import Vendors
+
+Import vendor data from Excel file.
+
+```bash
+POST /supplier/importVendor
+```
+
+<ParamField body="file" type="file" required>
+  Excel file containing vendor data
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code (200 for success)
+</ResponseField>
+
+<ResponseField name="data" type="string">
+  Import result message
+</ResponseField>
+
+<CodeGroup>
+```bash cURL
+curl -X POST "http://localhost:8080/supplier/importVendor" \
+  -F "file=@vendors.xlsx"
+```
+
+```json Response
+{
+  "code": 200,
+  "data": "导入成功"
+}
+```
+</CodeGroup>
+
+### Import Customers
+
+Import customer data from Excel file.
+
+```bash
+POST /supplier/importCustomer
+```
+
+<ParamField body="file" type="file" required>
+  Excel file containing customer data
+</ParamField>
+
+### Import Members
+
+Import member data from Excel file.
+
+```bash
+POST /supplier/importMember
+```
+
+<ParamField body="file" type="file" required>
+  Excel file containing member data
+</ParamField>
+
+### Export Excel
+
+Export supplier data to Excel file.
+
+```bash
+GET /supplier/exportExcel
+```
+
+<ParamField query="supplier" type="string">
+  Supplier name filter
+</ParamField>
+
+<ParamField query="type" type="string" required>
+  Type filter (供应商/客户/会员)
+</ParamField>
+
+<ParamField query="phonenum" type="string">
+  Phone number filter
+</ParamField>
+
+<ParamField query="telephone" type="string">
+  Telephone filter
+</ParamField>
+
+## Lookup by Name
+
+### Get Info by Name
+
+Retrieve supplier information by name and type.
+
+```bash
+GET /supplier/getInfoByName
+```
+
+<ParamField query="name" type="string" required>
+  Supplier name
+</ParamField>
+
+<ParamField query="type" type="string" required>
+  Supplier type (供应商/客户/会员)
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <ResponseField name="info" type="object">
+    Complete supplier object
+  </ResponseField>
+</ResponseField>

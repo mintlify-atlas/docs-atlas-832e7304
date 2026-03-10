@@ -1,0 +1,324 @@
+---
+title: 'API Introduction'
+description: 'Overview of jshERP REST API, base URL configuration, and general concepts'
+icon: 'code'
+---
+
+## Overview
+
+jshERP provides a comprehensive RESTful API built on Spring Boot that allows you to interact with all core ERP functionalities including inventory management, sales, purchasing, financial operations, and more.
+
+The API follows REST principles and returns JSON responses for all endpoints.
+
+## Base URL
+
+The API base URL is configured in `application.properties`:
+
+```properties
+server.port=9999
+server.servlet.context-path=/jshERP-boot
+```
+
+**Default Base URL:**
+
+```bash
+http://localhost:9999/jshERP-boot
+```
+
+All API endpoints are prefixed with this base URL.
+
+<Note>
+In production environments, replace `localhost` with your actual domain name and ensure proper SSL/TLS configuration.
+</Note>
+
+## API Structure
+
+The API is organized into logical resource groups:
+
+### Core Resources
+
+- **`/user`** - User management and authentication
+- **`/material`** - Product/material management
+- **`/depotHead`** - Warehouse document management (orders, receipts)
+- **`/depot`** - Warehouse/depot operations
+- **`/supplier`** - Supplier management
+- **`/role`** - Role and permissions management
+- **`/organization`** - Organization structure management
+
+### Inventory Management
+
+- **`/depotItem`** - Warehouse item details
+- **`/materialCategory`** - Product categories
+- **`/serialNumber`** - Serial number tracking
+- **`/unit`** - Unit of measure management
+
+### Financial Operations
+
+- **`/accountHead`** - Financial transaction headers
+- **`/accountItem`** - Financial transaction line items
+- **`/account`** - Account management
+
+### System Configuration
+
+- **`/systemConfig`** - System configuration settings
+- **`/function`** - Function/menu management
+- **`/log`** - System logging
+- **`/tenant`** - Multi-tenant management
+
+## Request & Response Format
+
+### Request Format
+
+All requests should include:
+
+<CodeGroup>
+
+```bash POST Request
+curl -X POST "http://localhost:9999/jshERP-boot/material/add" \
+  -H "Content-Type: application/json" \
+  -H "X-Access-Token: your-token-here" \
+  -d '{
+    "name": "Product Name",
+    "categoryId": 1,
+    "standard": "Standard Spec"
+  }'
+```
+
+```bash GET Request
+curl -X GET "http://localhost:9999/jshERP-boot/material/list?search={\"enabled\":\"true\"}" \
+  -H "X-Access-Token: your-token-here"
+```
+
+</CodeGroup>
+
+### Standard Response Format
+
+<CodeGroup>
+
+```json Success Response
+{
+  "code": 200,
+  "data": {
+    "rows": [...],
+    "total": 100
+  }
+}
+```
+
+```json Error Response
+{
+  "code": 500,
+  "data": "Error message description"
+}
+```
+
+</CodeGroup>
+
+### Response Codes
+
+| Code | Description |
+|------|-------------|
+| `200` | Success - Request completed successfully |
+| `500` | Error - Request failed, check error message |
+| `501` | Special condition (e.g., WeChat not bound) |
+
+<Info>
+jshERP uses a simplified response code structure. Most responses use code 200 for success and 500 for errors, with detailed messages in the data field.
+</Info>
+
+## Common Patterns
+
+### Pagination
+
+List endpoints support pagination through query parameters:
+
+```bash
+GET /material/list?pageNum=1&pageSize=20
+```
+
+**Parameters:**
+- `pageNum` - Page number (starting from 1)
+- `pageSize` - Number of records per page
+
+**Response includes:**
+```json
+{
+  "code": 200,
+  "data": {
+    "rows": [...],
+    "total": 150
+  }
+}
+```
+
+### Search Filtering
+
+Many endpoints accept a `search` parameter with JSON-encoded search criteria:
+
+```bash
+GET /material/list?search={"materialParam":"laptop","enabled":"true"}
+```
+
+### Batch Operations
+
+Batch operations use comma-separated IDs:
+
+<CodeGroup>
+
+```bash Delete Multiple
+DELETE /material/deleteBatch?ids=1,2,3,4,5
+```
+
+```bash Update Status
+POST /material/batchSetStatus
+{
+  "ids": "1,2,3,4,5",
+  "status": true
+}
+```
+
+</CodeGroup>
+
+## Data Operations
+
+### CRUD Operations
+
+Standard endpoints follow consistent patterns:
+
+| Operation | Method | Endpoint Pattern | Example |
+|-----------|--------|------------------|----------|
+| **Get by ID** | GET | `/{resource}/info?id={id}` | `/material/info?id=1` |
+| **List** | GET | `/{resource}/list` | `/material/list` |
+| **Create** | POST | `/{resource}/add` | `/material/add` |
+| **Update** | PUT | `/{resource}/update` | `/material/update` |
+| **Delete** | DELETE | `/{resource}/delete?id={id}` | `/material/delete?id=1` |
+| **Batch Delete** | DELETE | `/{resource}/deleteBatch?ids={ids}` | `/material/deleteBatch?ids=1,2,3` |
+
+### Existence Checks
+
+Many resources provide existence check endpoints:
+
+```bash
+GET /material/checkIsExist?id=0&name=Product&model=X100&...
+```
+
+Returns:
+```json
+{
+  "code": 200,
+  "data": {
+    "status": true
+  }
+}
+```
+
+## Session Management
+
+<Warning>
+All API requests (except login, registration, and documentation endpoints) require authentication via the X-Access-Token header.
+</Warning>
+
+jshERP uses Redis-backed session management:
+
+- Session data is stored in Redis with configurable timeout
+- Default session timeout: **10 hours** (36000 seconds)
+- Token is passed via `X-Access-Token` header
+- Session automatically expires after the configured timeout
+
+## Multi-Tenant Support
+
+jshERP includes built-in multi-tenant capabilities:
+
+- Each user belongs to a tenant
+- Tenant configuration includes user limits and trial periods
+- Data isolation is enforced at the application level
+- Tenant information is stored in user sessions
+
+<Info>
+When working with the API, all operations are automatically scoped to the authenticated user's tenant.
+</Info>
+
+## Swagger Documentation
+
+jshERP includes Swagger UI for interactive API exploration:
+
+```
+http://localhost:9999/jshERP-boot/doc.html
+```
+
+Swagger provides:
+- Complete endpoint documentation
+- Request/response schemas
+- Interactive API testing
+- API version information
+
+<Note>
+Swagger UI is accessible without authentication for ease of development.
+</Note>
+
+## Error Handling
+
+### Common Error Scenarios
+
+**Session Expired:**
+```json
+{
+  "code": 500,
+  "data": "loginOut"
+}
+```
+
+**Business Logic Error:**
+```json
+{
+  "code": 500,
+  "data": "操作失败"
+}
+```
+
+**Validation Error:**
+Check the specific error message in the `data` field for details.
+
+### Error Codes in Business Operations
+
+Some operations return specific status codes in the response data:
+
+```json
+{
+  "code": 200,
+  "data": {
+    "status": 2
+  }
+}
+```
+
+Where status might indicate:
+- `0` - Operation failed
+- `1` - Operation succeeded  
+- `2` - Specific condition (e.g., wrong password)
+- `3` - Exception occurred
+
+## Rate Limiting
+
+Session timeout is configured to **10 hours**. Each authenticated request automatically extends the session timeout.
+
+## Best Practices
+
+1. **Always include the X-Access-Token header** for authenticated requests
+2. **Handle session expiration** gracefully and redirect to login
+3. **Use batch operations** when performing multiple similar operations
+4. **Implement proper error handling** for all API calls
+5. **Encode search parameters** properly when using JSON in query strings
+6. **Check existence** before creating resources to avoid duplicates
+7. **Validate input data** on the client side before sending requests
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Authentication" icon="lock" href="/api/authentication">
+    Learn how to authenticate and manage user sessions
+  </Card>
+  <Card title="Swagger API Docs" icon="book" href="http://localhost:9999/jshERP-boot/doc.html">
+    Explore the interactive API documentation
+  </Card>
+</CardGroup>

@@ -1,0 +1,395 @@
+---
+title: 'Inventory Reports'
+description: 'Track and analyze inventory levels, stock movements, and warehouse operations'
+icon: 'warehouse'
+---
+
+## Overview
+
+jshERP provides comprehensive inventory reporting to help you monitor stock levels, track material movements, identify stock warnings, and analyze warehouse operations. These reports give you real-time visibility into your inventory health and help optimize stock management.
+
+## Available Reports
+
+<CardGroup cols={2}>
+  <Card title="Material Stock Report" icon="boxes-stacked" href="#material-stock-report">
+    View current inventory levels across all warehouses with detailed stock information
+  </Card>
+  <Card title="In/Out Stock Report" icon="chart-line" href="#in-out-stock-report">
+    Analyze stock movements with opening balance, inbound, outbound, and closing quantities
+  </Card>
+  <Card title="Stock Warning Report" icon="triangle-exclamation" href="#stock-warning-report">
+    Monitor items that have reached minimum or maximum stock thresholds
+  </Card>
+  <Card title="Stock Distribution" icon="building" href="#stock-distribution">
+    View how inventory is distributed across multiple warehouse locations
+  </Card>
+</CardGroup>
+
+---
+
+## Material Stock Report
+
+**Location:** Reports > Material Stock
+
+**Purpose:** Get a real-time snapshot of current inventory levels for all materials across warehouses.
+
+### Key Features
+
+<AccordionGroup>
+  <Accordion title="Comprehensive Stock Information">
+    - Current stock quantity and value
+    - Initial stock levels
+    - Stock valuation (current stock price)
+    - Total weight calculations
+    - Multi-warehouse support
+  </Accordion>
+
+  <Accordion title="Advanced Filtering Options">
+    - Filter by warehouse (single or multiple)
+    - Search by barcode, name, mnemonic code, specifications, or model
+    - Filter by material category
+    - Filter by storage location/shelf position
+    - Toggle zero-stock items (show/hide)
+  </Accordion>
+
+  <Accordion title="Detailed Material Attributes">
+    - Product images with zoom capability
+    - Barcode, name, specifications, model
+    - Color, brand, manufacturer
+    - Category and storage position
+    - Unit and cost price information
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Access the Report**
+   - Navigate to **Reports > Material Stock**
+   - The report loads with current stock data for all warehouses
+
+2. **Filter Your Data**
+   ```
+   Warehouse: Select one or more warehouses
+   Material Info: Enter barcode, name, or other identifiers
+   Category: Choose from material category tree
+   Storage Position: Filter by warehouse location
+   Zero Stock: Choose to show or hide items with zero inventory
+   ```
+
+3. **View Stock Details**
+   - Click **"Flow"** (流水) to view material transaction history
+   - Click **"Distribution"** (分布) to see stock across warehouses
+   - View summary totals at the top: Total Stock, Total Stock Value, Total Weight
+
+4. **Export and Print**
+   - Click **Export** to download as Excel file
+   - Click **Print** to generate a printable report
+
+<Note>
+  The report displays summary statistics at the top showing total inventory quantity, total inventory value, and total weight across all filtered items.
+</Note>
+
+### Business Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Inventory Valuation" icon="dollar-sign">
+    Calculate total inventory value for financial reporting and balance sheet preparation
+  </Card>
+  <Card title="Stock Level Monitoring" icon="gauge">
+    Monitor current stock levels to prevent stockouts and optimize reorder points
+  </Card>
+  <Card title="Physical Inventory Prep" icon="clipboard-check">
+    Generate stock lists for physical inventory counts and cycle counting
+  </Card>
+  <Card title="Multi-Warehouse Management" icon="warehouse">
+    Compare stock levels across different warehouse locations
+  </Card>
+</CardGroup>
+
+---
+
+## In/Out Stock Report
+
+**Location:** Reports > In/Out Stock Report
+
+**Purpose:** Analyze inventory movements over a specific period, showing opening balance, receipts, issues, and closing balance.
+
+### Key Metrics
+
+<AccordionGroup>
+  <Accordion title="Period Analysis">
+    - **Previous Period Balance** (上期结存): Quantity at start of period
+    - **Inbound Quantity** (入库数量): Total receipts during period
+    - **Outbound Quantity** (出库数量): Total issues during period
+    - **Current Period Balance** (本期结存): Quantity at end of period
+    - **Closing Stock Value** (结存金额): Value of ending inventory
+  </Accordion>
+
+  <Accordion title="Filtering Capabilities">
+    - Date range selection (stock period)
+    - Multi-warehouse selection
+    - Material search (barcode, name, specifications)
+    - Category filtering
+    - Material property filtering
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Select Stock Period**
+   - Choose start and end dates for analysis
+   - Default shows previous month to current date
+
+2. **Apply Filters**
+   ```
+   Stock Period: Select date range (required)
+   Warehouse: Choose warehouses to include
+   Material Info: Search specific materials
+   Category: Filter by material category
+   ```
+
+3. **Analyze Stock Movements**
+   - Review opening balance for each item
+   - See total inbound and outbound quantities
+   - Verify closing balance calculations
+   - Check valuation of closing stock
+   - View **Period Total Stock** and **Total Stock Value** at top
+
+4. **View Distribution Details**
+   - Click **"Distribution"** to see warehouse-level breakdown
+   - View how stock is spread across locations
+
+<Note>
+  The closing balance calculation is automatic: Previous Balance + Inbound - Outbound = Current Balance. This helps verify inventory accuracy.
+</Note>
+
+### Business Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Period-End Reconciliation" icon="balance-scale">
+    Reconcile inventory movements for monthly or quarterly closing procedures
+  </Card>
+  <Card title="Turnover Analysis" icon="rotate">
+    Calculate inventory turnover rates by comparing receipts and issues
+  </Card>
+  <Card title="Slow-Moving Items" icon="clock">
+    Identify items with low movement to optimize stock levels
+  </Card>
+  <Card title="Financial Reporting" icon="file-invoice-dollar">
+    Generate inventory movement reports for financial statements and audits
+  </Card>
+</CardGroup>
+
+---
+
+## Stock Warning Report
+
+**Location:** Reports > Stock Warning Report
+
+**Purpose:** Identify materials that have exceeded maximum safe stock levels or fallen below minimum safe stock levels, with suggested action quantities.
+
+### Warning Indicators
+
+<AccordionGroup>
+  <Accordion title="Safety Stock Levels">
+    - **Low Safe Stock** (最低安全库存): Minimum quantity before reorder
+    - **High Safe Stock** (最高安全库存): Maximum quantity to maintain
+    - **Current Stock** (库存): Present quantity on hand
+    - **Suggested Inbound** (建议入库量): Recommended purchase quantity
+    - **Suggested Outbound** (建议出库量): Recommended sales/transfer quantity
+  </Accordion>
+
+  <Accordion title="Alert Criteria">
+    Materials appear in this report when:
+    - Current stock < Low Safe Stock (understocked)
+    - Current stock > High Safe Stock (overstocked)
+    
+    The system calculates suggested actions to bring stock back to safe levels.
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Access Warning Report**
+   - Navigate to **Reports > Stock Warning Report**
+   - Report automatically shows all materials outside safe stock ranges
+
+2. **Filter Warnings**
+   ```
+   Warehouse: Select specific warehouse
+   Material Info: Search by barcode, name, specifications
+   Category: Filter by material category
+   ```
+
+3. **Review Warnings**
+   - Items below minimum show positive "Suggested Inbound"
+   - Items above maximum show positive "Suggested Outbound"
+   - Review safety stock thresholds for each item
+
+4. **Take Action**
+   - Create purchase orders for understocked items
+   - Plan sales promotions for overstocked items
+   - Adjust safety stock levels if needed
+   - Export list for purchasing or warehouse team
+
+<Warning>
+  Stock warnings are only generated for materials that have safety stock levels configured in the material master data. Ensure you set appropriate minimum and maximum levels for critical items.
+</Warning>
+
+### Business Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Automated Reordering" icon="cart-shopping">
+    Generate purchase orders for items below minimum stock levels
+  </Card>
+  <Card title="Excess Inventory Management" icon="box-archive">
+    Identify overstocked items for clearance sales or transfers
+  </Card>
+  <Card title="Stockout Prevention" icon="shield-halved">
+    Proactively prevent stockouts by monitoring low-stock alerts
+  </Card>
+  <Card title="Working Capital Optimization" icon="coins">
+    Reduce excess inventory carrying costs by managing overstock situations
+  </Card>
+</CardGroup>
+
+---
+
+## Stock Distribution
+
+**Location:** Available from Material Stock Report and In/Out Stock Report
+
+**Purpose:** View how a specific material's inventory is distributed across multiple warehouse locations.
+
+### What It Shows
+
+- Stock quantity at each warehouse location
+- Storage position/shelf location within warehouses
+- Low and high safety stock levels per warehouse
+- Warehouse-specific stock valuations
+
+### How to Access
+
+1. From **Material Stock Report** or **In/Out Stock Report**
+2. Click **"Distribution"** (分布) button for any material
+3. View popup with warehouse-level breakdown
+
+### Use Cases
+
+- **Transfer Planning**: Identify which warehouses have excess stock for transfers
+- **Order Fulfillment**: Check which location has stock available for customer orders
+- **Balanced Inventory**: Ensure stock is appropriately distributed across locations
+- **Regional Analysis**: Understand inventory positioning by geographic region
+
+---
+
+## Report Actions
+
+All inventory reports support these standard actions:
+
+### Export to Excel
+
+- Click the **Export** button (download icon)
+- Downloads complete dataset as Excel file
+- Includes all columns and summary totals
+- File format: `.xls`
+
+### Print Report
+
+- Click the **Print** button (printer icon)
+- Generates print-optimized layout
+- Includes all filtered data and totals
+- Browser print dialog opens automatically
+
+### Column Customization
+
+- Click the **Settings** icon (gear) in column header
+- Check/uncheck columns to show or hide
+- Rearrange columns by dragging
+- Click **Restore Default** to reset
+
+<Note>
+  Column preferences are saved per user and persist across sessions for each report.
+</Note>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Regular Monitoring Schedule">
+    - Review Material Stock Report daily for critical items
+    - Run In/Out Stock Report weekly for movement analysis
+    - Check Stock Warning Report daily before creating purchase orders
+    - Generate monthly reports for financial closing
+  </Accordion>
+
+  <Accordion title="Configure Safety Stock Levels">
+    - Set minimum and maximum stock levels for all active materials
+    - Base levels on lead times and demand variability
+    - Review and adjust safety stock quarterly
+    - Consider seasonal demand patterns
+  </Accordion>
+
+  <Accordion title="Multi-Warehouse Management">
+    - Use Stock Distribution to balance inventory across locations
+    - Analyze transfer opportunities between warehouses
+    - Set location-specific safety stocks
+    - Monitor location-level stock accuracy
+  </Accordion>
+
+  <Accordion title="Data Accuracy">
+    - Perform regular cycle counts and physical inventories
+    - Investigate discrepancies in In/Out Stock Report
+    - Verify transaction postings daily
+    - Use barcode scanning to improve accuracy
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Stock quantities don't match expectations">
+    **Solutions:**
+    - Check if all transactions have been posted and approved
+    - Review transaction history using the "Flow" button
+    - Verify date range filters in In/Out Stock Report
+    - Check if initial stock was properly set up
+  </Accordion>
+
+  <Accordion title="No data showing in reports">
+    **Solutions:**
+    - Verify you have permission to view the selected warehouses
+    - Check if materials are assigned to the selected categories
+    - Clear filters and search criteria
+    - Ensure transactions have been posted to inventory
+  </Accordion>
+
+  <Accordion title="Stock warning report is empty">
+    **Solutions:**
+    - Verify safety stock levels are configured in material master
+    - Check that warehouse field is populated for materials
+    - Confirm materials have current stock balances
+    - Review if all items are within safe stock ranges
+  </Accordion>
+
+  <Accordion title="Export or print not working">
+    **Solutions:**
+    - Check browser popup blocker settings
+    - Verify browser has permission to download files
+    - Try a different browser
+    - Reduce dataset size by applying filters
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Related Topics
+
+- [Financial Reports](/reporting/financial-reports) - Account balances and transactions
+- [Sales Reports](/reporting/sales-reports) - Sales analysis and customer insights
+- [Purchase Reports](/reporting/purchase-reports) - Purchase analysis and supplier insights
+- [Warehouse Management](/modules/warehouse-management) - Configure warehouses and locations
+- [Material Management](/modules/material-management) - Set up materials and safety stock levels

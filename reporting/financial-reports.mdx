@@ -1,0 +1,446 @@
+---
+title: 'Financial Reports'
+description: 'Monitor account balances, track financial transactions, and manage receivables and payables'
+icon: 'chart-line'
+---
+
+## Overview
+
+jshERP's financial reporting provides real-time visibility into your company's financial position, including account balances, transaction history, customer receivables, and vendor payables. These reports support financial management, reconciliation, and decision-making.
+
+## Available Reports
+
+<CardGroup cols={2}>
+  <Card title="Account Report" icon="building-columns" href="#account-report">
+    View all account balances with monthly activity and current balance
+  </Card>
+  <Card title="Account Flow Report" icon="arrow-right-arrow-left" href="#account-flow-report">
+    Detailed transaction history for specific accounts
+  </Card>
+  <Card title="Customer Account Statement" icon="user-tie" href="#customer-account-statement">
+    Track customer receivables and payment history
+  </Card>
+  <Card title="Vendor Account Statement" icon="truck-field" href="#vendor-account-statement">
+    Monitor vendor payables and payment obligations
+  </Card>
+</CardGroup>
+
+---
+
+## Account Report
+
+**Location:** Reports > Account Report
+
+**Purpose:** Get an overview of all financial accounts with their opening balances, current month activity, and current balances.
+
+### Key Features
+
+<AccordionGroup>
+  <Accordion title="Account Overview">
+    - Account name and serial number
+    - Opening balance (期初金额)
+    - Current month transactions (本月发生额)
+    - Current balance (当前余额)
+    - Summary totals for all accounts
+  </Accordion>
+
+  <Accordion title="Search and Filter">
+    - Search by account name
+    - Filter by account serial number
+    - Sortable columns for easy analysis
+  </Accordion>
+
+  <Accordion title="Drill-Down Capability">
+    - Click "Flow" (流水) to view detailed transactions
+    - See complete transaction history for each account
+    - Analyze inflows and outflows
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Access the Report**
+   - Navigate to **Reports > Account Report**
+   - Report displays all accounts with current balances
+
+2. **View Summary Information**
+   - **Monthly Total** shows total transactions for current month across all accounts
+   - **Current Total** shows total current balance across all accounts
+   - Quickly assess overall financial position
+
+3. **Search Specific Accounts**
+   ```
+   Name: Enter account name
+   Serial No: Enter account number
+   Click Query to filter results
+   ```
+
+4. **View Transaction Details**
+   - Click **"Flow"** (流水) button for any account
+   - See detailed transaction list with dates and amounts
+   - Review transaction types and sources
+
+5. **Export and Print**
+   - Click **Export** for Excel download
+   - Click **Print** for printable statement
+
+<Note>
+  Account balances are updated in real-time as transactions are posted. The current month activity reflects only transactions in the current calendar month.
+</Note>
+
+### Business Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Cash Flow Monitoring" icon="money-bill-trend-up">
+    Track cash and bank account balances to ensure adequate liquidity
+  </Card>
+  <Card title="Month-End Closing" icon="calendar-check">
+    Verify account balances during monthly financial closing procedures
+  </Card>
+  <Card title="Bank Reconciliation" icon="receipt">
+    Compare system balances with bank statements for reconciliation
+  </Card>
+  <Card title="Financial Planning" icon="chart-pie">
+    Monitor account trends to support cash flow forecasting
+  </Card>
+</CardGroup>
+
+---
+
+## Account Flow Report
+
+**Location:** Account Report > Flow button
+
+**Purpose:** View detailed transaction history for a specific account, showing all inflows and outflows.
+
+### Transaction Details
+
+<AccordionGroup>
+  <Accordion title="Transaction Information">
+    Each transaction shows:
+    - Transaction date and time
+    - Transaction type (receipt, payment, transfer)
+    - Source document number
+    - Transaction amount (debit/credit)
+    - Running balance after transaction
+    - Transaction description/notes
+  </Accordion>
+
+  <Accordion title="Historical Financial Analysis">
+    - View complete transaction history
+    - Filter by date range
+    - Sort by various columns
+    - Search by document number
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Open Account Flow**
+   - From Account Report, click **"Flow"** for desired account
+   - Modal window shows transaction history
+
+2. **Analyze Transactions**
+   - Review chronological transaction list
+   - Verify transaction amounts and dates
+   - Check running balance progression
+
+3. **Filter and Search**
+   - Use date filters to narrow time period
+   - Search for specific document numbers
+   - Sort by different columns
+
+### Use Cases
+
+- **Transaction Verification**: Verify specific receipts or payments posted to account
+- **Dispute Resolution**: Research transaction details for customer or vendor inquiries
+- **Audit Trail**: Provide detailed transaction history for auditors
+- **Reconciliation**: Match system transactions with external statements
+
+---
+
+## Customer Account Statement
+
+**Location:** Reports > Customer Account Statement
+
+**Purpose:** Track accounts receivable from customers, showing opening balance, current period charges, payments received, and outstanding balance.
+
+### Key Metrics
+
+<AccordionGroup>
+  <Accordion title="Receivables Tracking">
+    - **Opening Receivable** (期初应收): Balance at start of period
+    - **Current Period Charges** (本期欠款): New invoices and charges
+    - **Current Period Receipts** (本期收款): Payments received
+    - **Closing Receivable** (期末应收): Outstanding balance at period end
+    
+    Formula: Closing = Opening + Charges - Receipts
+  </Accordion>
+
+  <Accordion title="Customer Information">
+    - Customer name
+    - Contact person
+    - Mobile phone number
+    - Telephone number
+    - Email address
+  </Accordion>
+
+  <Accordion title="Aging and Analysis">
+    - Filter by date range (bill period)
+    - Filter by debt status (with/without outstanding balance)
+    - Summary totals at report level
+    - Drill-down to transaction details
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Access Customer Statements**
+   - Navigate to **Reports > Customer Account Statement**
+   - Report shows all customers with receivables
+
+2. **Select Reporting Period**
+   ```
+   Bill Period: Select start and end dates
+   Customer: Optionally filter to specific customer
+   Debt Status: Choose "With Debt" or "Without Debt"
+   ```
+
+3. **Review Receivables**
+   - Check **Opening Receivable** and **Closing Receivable** totals at top
+   - Review individual customer balances
+   - Identify customers with outstanding balances
+   - Sort by amount to prioritize collections
+
+4. **View Transaction Details**
+   - Click **"Details"** (详情) button for any customer
+   - See all invoices and payments for the period
+   - Review document numbers and dates
+
+5. **Export for Collections**
+   - Export to Excel for collections team
+   - Print statements for mailing to customers
+
+<Warning>
+  The closing receivable calculation includes all sales orders and receipts. Ensure all transactions are properly posted and approved before generating statements.
+</Warning>
+
+### Business Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Collections Management" icon="hand-holding-dollar">
+    Identify customers with overdue balances for follow-up and collections
+  </Card>
+  <Card title="Credit Management" icon="credit-card">
+    Monitor customer credit limits and outstanding balances
+  </Card>
+  <Card title="Customer Communication" icon="envelope">
+    Generate account statements for customer distribution
+  </Card>
+  <Card title="Cash Flow Forecasting" icon="chart-area">
+    Project expected cash receipts based on outstanding receivables
+  </Card>
+</CardGroup>
+
+---
+
+## Vendor Account Statement
+
+**Location:** Reports > Vendor Account Statement
+
+**Purpose:** Monitor accounts payable to vendors, showing opening balance, current period purchases, payments made, and outstanding balance.
+
+### Key Metrics
+
+<AccordionGroup>
+  <Accordion title="Payables Tracking">
+    - **Opening Payable** (期初应付): Balance owed at start of period
+    - **Current Period Purchases** (本期欠款): New purchase invoices
+    - **Current Period Payments** (本期付款): Payments made to vendor
+    - **Closing Payable** (期末应付): Balance owed at period end
+    
+    Formula: Closing = Opening + Purchases - Payments
+  </Accordion>
+
+  <Accordion title="Vendor Information">
+    - Vendor name
+    - Contact person
+    - Mobile phone number
+    - Telephone number
+    - Email address
+  </Accordion>
+
+  <Accordion title="Payment Management">
+    - Filter by date range (bill period)
+    - Filter by debt status
+    - Identify overdue payables
+    - Plan payment schedules
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Access Vendor Statements**
+   - Navigate to **Reports > Vendor Account Statement**
+   - Report displays all vendors with payables
+
+2. **Select Reporting Period**
+   ```
+   Bill Period: Choose date range
+   Vendor: Optionally filter to specific vendor
+   Debt Status: Show only vendors with balances
+   ```
+
+3. **Review Payables**
+   - Check **Opening Payable** and **Closing Payable** totals
+   - Review vendor balances for payment planning
+   - Identify vendors requiring payment
+   - Prioritize based on payment terms
+
+4. **View Transaction Details**
+   - Click **"Details"** (详情) for vendor
+   - Review purchase orders and payments
+   - Verify invoice amounts and due dates
+
+5. **Plan Payments**
+   - Export payables list for accounts payable team
+   - Schedule payments based on due dates and cash availability
+
+<Note>
+  Use this report to ensure timely vendor payments, maintain good supplier relationships, and take advantage of early payment discounts.
+</Note>
+
+### Business Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Payment Planning" icon="calendar-days">
+    Schedule vendor payments based on due dates and available cash
+  </Card>
+  <Card title="Vendor Relations" icon="handshake">
+    Ensure timely payments to maintain good supplier relationships
+  </Card>
+  <Card title="Cash Management" icon="wallet">
+    Plan cash outflows based on payables obligations
+  </Card>
+  <Card title="Discount Optimization" icon="tag">
+    Identify opportunities to take early payment discounts
+  </Card>
+</CardGroup>
+
+---
+
+## Report Actions
+
+All financial reports support these standard actions:
+
+### Export to Excel
+
+- Click **Export** button to download complete dataset
+- Includes all columns and summary totals
+- Useful for further analysis or sharing with stakeholders
+
+### Print Statements
+
+- Click **Print** button for printable format
+- Generates professional-looking statements
+- Include company header information
+- Suitable for mailing to customers or vendors
+
+### Column Customization
+
+- Click **Settings** icon in table header
+- Show/hide specific columns
+- Reorder columns by preference
+- Settings persist per user
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Daily Financial Monitoring">
+    - Review Account Report daily to monitor cash position
+    - Check key account balances each morning
+    - Investigate unexpected balance changes immediately
+    - Verify large transactions are properly recorded
+  </Accordion>
+
+  <Accordion title="Regular Reconciliation">
+    - Reconcile bank accounts weekly using Account Flow Report
+    - Match system transactions with bank statements
+    - Investigate and resolve discrepancies promptly
+    - Document reconciliation results
+  </Accordion>
+
+  <Accordion title="Receivables Management">
+    - Review Customer Account Statements weekly
+    - Follow up on overdue receivables promptly
+    - Set clear credit policies and payment terms
+    - Offer multiple payment methods for convenience
+  </Accordion>
+
+  <Accordion title="Payables Management">
+    - Review Vendor Account Statements bi-weekly
+    - Plan payments to optimize cash flow
+    - Take advantage of early payment discounts
+    - Maintain good payment history with key suppliers
+  </Accordion>
+
+  <Accordion title="Month-End Procedures">
+    - Generate all financial reports before closing month
+    - Verify account balances match general ledger
+    - Review and approve all pending transactions
+    - Archive reports for audit trail
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Account balance doesn't match bank statement">
+    **Solutions:**
+    - Review Account Flow to identify missing or duplicate transactions
+    - Check if all bank transactions have been recorded
+    - Verify transaction dates match bank statement dates
+    - Look for uncleared checks or deposits in transit
+    - Ensure no transactions are pending approval
+  </Accordion>
+
+  <Accordion title="Customer receivable amount is incorrect">
+    **Solutions:**
+    - Verify all sales orders are posted and approved
+    - Check if all customer payments are recorded
+    - Review transaction details for any errors
+    - Ensure correct date range is selected
+    - Check if any credit notes or adjustments are pending
+  </Accordion>
+
+  <Accordion title="Report shows no data">
+    **Solutions:**
+    - Verify you have permission to view financial data
+    - Check date range filters aren't too restrictive
+    - Ensure transactions have been properly posted
+    - Clear search filters and try again
+  </Accordion>
+
+  <Accordion title="Summary totals don't match detail lines">
+    **Solutions:**
+    - Refresh the report page
+    - Check if pagination is hiding some records
+    - Verify no filters are inadvertently applied
+    - Export to Excel to see complete dataset
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Related Topics
+
+- [Inventory Reports](/reporting/inventory-reports) - Stock levels and movements
+- [Sales Reports](/reporting/sales-reports) - Sales performance analysis
+- [Purchase Reports](/reporting/purchase-reports) - Purchase analysis
+- [Financial Management](/modules/financial-management) - Account setup and configuration
+- [Sales Management](/modules/sales-management) - Customer master data
+- [Purchase Management](/modules/purchase-management) - Supplier master data

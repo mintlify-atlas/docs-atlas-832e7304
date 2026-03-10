@@ -1,0 +1,426 @@
+---
+title: 'Sales Management'
+description: 'Sales orders, delivery, customer management, and receivables tracking'
+icon: 'handshake'
+---
+
+The Sales Management module handles the complete sales process from quotations and orders to delivery and customer payment collection.
+
+## Overview
+
+Manage B2B and B2C sales operations with support for sales orders, shipment processing, sales returns, and customer credit management.
+
+<Note>
+Sales documents support multi-account payments, partial deliveries, credit terms, and detailed receivables tracking.
+</Note>
+
+## Module Components
+
+<CardGroup cols={2}>
+  <Card title="Sales Order" icon="file-invoice">
+    Create sales orders that reserve inventory and track order fulfillment
+  </Card>
+  <Card title="Sales Delivery" icon="truck">
+    Process shipments to customers with payment collection
+  </Card>
+  <Card title="Sales Return" icon="box-open">
+    Handle customer returns and process refunds
+  </Card>
+  <Card title="Customer Accounts" icon="user-tie">
+    Manage customer credit, receivables, and payment history
+  </Card>
+</CardGroup>
+
+## Sales Order Process
+
+<Steps>
+  <Step title="Create Sales Order">
+    Navigate to **Bills > Sales Order** and click **New**.
+    
+    Sales orders represent customer commitments without immediately affecting inventory or requiring payment.
+  </Step>
+  
+  <Step title="Select Customer">
+    Choose or create a customer record. Search by:
+    - Customer name
+    - Customer code
+    - Contact information
+    
+    The system displays customer credit status and outstanding receivables.
+  </Step>
+  
+  <Step title="Add Order Items">
+    Add products using:
+    - Barcode scanning
+    - Product name search
+    - Mnemonic code lookup
+    - Specification/model filtering
+    
+    For each product:
+    - Enter quantity ordered
+    - Set unit price (defaults from price list)
+    - Calculate line totals
+    - Add item-specific remarks
+  </Step>
+  
+  <Step title="Configure Terms">
+    Set order parameters:
+    - Delivery date
+    - Settlement account for deposit
+    - Discount percentage
+    - Other fees (shipping, handling)
+    - Deposit amount
+    - Sales representative
+    - Order remarks
+  </Step>
+  
+  <Step title="Save and Audit">
+    Save the order, then submit for audit. Approved orders can be:
+    - Converted to delivery documents
+    - Converted to purchase orders (order-on-demand)
+    - Partially fulfilled over multiple shipments
+  </Step>
+</Steps>
+
+### Sales Order Status
+
+| Status | Description | Actions Available |
+|--------|-------------|-------------------|
+| **Unapproved** | Draft order | Edit, Delete, Audit |
+| **Under Review** | Approval pending | View only |
+| **Approved** | Order confirmed | Convert to Delivery |
+| **Partial Delivery** | Some items shipped | Continue shipping |
+| **Completed** | All items delivered | View history |
+
+## Sales Delivery (Outbound Shipment)
+
+### Delivery Process
+
+<Steps>
+  <Step title="Create Delivery">
+    Access **Bills > Sales Delivery** or convert from an approved sales order.
+    
+    Deliveries reduce inventory and record customer payments or receivables.
+  </Step>
+  
+  <Step title="Select Customer and Warehouse">
+    - Choose customer
+    - Select shipping warehouse (limited to your authorized warehouses)
+    - Link to sales order if applicable
+  </Step>
+  
+  <Step title="Add Delivery Items">
+    For each product:
+    - Verify product details
+    - Enter shipped quantity
+    - Confirm sales price
+    - Calculate tax if applicable
+    - Record serial/batch numbers if required
+    
+    <Note>
+    The system validates available inventory before allowing delivery.
+    </Note>
+  </Step>
+  
+  <Step title="Calculate Invoice Total">
+    System calculates:
+    - Subtotal (before tax)
+    - Tax amount
+    - Grand total (including tax)
+    - Discount amount
+    - Other fees
+    - Deposit applied
+    - Amount receivable
+  </Step>
+  
+  <Step title="Collect Payment">
+    Record payment collection:
+    - Select receiving account(s)
+    - Enter payment received
+    - Record outstanding receivable (debt)
+    - Support multi-account collection
+    
+    The system tracks:
+    - Current payment
+    - Current receivable
+    - Customer's total outstanding balance
+  </Step>
+  
+  <Step title="Assign Sales Rep">
+    Assign sales representative(s) to the delivery for:
+    - Commission calculation
+    - Performance tracking
+    - Customer relationship management
+  </Step>
+  
+  <Step title="Audit and Ship">
+    Audit the delivery to:
+    - Deduct inventory from warehouse
+    - Record payment in accounts
+    - Update customer receivables
+    - Update sales order fulfillment status
+  </Step>
+</Steps>
+
+### Partial Deliveries
+
+Sales orders can be fulfilled through multiple shipments:
+
+- Create multiple delivery documents linked to one order
+- Each delivery ships a portion of the ordered quantity
+- Order status shows **Partial Delivery**
+- When all items shipped, status becomes **Completed**
+
+### Payment and Receivables Tracking
+
+Delivery documents handle complex payment scenarios:
+
+```
+Grand Total (including tax): $15,000
+Discount: -$500
+Other Fees: +$200
+Deposit Applied: -$2,000
+─────────────────────────────
+Amount Receivable: $12,700
+
+Payment Received: $7,000
+Current Receivable: $5,700
+Previous Outstanding: $3,000
+─────────────────────────────
+Total Customer Debt: $8,700
+```
+
+<Note>
+Receivable indicators:
+- **Green amount**: Payment collected (linked payment document exists)
+- **Red amount**: Not yet collected (full receivable outstanding)
+</Note>
+
+## Sales Returns
+
+Process customer returns for refunds or exchanges:
+
+1. **Create Return**: Use **Convert to Sales Return** from original delivery
+2. **Select Return Items**: Choose products and quantities being returned
+3. **Enter Return Reason**: Document the reason (defect, wrong item, etc.)
+4. **Process Refund**: Issue refund or apply credit to customer account
+5. **Audit**: Returns inventory and updates accounts
+
+Returned deliveries display **[退]** indicator on the original document.
+
+## Order-on-Demand (以销定购)
+
+Connect sales orders directly to purchase orders for JIT fulfillment:
+
+<Steps>
+  <Step title="Receive Customer Order">
+    Create and audit a sales order for items you don't currently stock.
+  </Step>
+  
+  <Step title="Convert to Purchase Order">
+    Select the sales order and click **Convert to Purchase Order - Order on Demand**.
+    
+    The system creates a linked purchase order.
+  </Step>
+  
+  <Step title="Fulfill Purchase">
+    Receive goods from supplier through normal purchase receipt process.
+  </Step>
+  
+  <Step title="Deliver to Customer">
+    Convert the sales order to delivery once inventory is available.
+  </Step>
+</Steps>
+
+This approach:
+- Minimizes inventory holding costs
+- Reduces obsolescence risk
+- Enables made-to-order business models
+- Maintains traceability from customer to supplier
+
+## Customer Credit Management
+
+### Credit Terms
+
+For each customer, configure:
+- Credit limit
+- Payment terms (Net 30, Net 60, etc.)
+- Discount terms (2/10 Net 30)
+- Required deposit percentage
+
+### Outstanding Receivables
+
+Monitor customer debt:
+- View total receivables per customer
+- Track aging (current, 30 days, 60 days, 90+ days)
+- Filter deliveries by debt status
+- Link to collection documents
+
+### Collection Management
+
+Options for collecting payment:
+
+1. **Payment at Delivery**: Collect when auditing the delivery document
+2. **Separate Payment**: Create payment collection documents later
+3. **Partial Payments**: Allow customers to pay in installments
+4. **Apply Discounts**: Offer early payment discounts
+
+## Search and Filtering
+
+**Basic Search:**
+- Document number
+- Product information
+- Date range
+
+**Advanced Filters:**
+- Customer
+- Warehouse
+- Operator
+- Linked order number
+- Settlement account
+- Debt status (has receivables / fully paid)
+- Document status
+- Sales representative
+- Remarks
+
+## Force Close Orders
+
+For orders in **Partial Delivery** that won't be fully fulfilled:
+
+1. Select partial orders
+2. Click **Force Close**
+3. Confirm closure
+4. Status changes to **Completed**
+
+Use when:
+- Customer cancels remaining items
+- Items discontinued
+- Partial fulfillment accepted by customer
+
+## Batch Operations
+
+<CardGroup cols={2}>
+  <Card title="Batch Delete" icon="trash-can">
+    Remove multiple unapproved documents
+  </Card>
+  <Card title="Batch Audit" icon="circle-check">
+    Approve multiple orders or deliveries
+  </Card>
+  <Card title="Batch Reverse Audit" icon="circle-xmark">
+    Unapprove multiple documents
+  </Card>
+  <Card title="Convert to Return" icon="reply">
+    Create return documents from deliveries
+  </Card>
+</CardGroup>
+
+## Multi-Account Payments
+
+Deliveries support receiving payment across multiple accounts:
+
+**Example:**
+- Bank Transfer: $8,000
+- Credit Card: $3,000
+- Cash: $500
+- Outstanding: $1,200
+
+## Sales Representative Management
+
+Track sales performance:
+
+- Assign multiple reps to one order
+- Filter orders/deliveries by sales rep
+- Generate commission reports
+- Analyze rep performance
+
+### Assigning Sales Reps
+
+In the delivery document:
+1. Select **Sales Representative** field
+2. Choose one or more reps
+3. System links delivery to rep performance records
+
+## Column Customization
+
+Show/hide columns in list views:
+
+- Customer name
+- Document number
+- Linked orders
+- Product information
+- Dates and operators
+- Quantities
+- Financial details (prices, discounts, deposits, receivables)
+- Sales representatives
+- Status
+
+Click **Restore Default** to reset layout.
+
+## Document Indicators
+
+Document numbers display helpful flags:
+
+- **[订]**: Converted from sales order
+- **[退]**: Has associated return
+
+## Integration Points
+
+<CardGroup cols={1}>
+  <Card title="Inventory Management" icon="boxes-stacked">
+    Sales deliveries automatically reduce stock levels and update inventory valuation.
+  </Card>
+  
+  <Card title="Financial Management" icon="money-bill-trend-up">
+    Payments and receivables flow to accounts receivable tracking and customer statements.
+  </Card>
+  
+  <Card title="Purchase Orders" icon="cart-flatbed">
+    Order-on-demand links sales orders to procurement for JIT fulfillment.
+  </Card>
+  
+  <Card title="Reporting" icon="chart-column">
+    Sales data feeds:
+    - Sales analysis reports
+    - Customer purchase history
+    - Sales rep performance
+    - Profit margin analysis
+    - Customer account statements
+  </Card>
+</CardGroup>
+
+## Best Practices
+
+<CardGroup cols={1}>
+  <Card title="Use Sales Orders" icon="clipboard-list">
+    Create orders for all B2B transactions to track commitments and manage fulfillment.
+  </Card>
+  
+  <Card title="Set Credit Limits" icon="scale-balanced">
+    Establish and monitor customer credit limits to minimize bad debt risk.
+  </Card>
+  
+  <Card title="Assign Sales Reps" icon="user-tag">
+    Always assign sales representatives for accurate commission calculation and CRM.
+  </Card>
+  
+  <Card title="Prompt Collection" icon="money-check-dollar">
+    Follow up on outstanding receivables promptly using aging reports.
+  </Card>
+  
+  <Card title="Link Documents" icon="link">
+    Maintain document linkages (order → delivery → return) for complete traceability.
+  </Card>
+</CardGroup>
+
+## Permissions
+
+Control sales functions by user role:
+
+- **View**: See sales documents
+- **Add/Edit**: Create and modify documents
+- **Delete**: Remove unapproved documents
+- **Audit**: Approve/unapprove transactions
+- **Export**: Download data
+- **Warehouse Access**: Control shipping warehouse visibility
+- **Price Access**: View and modify sales prices
+- **Discount Authority**: Apply discounts within limits

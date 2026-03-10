@@ -1,80 +1,325 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart Guide
+description: Get started with jshERP in minutes
 ---
 
-## Get started in three steps
+# jshERP Quickstart Guide
 
-Get your documentation site running locally and make your first customization.
+Get up and running with jshERP quickly. This guide will walk you through your first steps, from logging in to performing basic operations.
 
-### Step 1: Set up your local environment
-
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
+## Choose Your Path
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Cloud Platform" icon="cloud" href="#cloud-quickstart">
+    Start immediately using our hosted platform
+  </Card>
+  <Card title="Self-Hosted" icon="server" href="#self-hosted-quickstart">
+    Install on your own infrastructure for full control. See the [installation guide](/installation) for setup instructions.
+  </Card>
 </CardGroup>
 
+## Cloud Quickstart
+
+The fastest way to try jshERP is using the cloud platform at [http://cloud.gyjerp.com](http://cloud.gyjerp.com).
+
+<Steps>
+  <Step title="Create Your Account">
+    Register for a new tenant account on the cloud platform. You'll get instant access to all features.
+  </Step>
+  
+  <Step title="Log In">
+    Use your credentials to log into the system. The cloud platform provides a pre-configured environment ready to use.
+  </Step>
+  
+  <Step title="Explore the Dashboard">
+    Familiarize yourself with the main dashboard and navigation menu showing all available modules.
+  </Step>
+</Steps>
+
+## Self-Hosted Quickstart
+
+If you've already completed the [installation process](/installation), follow these steps:
+
+<Steps>
+  <Step title="Access the System">
+    Navigate to your jshERP installation:
+    ```
+    http://your-server-ip:9999/jshERP-boot
+    ```
+    Or if you've configured Nginx:
+    ```
+    http://your-domain.com
+    ```
+  </Step>
+  
+  <Step title="Log In with Default Credentials">
+    Use the default credentials for your first login:
+    
+    **Default Tenant**: `jsh`  
+    **Default Username**: `admin`  
+    **Default Password**: `123456`
+    
+    <Warning>
+    Change the default password immediately after first login for security!
+    </Warning>
+  </Step>
+  
+  <Step title="Change Your Password">
+    Click your username in the top-right corner → **Personal Settings** → **Change Password**
+  </Step>
+</Steps>
+
+## Understanding the Dashboard
+
+After logging in, you'll see the main dashboard with several key areas:
+
+<AccordionGroup>
+  <Accordion title="Navigation Menu (Left Sidebar)">
+    The left sidebar contains all main modules:
+    - **Dashboard** - System overview and statistics
+    - **Retail Management** - POS and retail sales
+    - **Purchase Management** - Procurement and vendor management
+    - **Sales Management** - Sales orders and customer management
+    - **Warehouse Management** - Inventory and depot operations
+    - **Financial Management** - Accounting and financial records
+    - **Reports** - Analytics and business intelligence
+    - **Product Management** - Material and product catalog
+    - **Basic Data** - Master data (suppliers, customers, members)
+    - **System** - User management, roles, and configuration
+  </Accordion>
+  
+  <Accordion title="Top Bar">
+    - **Organization Selector** - Switch between different organizations (if applicable)
+    - **User Profile** - Access personal settings, language preferences, and logout
+    - **Notifications** - System messages and alerts
+  </Accordion>
+  
+  <Accordion title="Main Content Area">
+    - Displays the selected module's interface
+    - Most modules show a searchable list view with action buttons
+    - Forms appear in modal dialogs or separate pages
+  </Accordion>
+</AccordionGroup>
+
+## Your First Operations
+
+Let's walk through five basic workflows to get you familiar with jshERP:
+
+### 1. Add Your First Product
+
+<Steps>
+  <Step title="Navigate to Material Management">
+    Click **Product Management** → **Material** in the left menu
+  </Step>
+  
+  <Step title="Create a New Product">
+    Click the **Add** button and fill in:
+    - Material Name (e.g., "Laptop Computer")
+    - Category (select from dropdown)
+    - Unit of Measure (e.g., "Piece")
+    - Purchase Price, Sale Price, Retail Price
+    - Optional: Barcode, SKU, specifications
+  </Step>
+  
+  <Step title="Save the Product">
+    Click **OK** to save. The product now appears in your material list.
+  </Step>
+</Steps>
+
+### 2. Create a Purchase Order
+
+<Steps>
+  <Step title="Navigate to Purchase Management">
+    Click **Purchase Management** → **Purchase Order** in the menu
+  </Step>
+  
+  <Step title="Create New Order">
+    Click **Add** and select:
+    - Supplier (vendor)
+    - Warehouse (destination depot)
+    - Purchase Date
+  </Step>
+  
+  <Step title="Add Line Items">
+    Click **Add Product** and select materials with quantities and prices. The system calculates totals automatically.
+  </Step>
+  
+  <Step title="Submit Order">
+    Review and click **OK** to save the order. You can print or export the document.
+  </Step>
+</Steps>
+
+### 3. Process a Receipt (Goods In)
+
+<Steps>
+  <Step title="Navigate to Purchase Receipts">
+    Go to **Purchase Management** → **Purchase Receipt**
+  </Step>
+  
+  <Step title="Create Receipt">
+    Click **Add**, select the purchase order (or create a direct receipt), and confirm:
+    - Supplier
+    - Warehouse
+    - Receipt date
+  </Step>
+  
+  <Step title="Confirm Quantities">
+    Verify received quantities match the order. Adjust if needed for partial receipts.
+  </Step>
+  
+  <Step title="Complete Receipt">
+    Save the receipt. Inventory levels automatically update in the warehouse.
+  </Step>
+</Steps>
+
+### 4. Make a Retail Sale
+
+<Steps>
+  <Step title="Open Retail Management">
+    Click **Retail Management** → **Retail Sale** in the menu
+  </Step>
+  
+  <Step title="Create New Sale">
+    Click **Add** and select:
+    - Member card (optional, for registered customers)
+    - Warehouse (source depot)
+    - Sale date and time
+  </Step>
+  
+  <Step title="Scan or Select Products">
+    Add products by barcode scanning or manual selection. Enter quantities and confirm prices.
+  </Step>
+  
+  <Step title="Process Payment">
+    Enter payment amount, select payment method (cash, card, etc.), calculate change, and complete the sale.
+  </Step>
+</Steps>
+
+### 5. Check Your Inventory
+
+<Steps>
+  <Step title="Navigate to Reports">
+    Click **Reports** → **Inventory Status** in the menu
+  </Step>
+  
+  <Step title="View Stock Levels">
+    See real-time stock quantities for all products across all warehouses.
+  </Step>
+  
+  <Step title="Filter and Export">
+    Use filters to find specific products, warehouses, or categories. Export to Excel for further analysis.
+  </Step>
+</Steps>
+
+## Essential Configuration
+
+Before using jshERP in production, complete these configuration tasks:
+
+<CardGroup cols={2}>
+  <Card title="Change Default Password" icon="key">
+    Secure your account by updating the default admin password
+  </Card>
+  
+  <Card title="Set Up Company Info" icon="building">
+    Go to **System** → **System Configuration** to add your business details
+  </Card>
+  
+  <Card title="Configure Warehouses" icon="warehouse">
+    Add your depot locations under **Basic Data** → **Depot**
+  </Card>
+  
+  <Card title="Add Users and Roles" icon="users">
+    Create user accounts with appropriate permissions under **System** → **User**
+  </Card>
+  
+  <Card title="Set Up Chart of Accounts" icon="coins">
+    Configure financial accounts under **Basic Data** → **Account**
+  </Card>
+  
+  <Card title="Import Master Data" icon="database">
+    Use Excel import features to bulk-load suppliers, customers, and products
+  </Card>
+</CardGroup>
+
+## Language Settings
+
+jshERP supports 73 languages:
+
+<Steps>
+  <Step title="Access Language Settings">
+    Click your username (top-right) → **Interface Settings**
+  </Step>
+  
+  <Step title="Select Your Language">
+    Choose from the dropdown list and click **OK**
+  </Step>
+  
+  <Step title="Refresh the Page">
+    The interface updates to your selected language immediately
+  </Step>
+</Steps>
+
+## Mobile Access
+
+jshERP provides mobile apps for iOS, Android, and WeChat mini-program:
+
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+Scan the QR codes on the [official website](http://cloud.gyjerp.com) to download mobile apps or access the WeChat mini-program.
 </Note>
+
+## Getting Help
+
+<CardGroup cols={2}>
+  <Card title="User Manual" icon="book" href="https://www.gyjerp.com/doc/archive/user-manual.html">
+    Complete user documentation
+  </Card>
+  
+  <Card title="API Documentation" icon="code" href="https://www.gyjerp.com/doc/archive/apidoc.html">
+    REST API reference
+  </Card>
+  
+  <Card title="Video Tutorials" icon="video" href="https://space.bilibili.com/540003552/channel/series">
+    Step-by-step video guides
+  </Card>
+  
+  <Card title="Deployment Guide" icon="server" href="https://www.gyjerp.com/doc/archive/deploy.html">
+    Production deployment instructions
+  </Card>
+</CardGroup>
+
+## Common Issues
+
+<AccordionGroup>
+  <Accordion title="Can't log in with default credentials">
+    **Solution**: Ensure you're using the correct tenant (`jsh`), username (`admin`), and password (`123456`). Check that your instance is running and accessible.
+  </Accordion>
+  
+  <Accordion title="Missing menu items or buttons">
+    **Solution**: Check your user role permissions. Contact your administrator to grant necessary access rights.
+  </Accordion>
+  
+  <Accordion title="Inventory not updating after transactions">
+    **Solution**: Ensure transactions are approved/audited (check document status). Review system configuration flags for inventory controls.
+  </Accordion>
+  
+  <Accordion title="Cannot import Excel files">
+    **Solution**: Use the correct template format. Download the template from the import dialog and match the column structure exactly.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Explore All Features" icon="compass" href="/features">
+    Learn about advanced capabilities
+  </Card>
+  <Card title="Self-Hosted Installation" icon="server" href="/installation">
+    Deploy jshERP on your own servers
+  </Card>
+  <Card title="Module Guides" icon="book-open" href="/modules/retail-management">
+    Deep dive into each business module
+  </Card>
+  <Card title="API Integration" icon="plug" href="/api/introduction">
+    Integrate jshERP with other systems
+  </Card>
+</CardGroup>

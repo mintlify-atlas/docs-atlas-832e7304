@@ -1,0 +1,498 @@
+---
+title: Role & Permissions
+description: Configure RBAC (Role-Based Access Control) and manage permissions in jshERP
+icon: shield-halved
+---
+
+## Overview
+
+jshERP implements a comprehensive Role-Based Access Control (RBAC) system that allows administrators to define roles and assign specific permissions to users. The system supports function-level permissions, button-level controls, and price visibility restrictions.
+
+<Note>
+Roles are tenant-scoped, meaning each tenant can define their own roles independently. System-level roles are available across all tenants.
+</Note>
+
+## Role Structure
+
+Each role in jshERP contains:
+
+<ParamField path="id" type="Long">
+  Unique role identifier
+</ParamField>
+
+<ParamField path="name" type="String" required>
+  Role display name (e.g., "Sales Manager", "Warehouse Clerk")
+</ParamField>
+
+<ParamField path="type" type="String" required>
+  Role type defining scope and permissions level
+</ParamField>
+
+<ParamField path="priceLimit" type="String">
+  Price visibility restrictions (see Price Limits section)
+</ParamField>
+
+<ParamField path="value" type="String">
+  Role value used for internal logic
+</ParamField>
+
+<ParamField path="description" type="String">
+  Detailed role description
+</ParamField>
+
+<ParamField path="enabled" type="Boolean">
+  Whether the role is active
+</ParamField>
+
+<ParamField path="sort" type="String">
+  Display order for role listing
+</ParamField>
+
+<ParamField path="tenantId" type="Long">
+  Associated tenant ID (null for system roles)
+</ParamField>
+
+**Reference**: `Role.java:1-103`
+
+## Creating Roles
+
+<Steps>
+  <Step title="Navigate to Role Management">
+    Access the role management interface from the admin panel.
+  </Step>
+  
+  <Step title="Create New Role">
+    Click "Add Role" and configure:
+    
+    ```java
+    POST /role/add
+    ```
+    
+    **Request Body**:
+    ```json
+    {
+      "name": "Sales Manager",
+      "type": "sales",
+      "description": "Manages sales operations and team",
+      "priceLimit": "1,2,3",
+      "enabled": true,
+      "sort": "10"
+    }
+    ```
+    
+    **Reference**: `RoleController.java:68-74`
+  </Step>
+  
+  <Step title="Assign Functions">
+    Link specific functions (menu items, features) to this role through the UserBusiness relationship with type "RoleFunctions".
+  </Step>
+  
+  <Step title="Configure Permissions">
+    Set up button-level permissions and price visibility restrictions.
+  </Step>
+</Steps>
+
+## Permission Types
+
+### Function Permissions
+
+Functions represent menu items, pages, and major features in the system. Each function has:
+
+<ParamField path="number" type="String">
+  Unique function identifier (e.g., "01", "0101")
+</ParamField>
+
+<ParamField path="name" type="String">
+  Display name of the function
+</ParamField>
+
+<ParamField path="parentNumber" type="String">
+  Parent function for hierarchical menu structure
+</ParamField>
+
+<ParamField path="url" type="String">
+  Route URL for navigation
+</ParamField>
+
+<ParamField path="component" type="String">
+  Frontend component path
+</ParamField>
+
+<ParamField path="type" type="String">
+  Function type (menu, button, etc.)
+</ParamField>
+
+<ParamField path="pushBtn" type="String">
+  Associated button permissions (comma-separated)
+</ParamField>
+
+<ParamField path="icon" type="String">
+  Icon identifier for UI display
+</ParamField>
+
+<ParamField path="state" type="Boolean">
+  Open/closed state for tree navigation
+</ParamField>
+
+<ParamField path="enabled" type="Boolean">
+  Whether function is active
+</ParamField>
+
+**Reference**: `Function.java:1-133`
+
+### Button Permissions
+
+Button-level permissions control specific actions within pages:
+
+- Create/Add
+- Edit/Update  
+- Delete
+- Import/Export
+- Approve/Audit
+- Print
+- Custom actions
+
+Button permissions are stored in the `pushBtn` field of Function entities and assigned to roles via UserBusiness relationships.
+
+**Reference**: `UserController.java:438-456`
+
+## Price Visibility Controls
+
+jshERP includes sophisticated price visibility restrictions to control what financial information different roles can see.
+
+### Price Limit Codes
+
+<ParamField path="1" type="Price Type">
+  **Home Purchase Price** - Hide purchase prices on homepage/dashboard
+</ParamField>
+
+<ParamField path="2" type="Price Type">
+  **Home Retail Price** - Hide retail prices on homepage/dashboard
+</ParamField>
+
+<ParamField path="3" type="Price Type">
+  **Home Sales Price** - Hide sales prices on homepage/dashboard
+</ParamField>
+
+<ParamField path="4" type="Price Type">
+  **Purchase Bill Price** - Hide prices in purchase documents
+</ParamField>
+
+<ParamField path="5" type="Price Type">
+  **Retail Bill Price** - Hide prices in retail documents
+</ParamField>
+
+<ParamField path="6" type="Price Type">
+  **Sales Bill Price** - Hide prices in sales documents
+</ParamField>
+
+### Configuring Price Limits
+
+Set the `priceLimit` field as a comma-separated string of limit codes:
+
+```json
+{
+  "name": "Warehouse Staff",
+  "priceLimit": "1,4,6"
+}
+```
+
+This configuration hides:
+- Purchase prices on homepage (1)
+- Prices in purchase bills (4)
+- Prices in sales bills (6)
+
+**Reference**: `RoleService.java:240-298`
+
+### Price Masking Logic
+
+When a user has price restrictions:
+
+```java
+if (priceLimit.contains("4")) {
+    // Hide purchase bill prices
+    price = null; // or "***" placeholder
+}
+```
+
+The system automatically:
+1. Checks user's role `priceLimit` setting
+2. Compares against current page/bill type
+3. Masks prices matching the restriction codes
+
+**Reference**: `RoleService.java:264-298`
+
+## Role Assignment
+
+### Assigning Roles to Users
+
+Users can have multiple roles simultaneously:
+
+```java
+GET /role/findUserRole?UBType=UserRole&UBKeyId={userId}
+```
+
+Returns available roles with checkmarks for currently assigned ones.
+
+**Reference**: `RoleController.java:119-144`
+
+### Role Functions Assignment
+
+Link functions to roles through the UserBusiness table:
+
+- **Type**: "RoleFunctions"
+- **Key ID**: Role ID
+- **Value**: Comma-separated function IDs in format `[1],[2],[3]`
+
+**Reference**: `UserService.java:862-876`
+
+## API Endpoints
+
+### Get Role Information
+
+```java
+GET /role/info?id={roleId}
+```
+
+Returns detailed role information including price limits.
+
+**Reference**: `RoleController.java:44-56`
+
+### List All Roles
+
+```java
+GET /role/list?search={searchParams}
+```
+
+Search parameters:
+- `name`: Filter by role name
+- `description`: Search in description
+
+**Reference**: `RoleController.java:58-66`
+
+### List Tenant Roles
+
+```java
+GET /role/tenantRoleList
+```
+
+Returns only roles belonging to the current tenant (excludes system roles).
+
+**Reference**: `RoleController.java:152-156`
+
+### List All Roles (Including System)
+
+```java
+GET /role/allList
+```
+
+Returns all available roles including system-level roles.
+
+**Reference**: `RoleController.java:146-150`
+
+### Update Role
+
+```java
+PUT /role/update
+```
+
+**Request Body**:
+```json
+{
+  "id": 123,
+  "name": "Updated Role Name",
+  "description": "New description",
+  "priceLimit": "1,2",
+  "enabled": true
+}
+```
+
+**Reference**: `RoleController.java:76-82`
+
+### Delete Roles
+
+```java
+DELETE /role/delete?id={roleId}
+DELETE /role/deleteBatch?ids={id1,id2,id3}
+```
+
+<Warning>
+Deleting a role will affect all users assigned to that role. Ensure users have alternative roles before deletion.
+</Warning>
+
+**Reference**: `RoleController.java:84-98`
+
+## Batch Operations
+
+### Enable/Disable Multiple Roles
+
+```java
+POST /role/batchSetStatus
+```
+
+**Request Body**:
+```json
+{
+  "status": true,
+  "ids": "1,2,3"
+}
+```
+
+**Reference**: `RoleController.java:164-177`
+
+## Permission Checking
+
+### Get Current User Price Limit
+
+```java
+GET /user/getCurrentPriceLimit
+```
+
+Returns the price limit configuration for the current user's role.
+
+**Reference**: `UserController.java:389-405`
+
+### Get Current User Role Type
+
+```java
+GET /user/getRoleTypeByCurrentUser
+```
+
+Returns the role type for the authenticated user.
+
+**Reference**: `UserController.java:412-429`
+
+### Get User Button Permissions
+
+```java
+GET /user/getUserBtnByCurrentUser
+```
+
+Returns an array of button permission strings for the current user.
+
+<Note>
+The `admin` user bypasses all permission checks and has access to everything.
+</Note>
+
+**Reference**: `UserController.java:438-456`
+
+## Common Role Configurations
+
+### System Administrator
+
+```json
+{
+  "name": "System Administrator",
+  "type": "admin",
+  "priceLimit": "",
+  "description": "Full system access"
+}
+```
+
+### Sales Manager
+
+```json
+{
+  "name": "Sales Manager",
+  "type": "sales",
+  "priceLimit": "1,4",
+  "description": "Manages sales team, cannot see purchase prices"
+}
+```
+
+### Warehouse Staff
+
+```json
+{
+  "name": "Warehouse Staff",
+  "type": "warehouse",
+  "priceLimit": "1,2,3,4,5,6",
+  "description": "Inventory management only, no price visibility"
+}
+```
+
+### Accountant
+
+```json
+{
+  "name": "Accountant",
+  "type": "finance",
+  "priceLimit": "",
+  "description": "Full financial visibility, no operational permissions"
+}
+```
+
+## Validation
+
+### Check Role Name Uniqueness
+
+```java
+GET /role/checkIsNameExist?id={id}&name={name}
+```
+
+Validates whether a role name is already in use.
+
+**Reference**: `RoleController.java:100-112`
+
+## Multi-Tenant Considerations
+
+<Note>
+**Tenant Isolation**:
+- Roles with `tenantId = null` are system roles available to all tenants
+- Roles with a specific `tenantId` are only visible to that tenant
+- Users can only be assigned roles from their own tenant or system roles
+</Note>
+
+## Best Practices
+
+<Warning>
+**Security Recommendations**:
+- Follow the principle of least privilege
+- Regularly audit role assignments
+- Use descriptive role names that reflect business functions
+- Test permission changes in a non-production environment
+- Document custom role configurations
+</Warning>
+
+<Note>
+**Role Design Tips**:
+- Create roles based on job functions, not individuals
+- Keep the number of roles manageable (5-15 is typical)
+- Use price limits to separate operational from financial roles
+- Combine function permissions with button permissions for granular control
+- Consider role hierarchy in your organization
+</Note>
+
+## Permission Flow
+
+<Steps>
+  <Step title="User Authentication">
+    User logs in and system retrieves their role assignments.
+  </Step>
+  
+  <Step title="Role Resolution">
+    System loads all roles assigned to the user.
+  </Step>
+  
+  <Step title="Function Loading">
+    For each role, load associated functions via UserBusiness (RoleFunctions).
+  </Step>
+  
+  <Step title="Permission Aggregation">
+    Combine all functions and buttons from all user roles.
+  </Step>
+  
+  <Step title="UI Rendering">
+    Frontend displays only permitted menus and buttons.
+  </Step>
+  
+  <Step title="Price Masking">
+    Apply price limits from roles to hide restricted financial data.
+  </Step>
+</Steps>
+
+## Related Documentation
+
+- [User Management](/admin/user-management) - Managing user accounts
+- [Tenant Management](/admin/tenant-management) - Multi-tenant configuration
+- [System Configuration](/admin/system-configuration) - System-wide settings

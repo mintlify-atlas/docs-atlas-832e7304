@@ -1,0 +1,541 @@
+---
+title: System Configuration
+description: Configure system-wide settings and parameters in jshERP
+icon: gear
+---
+
+## Overview
+
+jshERP provides comprehensive system configuration options that control business rules, company information, and operational behavior. These settings are tenant-specific, allowing each organization to customize the system to their needs.
+
+<Note>
+System configurations are stored per tenant. Changes affect only the current tenant's operations.
+</Note>
+
+## Configuration Structure
+
+The SystemConfig entity contains:
+
+### Company Information
+
+<ParamField path="companyName" type="String">
+  Legal company name displayed on documents
+</ParamField>
+
+<ParamField path="companyContacts" type="String">
+  Primary contact person or department
+</ParamField>
+
+<ParamField path="companyAddress" type="String">
+  Physical business address
+</ParamField>
+
+<ParamField path="companyTel" type="String">
+  Main telephone number
+</ParamField>
+
+<ParamField path="companyFax" type="String">
+  Fax number (if applicable)
+</ParamField>
+
+<ParamField path="companyPostCode" type="String">
+  Postal/ZIP code
+</ParamField>
+
+### Business Rules
+
+<ParamField path="depotFlag" type="String">
+  Warehouse/depot management rules (0=disabled, 1=enabled)
+</ParamField>
+
+<ParamField path="customerFlag" type="String">
+  Customer management rules and requirements
+</ParamField>
+
+<ParamField path="minusStockFlag" type="String">
+  Allow negative inventory: 0=No, 1=Yes
+</ParamField>
+
+<ParamField path="purchaseBySaleFlag" type="String">
+  Enable purchase-from-sales workflow: 0=No, 1=Yes
+</ParamField>
+
+<ParamField path="multiLevelApprovalFlag" type="String">
+  Enable multi-level approval workflow: 0=No, 1=Yes
+</ParamField>
+
+<ParamField path="multiBillType" type="String">
+  Support multiple bill types per transaction
+</ParamField>
+
+<ParamField path="forceApprovalFlag" type="String">
+  Require approval for all transactions: 0=No, 1=Yes
+</ParamField>
+
+<ParamField path="updateUnitPriceFlag" type="String">
+  Allow updating unit prices: 0=No, 1=Yes
+</ParamField>
+
+<ParamField path="overLinkBillFlag" type="String">
+  Allow over-linking in document chains: 0=No, 1=Yes
+</ParamField>
+
+<ParamField path="inOutManageFlag" type="String">
+  Enable detailed inbound/outbound management: 0=No, 1=Yes
+</ParamField>
+
+<ParamField path="multiAccountFlag" type="String">
+  Support multiple accounting accounts: 0=No, 1=Yes
+</ParamField>
+
+<ParamField path="moveAvgPriceFlag" type="String">
+  Use moving average for costing: 0=No, 1=Yes
+</ParamField>
+
+<ParamField path="auditPrintFlag" type="String">
+  Require audit before printing: 0=No, 1=Yes
+</ParamField>
+
+<ParamField path="zeroChangeAmountFlag" type="String">
+  Allow zero change amounts: 0=No, 1=Yes
+</ParamField>
+
+<ParamField path="customerStaticPriceFlag" type="String">
+  Use static customer pricing: 0=No, 1=Yes
+</ParamField>
+
+### Other Fields
+
+<ParamField path="saleAgreement" type="String">
+  Default sales agreement text or template
+</ParamField>
+
+<ParamField path="tenantId" type="Long">
+  Associated tenant identifier
+</ParamField>
+
+**Reference**: `SystemConfig.java:1-253`
+
+## Managing Configuration
+
+### Get Current Configuration
+
+<Steps>
+  <Step title="Retrieve Tenant Config">
+    ```java
+    GET /systemConfig/getCurrentInfo
+    ```
+    
+    Returns the current tenant's system configuration.
+    
+    **Response**:
+    ```json
+    {
+      "code": 200,
+      "data": {
+        "id": 1,
+        "companyName": "Example Corp",
+        "companyAddress": "123 Business St",
+        "minusStockFlag": "0",
+        "multiLevelApprovalFlag": "1",
+        "tenantId": 123
+      }
+    }
+    ```
+    
+    **Reference**: `SystemConfigController.java:136-152`
+  </Step>
+</Steps>
+
+### Create Configuration
+
+```java
+POST /systemConfig/add
+```
+
+**Request Body**:
+```json
+{
+  "companyName": "My Company Ltd",
+  "companyAddress": "456 Enterprise Ave",
+  "companyTel": "+1-555-0123",
+  "companyContacts": "John Smith",
+  "minusStockFlag": "0",
+  "multiLevelApprovalFlag": "1",
+  "forceApprovalFlag": "1",
+  "updateUnitPriceFlag": "1",
+  "moveAvgPriceFlag": "1"
+}
+```
+
+**Reference**: `SystemConfigController.java:85-91`
+
+### Update Configuration
+
+```java
+PUT /systemConfig/update
+```
+
+<Warning>
+Configuration changes take effect immediately for all users in the tenant. Test changes carefully.
+</Warning>
+
+**Reference**: `SystemConfigController.java:93-99`
+
+## File Upload Configuration
+
+jshERP supports file uploads for bills, financial documents, and materials with configurable storage backends.
+
+### File Upload Types
+
+Configured via `application.properties`:
+
+```properties
+# File upload type: 1=Local Storage, 2=Alibaba Cloud OSS
+file.uploadType=1
+
+# Local storage path
+file.path=/opt/jshERP/upload
+
+# File size limits
+spring.servlet.multipart.max-file-size=100MB
+spring.servlet.multipart.max-request-size=100MB
+```
+
+**Reference**: `SystemConfigController.java:50-60`
+
+### Get File Size Limits
+
+```java
+GET /systemConfig/fileSizeLimit
+```
+
+Returns the smaller of `max-file-size` or `max-request-size`.
+
+**Reference**: `SystemConfigController.java:160-179`
+
+### Upload Files
+
+```java
+POST /systemConfig/upload?biz={bizType}
+```
+
+**Parameters**:
+- `biz`: Business type - "bill", "financial", or "material"
+- `file`: Multipart file data
+
+**Supported Storage Backends**:
+1. **Local Storage** (`uploadType=1`): Files stored in configured local path
+2. **Alibaba Cloud OSS** (`uploadType=2`): Files uploaded to OSS bucket
+
+**Response**:
+```json
+{
+  "code": 200,
+  "data": "/upload/bill/abc123_document.pdf"
+}
+```
+
+**Reference**: `SystemConfigController.java:187-219`
+
+### View Files
+
+#### Standard View/Download
+
+```java
+GET /systemConfig/static/{path}
+```
+
+Example: `GET /systemConfig/static/bill/invoice_20240101.pdf`
+
+Retrieves the file from configured storage (local or OSS) and streams it to the browser.
+
+**Reference**: `SystemConfigController.java:228-286`
+
+#### Thumbnail View
+
+```java
+GET /systemConfig/static/mini/{path}
+```
+
+Returns a resized thumbnail (80px width) for image files.
+
+**Reference**: `SystemConfigController.java:293-338`
+
+## Excel Export
+
+jshERP provides a unified Excel export interface:
+
+```java
+POST /systemConfig/exportExcelByParam
+```
+
+**Request Body**:
+```json
+{
+  "title": "Sales Report",
+  "head": "Product ID,Product Name,Quantity,Price,Total",
+  "tip": "Generated on 2024-01-15",
+  "list": [
+    {"productId": "P001", "name": "Widget A", "qty": 100, "price": 10.50, "total": 1050.00},
+    {"productId": "P002", "name": "Widget B", "qty": 50, "price": 25.00, "total": 1250.00}
+  ]
+}
+```
+
+**Parameters**:
+- `title`: Excel file title
+- `head`: Comma-separated column headers
+- `tip`: Additional information displayed in header
+- `list`: Array of data objects
+
+The system generates an Excel file and streams it as a download.
+
+**Reference**: `SystemConfigController.java:344-357`
+
+## API Endpoints Reference
+
+### Get Configuration by ID
+
+```java
+GET /systemConfig/info?id={id}
+```
+
+**Reference**: `SystemConfigController.java:62-74`
+
+### List Configurations
+
+```java
+GET /systemConfig/list?search={searchParams}
+```
+
+Search parameters:
+- `companyName`: Filter by company name
+
+**Reference**: `SystemConfigController.java:76-83`
+
+### Delete Configuration
+
+```java
+DELETE /systemConfig/delete?id={id}
+DELETE /systemConfig/deleteBatch?ids={id1,id2,id3}
+```
+
+<Warning>
+Deleting system configuration may cause system instability. Ensure you have backups before deletion.
+</Warning>
+
+**Reference**: `SystemConfigController.java:101-115`
+
+### Check Name Uniqueness
+
+```java
+GET /systemConfig/checkIsNameExist?id={id}&name={name}
+```
+
+**Reference**: `SystemConfigController.java:117-129`
+
+## Configuration Best Practices
+
+### Inventory Management
+
+<Note>
+**Recommended Settings**:
+- `minusStockFlag=0`: Prevent negative inventory to maintain accurate stock levels
+- `depotFlag=1`: Enable warehouse management for multi-location businesses
+- `moveAvgPriceFlag=1`: Use moving average costing for accurate valuations
+</Note>
+
+### Approval Workflows
+
+<Steps>
+  <Step title="Enable Multi-Level Approval">
+    Set `multiLevelApprovalFlag=1` for organizations requiring multiple approval stages.
+  </Step>
+  
+  <Step title="Configure Force Approval">
+    Set `forceApprovalFlag=1` to require approval on all transactions, or `0` for selective approval.
+  </Step>
+  
+  <Step title="Audit Before Print">
+    Enable `auditPrintFlag=1` to ensure documents are approved before printing.
+  </Step>
+</Steps>
+
+### Pricing Control
+
+<Warning>
+**Important**:
+- `updateUnitPriceFlag=0`: Lock unit prices to prevent unauthorized changes
+- `customerStaticPriceFlag=1`: Use fixed customer pricing for consistency
+- Combine with role-based price limits for comprehensive control
+</Warning>
+
+### Document Management
+
+<ParamField path="overLinkBillFlag" type="String">
+  Control whether bills can exceed linked document quantities:
+  - `0`: Strict linking (recommended for most businesses)
+  - `1`: Allow over-linking for flexible workflows
+</ParamField>
+
+<ParamField path="multiBillType" type="String">
+  Enable if your business processes require multiple document types per transaction.
+</ParamField>
+
+## File Storage Configuration
+
+### Local Storage Setup
+
+<Steps>
+  <Step title="Set Upload Type">
+    Configure in `application.properties`:
+    ```properties
+    file.uploadType=1
+    ```
+  </Step>
+  
+  <Step title="Configure Path">
+    ```properties
+    file.path=/var/jshERP/uploads
+    ```
+    
+    Ensure the directory exists and has proper write permissions.
+  </Step>
+  
+  <Step title="Set Size Limits">
+    ```properties
+    spring.servlet.multipart.max-file-size=50MB
+    spring.servlet.multipart.max-request-size=50MB
+    ```
+  </Step>
+</Steps>
+
+### Alibaba Cloud OSS Setup
+
+<Steps>
+  <Step title="Set Upload Type">
+    ```properties
+    file.uploadType=2
+    ```
+  </Step>
+  
+  <Step title="Configure OSS Credentials">
+    Add OSS configuration to your properties file (credentials managed by SystemConfigService).
+  </Step>
+  
+  <Step title="Test Upload">
+    Verify connectivity by uploading a test file.
+  </Step>
+</Steps>
+
+**Reference**: `SystemConfigController.java:187-219`, `SystemConfigService.java`
+
+## Company Information Display
+
+Company information from system configuration is automatically included in:
+
+- **Printed Documents**: Invoices, purchase orders, receipts
+- **PDF Exports**: Sales reports, financial statements
+- **Email Templates**: Order confirmations, shipment notices
+- **System Header**: Company name displayed in UI
+
+## Multi-Account Support
+
+Enable `multiAccountFlag=1` to support:
+
+- Multiple bank accounts per tenant
+- Different payment methods
+- Separate accounting books
+- Multi-currency transactions
+
+<Note>
+Multi-account functionality requires additional configuration in the financial modules.
+</Note>
+
+## Business Rule Examples
+
+### Strict Inventory Control
+
+```json
+{
+  "minusStockFlag": "0",
+  "depotFlag": "1",
+  "moveAvgPriceFlag": "1",
+  "inOutManageFlag": "1"
+}
+```
+
+This configuration:
+- Prevents overselling (no negative stock)
+- Tracks inventory by warehouse
+- Uses moving average costing
+- Requires detailed inbound/outbound documentation
+
+### Flexible Sales Operations
+
+```json
+{
+  "minusStockFlag": "1",
+  "updateUnitPriceFlag": "1",
+  "overLinkBillFlag": "1",
+  "forceApprovalFlag": "0"
+}
+```
+
+This configuration:
+- Allows back-orders (negative stock)
+- Permits price adjustments
+- Enables over-shipping
+- Selective approval required
+
+### Compliance-Focused Setup
+
+```json
+{
+  "multiLevelApprovalFlag": "1",
+  "forceApprovalFlag": "1",
+  "auditPrintFlag": "1",
+  "updateUnitPriceFlag": "0"
+}
+```
+
+This configuration:
+- Requires multi-stage approval
+- All transactions need approval
+- Documents must be audited before printing
+- Prices cannot be modified
+
+## Troubleshooting
+
+### File Upload Issues
+
+<Warning>
+**Common Problems**:
+- Permission denied: Check directory write permissions
+- File size exceeded: Adjust `max-file-size` settings
+- OSS connection failed: Verify credentials and network access
+- Invalid biz type: Only "bill", "financial", and "material" are supported
+</Warning>
+
+### Configuration Not Applying
+
+<Steps>
+  <Step title="Verify Tenant ID">
+    Ensure configuration has correct `tenantId`.
+  </Step>
+  
+  <Step title="Check Cache">
+    Clear Redis cache if configuration changes don't take effect.
+  </Step>
+  
+  <Step title="Review Logs">
+    Check application logs for configuration loading errors.
+  </Step>
+</Steps>
+
+## Related Documentation
+
+- [Tenant Management](/admin/tenant-management) - Managing tenant accounts
+- [User Management](/admin/user-management) - User configuration
+- [Role & Permissions](/admin/role-permissions) - Access control settings

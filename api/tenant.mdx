@@ -1,0 +1,492 @@
+---
+title: 'Tenant Management API'
+description: 'API reference for multi-tenant management and configuration'
+icon: 'building'
+---
+
+## Overview
+
+The Tenant Management API provides endpoints for managing tenant accounts, including tenant creation, configuration, and status management. Tenants represent separate organizations or instances within the multi-tenant jshERP system.
+
+**Base Path:** `/tenant`
+
+<Warning>
+Tenant management endpoints typically require administrator-level permissions.
+</Warning>
+
+---
+
+## CRUD Operations
+
+### Get Tenant Information
+
+```http
+GET /tenant/info?id={id}
+```
+
+Retrieves detailed information for a specific tenant.
+
+<ParamField query="id" type="long" required>
+  Tenant record ID
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code (200 for success)
+</ResponseField>
+
+<ResponseField name="info" type="object">
+  Tenant entity object
+  <Expandable title="Tenant Fields">
+    <ResponseField name="id" type="long">
+      Tenant record ID
+    </ResponseField>
+    <ResponseField name="tenantId" type="long">
+      Tenant business ID
+    </ResponseField>
+    <ResponseField name="loginName" type="string">
+      Associated login name
+    </ResponseField>
+    <ResponseField name="userNumLimit" type="integer">
+      Maximum number of users allowed
+    </ResponseField>
+    <ResponseField name="type" type="string">
+      Tenant type (0: free, 1: paid)
+    </ResponseField>
+    <ResponseField name="enabled" type="boolean">
+      Tenant enabled status
+    </ResponseField>
+    <ResponseField name="createTime" type="date">
+      Creation timestamp
+    </ResponseField>
+    <ResponseField name="expireTime" type="date">
+      Expiration timestamp
+    </ResponseField>
+    <ResponseField name="remark" type="string">
+      Additional remarks
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```bash Request Example
+curl -X GET "http://localhost:8080/tenant/info?id=1" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response Example
+{
+  "code": 200,
+  "info": {
+    "id": 1,
+    "tenantId": 63336699809321,
+    "loginName": "admin",
+    "userNumLimit": 10,
+    "type": "1",
+    "enabled": true,
+    "createTime": "2024-01-01 00:00:00",
+    "expireTime": "2025-12-31 23:59:59",
+    "remark": "Main tenant account"
+  }
+}
+```
+</CodeGroup>
+
+---
+
+### Get Tenant List
+
+```http
+GET /tenant/list?search={search}
+```
+
+Retrieves a paginated list of tenants with optional filtering.
+
+<ParamField query="search" type="string">
+  JSON string containing search filters:
+  - `loginName`: Filter by login name
+  - `type`: Filter by tenant type
+  - `enabled`: Filter by enabled status
+  - `remark`: Filter by remark text
+</ParamField>
+
+<ResponseField name="rows" type="array">
+  Array of TenantEx objects with extended information
+</ResponseField>
+
+<ResponseField name="total" type="integer">
+  Total number of records matching the search criteria
+</ResponseField>
+
+<CodeGroup>
+```bash Request Example
+curl -X GET "http://localhost:8080/tenant/list?search={\"type\":\"1\"}" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response Example
+{
+  "rows": [
+    {
+      "id": 1,
+      "tenantId": 63336699809321,
+      "loginName": "admin",
+      "userNumLimit": 10,
+      "type": "1",
+      "enabled": true,
+      "createTime": "2024-01-01 00:00:00",
+      "expireTime": "2025-12-31 23:59:59"
+    }
+  ],
+  "total": 1
+}
+```
+</CodeGroup>
+
+---
+
+### Create Tenant
+
+```http
+POST /tenant/add
+```
+
+Creates a new tenant account.
+
+<ParamField body="tenantId" type="long" required>
+  Unique tenant business ID
+</ParamField>
+
+<ParamField body="loginName" type="string" required>
+  Associated login name
+</ParamField>
+
+<ParamField body="userNumLimit" type="integer" required>
+  Maximum number of users allowed
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  Tenant type:
+  - `0`: Free tenant
+  - `1`: Paid tenant
+</ParamField>
+
+<ParamField body="enabled" type="boolean" default="true">
+  Tenant enabled status
+</ParamField>
+
+<ParamField body="expireTime" type="date">
+  Expiration date (format: yyyy-MM-dd HH:mm:ss)
+</ParamField>
+
+<ParamField body="remark" type="string">
+  Additional remarks or notes
+</ParamField>
+
+<CodeGroup>
+```json Request Example
+{
+  "tenantId": 63336699809321,
+  "loginName": "company_admin",
+  "userNumLimit": 50,
+  "type": "1",
+  "enabled": true,
+  "expireTime": "2025-12-31 23:59:59",
+  "remark": "Enterprise tenant account"
+}
+```
+
+```json Response Example
+{
+  "code": 200,
+  "data": {}
+}
+```
+</CodeGroup>
+
+---
+
+### Update Tenant
+
+```http
+PUT /tenant/update
+```
+
+Updates an existing tenant's configuration.
+
+<ParamField body="id" type="long" required>
+  Tenant record ID
+</ParamField>
+
+<ParamField body="loginName" type="string">
+  Associated login name
+</ParamField>
+
+<ParamField body="userNumLimit" type="integer">
+  Maximum number of users allowed
+</ParamField>
+
+<ParamField body="type" type="string">
+  Tenant type (0: free, 1: paid)
+</ParamField>
+
+<ParamField body="enabled" type="boolean">
+  Tenant enabled status
+</ParamField>
+
+<ParamField body="expireTime" type="date">
+  Expiration date
+</ParamField>
+
+<ParamField body="remark" type="string">
+  Additional remarks
+</ParamField>
+
+<CodeGroup>
+```json Request Example
+{
+  "id": 1,
+  "userNumLimit": 100,
+  "expireTime": "2026-12-31 23:59:59",
+  "remark": "Upgraded to premium plan"
+}
+```
+</CodeGroup>
+
+---
+
+### Delete Tenant
+
+```http
+DELETE /tenant/delete?id={id}
+```
+
+Deletes a tenant account (soft delete).
+
+<Warning>
+Deleting a tenant will affect all associated users and data. This operation should be performed with caution.
+</Warning>
+
+<ParamField query="id" type="long" required>
+  Tenant record ID to delete
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+---
+
+### Batch Delete Tenants
+
+```http
+DELETE /tenant/deleteBatch?ids={ids}
+```
+
+Deletes multiple tenants in a single operation.
+
+<ParamField query="ids" type="string" required>
+  Comma-separated tenant IDs (e.g., "1,2,3")
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+---
+
+## Tenant Management
+
+### Check Tenant Name Exists
+
+```http
+GET /tenant/checkIsNameExist?id={id}&name={name}
+```
+
+Checks if a tenant login name is already in use.
+
+<ParamField query="id" type="long" required>
+  Tenant record ID (0 for new tenant)
+</ParamField>
+
+<ParamField query="name" type="string">
+  Login name to check
+</ParamField>
+
+<ResponseField name="status" type="boolean">
+  `true` if name exists, `false` otherwise
+</ResponseField>
+
+<CodeGroup>
+```bash Request Example
+curl -X GET "http://localhost:8080/tenant/checkIsNameExist?id=0&name=test_tenant" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response Example
+{
+  "code": 200,
+  "status": false
+}
+```
+</CodeGroup>
+
+---
+
+### Batch Set Tenant Status
+
+```http
+POST /tenant/batchSetStatus
+```
+
+Enables or disables multiple tenants at once.
+
+<ParamField body="status" type="boolean" required>
+  Status to set:
+  - `true`: Enable tenants
+  - `false`: Disable tenants
+</ParamField>
+
+<ParamField body="ids" type="string" required>
+  Comma-separated tenant IDs
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<CodeGroup>
+```json Request Example
+{
+  "status": false,
+  "ids": "1,2,3"
+}
+```
+
+```json Response Example
+{
+  "code": 200,
+  "data": {}
+}
+```
+</CodeGroup>
+
+---
+
+## Data Models
+
+### Tenant Entity
+
+<ResponseField name="id" type="long">
+  Unique tenant record identifier
+</ResponseField>
+
+<ResponseField name="tenantId" type="long">
+  Tenant business identifier (used throughout the system)
+</ResponseField>
+
+<ResponseField name="loginName" type="string">
+  Associated login name for the tenant account
+</ResponseField>
+
+<ResponseField name="userNumLimit" type="integer">
+  Maximum number of users allowed for this tenant
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  Tenant type:
+  - `0`: Free tenant (limited features)
+  - `1`: Paid tenant (full features)
+</ResponseField>
+
+<ResponseField name="enabled" type="boolean">
+  Tenant enabled status:
+  - `true`: Tenant is active
+  - `false`: Tenant is disabled
+</ResponseField>
+
+<ResponseField name="createTime" type="date">
+  Timestamp when the tenant was created
+</ResponseField>
+
+<ResponseField name="expireTime" type="date">
+  Expiration timestamp for the tenant subscription
+</ResponseField>
+
+<ResponseField name="remark" type="string">
+  Additional remarks or notes about the tenant
+</ResponseField>
+
+<ResponseField name="deleteFlag" type="string">
+  Soft delete flag (used internally)
+</ResponseField>
+
+---
+
+## Tenant Types
+
+### Free Tenant (Type: 0)
+
+- Limited number of users
+- Basic features only
+- May have restricted functionality
+- No expiration date required
+
+### Paid Tenant (Type: 1)
+
+- Higher user limits
+- Full feature access
+- Requires expiration date
+- Premium support
+
+---
+
+## Common Use Cases
+
+### Creating a New Tenant
+
+1. Check if the tenant name exists using `/tenant/checkIsNameExist`
+2. Create the tenant using `/tenant/add` with appropriate limits
+3. Configure the expiration date for paid tenants
+4. Set the user limit based on subscription plan
+
+### Managing Tenant Expiration
+
+1. Retrieve tenant information using `/tenant/info`
+2. Check the `expireTime` field
+3. Update the expiration date using `/tenant/update` when renewing
+4. Monitor tenant status - expired tenants are automatically disabled
+
+### Disabling Multiple Tenants
+
+1. Collect tenant IDs to disable
+2. Use `/tenant/batchSetStatus` with `status: false`
+3. Verify changes using `/tenant/list`
+
+---
+
+## Best Practices
+
+<Tip>
+**User Limit Management**: Always set realistic user limits based on the tenant's subscription plan. The system will prevent user creation when the limit is reached.
+</Tip>
+
+<Tip>
+**Expiration Handling**: For paid tenants, always set an appropriate expiration date. The system automatically checks expiration and disables access when expired.
+</Tip>
+
+<Warning>
+**Tenant Deletion**: Deleting a tenant is a serious operation that affects all associated data. Always backup data before deletion and consider disabling instead of deleting.
+</Warning>
+
+---
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| 200  | Success |
+| 500  | Internal server error |
+
+<Note>
+All endpoints return a standard response format with `code` and `data` fields. Check the `code` field to determine success or failure.
+</Note>

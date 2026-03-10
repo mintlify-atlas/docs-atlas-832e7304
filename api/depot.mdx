@@ -1,0 +1,754 @@
+---
+title: 'Depot/Warehouse API'
+description: 'API endpoints for managing depots, warehouses, and inventory transactions'
+---
+
+## Overview
+
+The Depot API provides comprehensive endpoints for managing warehouses, inventory transactions, and stock movements in jshERP. This includes depot management, depot head (transaction headers), and depot items (transaction details).
+
+## Depot Management
+
+Manage warehouse/depot entities including creation, updates, and configuration.
+
+### Get Depot Info
+
+Retrieve detailed information about a specific depot by ID.
+
+```bash
+GET /depot/info?id={id}
+```
+
+<ParamField query="id" type="Long" required>
+  The unique identifier of the depot
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code (200 for success)
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="Depot object">
+    <ResponseField name="id" type="Long">Depot ID</ResponseField>
+    <ResponseField name="name" type="string">Depot name</ResponseField>
+    <ResponseField name="address" type="string">Physical address</ResponseField>
+    <ResponseField name="warehousing" type="BigDecimal">Warehousing fee</ResponseField>
+    <ResponseField name="truckage" type="BigDecimal">Trucking fee</ResponseField>
+    <ResponseField name="type" type="integer">Depot type</ResponseField>
+    <ResponseField name="principal" type="Long">Principal user ID</ResponseField>
+    <ResponseField name="enabled" type="boolean">Whether depot is enabled</ResponseField>
+    <ResponseField name="isDefault" type="boolean">Whether this is the default depot</ResponseField>
+    <ResponseField name="remark" type="string">Additional remarks</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### List Depots
+
+Retrieve a paginated list of depots with optional search filters.
+
+```bash
+GET /depot/list?search={search}
+```
+
+<ParamField query="search" type="string">
+  JSON string containing search parameters:
+  - `name`: Depot name filter
+  - `type`: Depot type filter
+  - `remark`: Remark filter
+</ParamField>
+
+### Create Depot
+
+Create a new depot/warehouse.
+
+```bash
+POST /depot/add
+```
+
+<ParamField body="name" type="string" required>
+  Depot name
+</ParamField>
+
+<ParamField body="address" type="string">
+  Physical address
+</ParamField>
+
+<ParamField body="type" type="integer">
+  Depot type
+</ParamField>
+
+<ParamField body="principal" type="Long">
+  Principal user ID
+</ParamField>
+
+<ParamField body="enabled" type="boolean">
+  Enable/disable depot (default: true)
+</ParamField>
+
+<ParamField body="remark" type="string">
+  Additional remarks
+</ParamField>
+
+<CodeGroup>
+```bash cURL
+curl -X POST "http://localhost:8080/depot/add" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Main Warehouse",
+    "address": "123 Storage St, City",
+    "type": 1,
+    "enabled": true,
+    "remark": "Primary storage facility"
+  }'
+```
+
+```json Response
+{
+  "code": 200,
+  "data": {
+    "message": "操作成功"
+  }
+}
+```
+</CodeGroup>
+
+### Update Depot
+
+Update an existing depot's information.
+
+```bash
+PUT /depot/update
+```
+
+<ParamField body="id" type="Long" required>
+  Depot ID to update
+</ParamField>
+
+<ParamField body="name" type="string">
+  Updated depot name
+</ParamField>
+
+<ParamField body="address" type="string">
+  Updated address
+</ParamField>
+
+### Delete Depot
+
+Delete a depot by ID.
+
+```bash
+DELETE /depot/delete?id={id}
+```
+
+<ParamField query="id" type="Long" required>
+  Depot ID to delete
+</ParamField>
+
+### Batch Delete Depots
+
+Delete multiple depots at once.
+
+```bash
+DELETE /depot/deleteBatch?ids={ids}
+```
+
+<ParamField query="ids" type="string" required>
+  Comma-separated depot IDs (e.g., "1,2,3")
+</ParamField>
+
+### Get All Depots
+
+Retrieve all depots without pagination.
+
+```bash
+GET /depot/getAllList
+```
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  Array of depot objects
+</ResponseField>
+
+### Get User Depots
+
+Retrieve depots accessible by the current user.
+
+```bash
+GET /depot/findDepotByCurrentUser
+```
+
+<CodeGroup>
+```bash cURL
+curl -X GET "http://localhost:8080/depot/findDepotByCurrentUser" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response
+{
+  "code": 200,
+  "data": [
+    {
+      "id": 1,
+      "depotName": "Main Warehouse",
+      "isDefault": true
+    },
+    {
+      "id": 2,
+      "depotName": "Secondary Warehouse",
+      "isDefault": false
+    }
+  ]
+}
+```
+</CodeGroup>
+
+### Get Depots with Stock
+
+Retrieve depots along with stock information for a specific material.
+
+```bash
+GET /depot/getAllListWithStock?mId={mId}
+```
+
+<ParamField query="mId" type="Long" required>
+  Material ID to get stock information for
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  <Expandable title="Depot stock information">
+    <ResponseField name="id" type="Long">Depot ID</ResponseField>
+    <ResponseField name="name" type="string">Depot name</ResponseField>
+    <ResponseField name="initStock" type="BigDecimal">Initial stock</ResponseField>
+    <ResponseField name="currentStock" type="BigDecimal">Current stock level</ResponseField>
+    <ResponseField name="lowSafeStock" type="BigDecimal">Low safety stock threshold</ResponseField>
+    <ResponseField name="highSafeStock" type="BigDecimal">High safety stock threshold</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Update Default Depot
+
+Set a depot as the default depot.
+
+```bash
+POST /depot/updateIsDefault
+```
+
+<ParamField body="id" type="Long" required>
+  Depot ID to set as default
+</ParamField>
+
+### Batch Set Status
+
+Enable or disable multiple depots at once.
+
+```bash
+POST /depot/batchSetStatus
+```
+
+<ParamField body="status" type="boolean" required>
+  true to enable, false to disable
+</ParamField>
+
+<ParamField body="ids" type="string" required>
+  Comma-separated depot IDs
+</ParamField>
+
+## Depot Head (Transaction Headers)
+
+Manage depot transaction headers including purchase orders, sales orders, transfers, and other inventory movements.
+
+### Get Depot Head Info
+
+```bash
+GET /depotHead/info?id={id}
+```
+
+<ParamField query="id" type="Long" required>
+  Depot head ID
+</ParamField>
+
+### List Depot Heads
+
+Retrieve depot transaction headers with advanced filtering.
+
+```bash
+GET /depotHead/list?search={search}
+```
+
+<ParamField query="search" type="string">
+  JSON string containing search parameters:
+  - `type`: Transaction type (入库/出库/其它)
+  - `subType`: Sub-type (采购/销售/调拨/etc.)
+  - `number`: Bill number
+  - `beginTime`: Start date
+  - `endTime`: End date
+  - `organId`: Organization ID
+  - `depotId`: Depot ID
+  - `status`: Status filter
+</ParamField>
+
+### Create Depot Head and Details
+
+Create a new depot transaction with header and line items.
+
+```bash
+POST /depotHead/addDepotHeadAndDetail
+```
+
+<ParamField body="info" type="string" required>
+  JSON string of depot head information
+</ParamField>
+
+<ParamField body="rows" type="string" required>
+  JSON string of depot item rows
+</ParamField>
+
+<CodeGroup>
+```bash cURL
+curl -X POST "http://localhost:8080/depotHead/addDepotHeadAndDetail" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "info": "{\"type\":\"入库\",\"subType\":\"采购\",\"organId\":1,\"operTime\":\"2024-01-15 10:00:00\"}",
+    "rows": "[{\"materialId\":101,\"operNumber\":50,\"unitPrice\":25.50,\"depotId\":1}]"
+  }'
+```
+
+```json Response
+{
+  "code": 200,
+  "data": {
+    "message": "操作成功"
+  }
+}
+```
+</CodeGroup>
+
+### Update Depot Head and Details
+
+Update an existing depot transaction.
+
+```bash
+PUT /depotHead/updateDepotHeadAndDetail
+```
+
+<ParamField body="info" type="string" required>
+  JSON string of updated depot head information (must include id)
+</ParamField>
+
+<ParamField body="rows" type="string" required>
+  JSON string of updated depot item rows
+</ParamField>
+
+### Delete Depot Head
+
+```bash
+DELETE /depotHead/delete?id={id}
+```
+
+<ParamField query="id" type="Long" required>
+  Depot head ID to delete
+</ParamField>
+
+### Batch Delete Depot Heads
+
+```bash
+DELETE /depotHead/deleteBatch?ids={ids}
+```
+
+<ParamField query="ids" type="string" required>
+  Comma-separated depot head IDs
+</ParamField>
+
+### Batch Set Status
+
+Approve or reverse approval for depot transactions.
+
+```bash
+POST /depotHead/batchSetStatus
+```
+
+<ParamField body="status" type="string" required>
+  Status value ("0" for pending, "1" for approved)
+</ParamField>
+
+<ParamField body="ids" type="string" required>
+  Comma-separated depot head IDs
+</ParamField>
+
+### Force Close Batch
+
+Force close depot transactions.
+
+```bash
+POST /depotHead/forceCloseBatch
+```
+
+<ParamField body="ids" type="string" required>
+  Comma-separated depot head IDs to force close
+</ParamField>
+
+### In/Out Detail Report
+
+Get detailed inventory in/out transactions report.
+
+```bash
+GET /depotHead/findInOutDetail
+```
+
+<ParamField query="currentPage" type="integer" required>
+  Current page number
+</ParamField>
+
+<ParamField query="pageSize" type="integer" required>
+  Number of records per page
+</ParamField>
+
+<ParamField query="type" type="string" required>
+  Transaction type ("入库" or "出库")
+</ParamField>
+
+<ParamField query="beginTime" type="string" required>
+  Start date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="endTime" type="string" required>
+  End date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="depotId" type="Long">
+  Filter by depot ID
+</ParamField>
+
+<ParamField query="materialParam" type="string">
+  Material search parameter
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="Report data">
+    <ResponseField name="rows" type="array">Transaction detail rows</ResponseField>
+    <ResponseField name="total" type="integer">Total record count</ResponseField>
+    <ResponseField name="operNumberTotal" type="BigDecimal">Total operation quantity</ResponseField>
+    <ResponseField name="allPriceTotal" type="BigDecimal">Total amount</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### In/Out Material Count
+
+Get aggregated material in/out statistics.
+
+```bash
+GET /depotHead/findInOutMaterialCount
+```
+
+<ParamField query="currentPage" type="integer" required>
+  Current page number
+</ParamField>
+
+<ParamField query="pageSize" type="integer" required>
+  Number of records per page
+</ParamField>
+
+<ParamField query="type" type="string" required>
+  Transaction type
+</ParamField>
+
+<ParamField query="beginTime" type="string" required>
+  Start date
+</ParamField>
+
+<ParamField query="endTime" type="string" required>
+  End date
+</ParamField>
+
+### Get Statement Account
+
+Retrieve account statements for suppliers or customers.
+
+```bash
+GET /depotHead/getStatementAccount
+```
+
+<ParamField query="currentPage" type="integer" required>
+  Current page number
+</ParamField>
+
+<ParamField query="pageSize" type="integer" required>
+  Records per page
+</ParamField>
+
+<ParamField query="beginTime" type="string" required>
+  Start date
+</ParamField>
+
+<ParamField query="endTime" type="string" required>
+  End date
+</ParamField>
+
+<ParamField query="supplierType" type="string" required>
+  "供应商" for vendor or "客户" for customer
+</ParamField>
+
+<ParamField query="organId" type="integer">
+  Organization ID filter
+</ParamField>
+
+<ParamField query="hasDebt" type="integer">
+  Filter by debt status (1 for has debt, 0 for no debt)
+</ParamField>
+
+### Get Detail by Number
+
+Retrieve depot transaction details by bill number.
+
+```bash
+GET /depotHead/getDetailByNumber?number={number}
+```
+
+<ParamField query="number" type="string" required>
+  Bill number
+</ParamField>
+
+### Get Buy and Sale Statistics
+
+Get purchase and sales statistics for dashboard.
+
+```bash
+GET /depotHead/getBuyAndSaleStatistics
+```
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Contains today's, yesterday's, monthly, and yearly purchase/sale statistics
+</ResponseField>
+
+## Depot Item (Transaction Details)
+
+Manage individual line items within depot transactions.
+
+### Get Detail List
+
+Retrieve line items for a specific depot transaction.
+
+```bash
+GET /depotItem/getDetailList?headerId={headerId}
+```
+
+<ParamField query="headerId" type="Long" required>
+  Depot head ID
+</ParamField>
+
+<ParamField query="mpList" type="string">
+  Material property list
+</ParamField>
+
+<ParamField query="linkType" type="string">
+  Link type (e.g., "basic")
+</ParamField>
+
+<ParamField query="isReadOnly" type="string">
+  "1" for read-only mode
+</ParamField>
+
+### Find Stock by Depot and BarCode
+
+Get current stock level for a material in a depot.
+
+```bash
+GET /depotItem/findStockByDepotAndBarCode
+```
+
+<ParamField query="depotId" type="Long">
+  Depot ID (optional)
+</ParamField>
+
+<ParamField query="barCode" type="string" required>
+  Material barcode
+</ParamField>
+
+<CodeGroup>
+```bash cURL
+curl -X GET "http://localhost:8080/depotItem/findStockByDepotAndBarCode?depotId=1&barCode=ABC123"
+```
+
+```json Response
+{
+  "code": 200,
+  "data": {
+    "stock": 150.00
+  }
+}
+```
+</CodeGroup>
+
+### Get In/Out Stock Report
+
+Comprehensive inventory movement report.
+
+```bash
+GET /depotItem/getInOutStock
+```
+
+<ParamField query="currentPage" type="integer" required>
+  Page number
+</ParamField>
+
+<ParamField query="pageSize" type="integer" required>
+  Records per page
+</ParamField>
+
+<ParamField query="beginTime" type="string" required>
+  Start date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="endTime" type="string" required>
+  End date (YYYY-MM-DD)
+</ParamField>
+
+<ParamField query="depotIds" type="string">
+  Comma-separated depot IDs
+</ParamField>
+
+<ParamField query="materialParam" type="string" required>
+  Material search parameter
+</ParamField>
+
+<ParamField query="categoryId" type="Long">
+  Material category filter
+</ParamField>
+
+### Purchase Statistics
+
+Get purchase statistics by material.
+
+```bash
+GET /depotItem/buyIn
+```
+
+<ParamField query="currentPage" type="integer" required>
+  Page number
+</ParamField>
+
+<ParamField query="pageSize" type="integer" required>
+  Records per page
+</ParamField>
+
+<ParamField query="beginTime" type="string" required>
+  Start date
+</ParamField>
+
+<ParamField query="endTime" type="string" required>
+  End date
+</ParamField>
+
+<ParamField query="materialParam" type="string" required>
+  Material search parameter
+</ParamField>
+
+### Sales Statistics
+
+Get sales statistics by material.
+
+```bash
+GET /depotItem/saleOut
+```
+
+<ParamField query="currentPage" type="integer" required>
+  Page number
+</ParamField>
+
+<ParamField query="pageSize" type="integer" required>
+  Records per page
+</ParamField>
+
+<ParamField query="beginTime" type="string" required>
+  Start date
+</ParamField>
+
+<ParamField query="endTime" type="string" required>
+  End date
+</ParamField>
+
+<ParamField query="materialParam" type="string" required>
+  Material search parameter
+</ParamField>
+
+### Retail Statistics
+
+Get retail sales statistics.
+
+```bash
+GET /depotItem/retailOut
+```
+
+<ParamField query="currentPage" type="integer" required>
+  Page number
+</ParamField>
+
+<ParamField query="pageSize" type="integer" required>
+  Records per page
+</ParamField>
+
+<ParamField query="beginTime" type="string" required>
+  Start date
+</ParamField>
+
+<ParamField query="endTime" type="string" required>
+  End date
+</ParamField>
+
+<ParamField query="materialParam" type="string" required>
+  Material search parameter
+</ParamField>
+
+### Stock Warning Report
+
+Get materials with stock levels outside safe thresholds.
+
+```bash
+GET /depotItem/findStockWarningCount
+```
+
+<ParamField query="currentPage" type="integer" required>
+  Page number
+</ParamField>
+
+<ParamField query="pageSize" type="integer" required>
+  Records per page
+</ParamField>
+
+<ParamField query="materialParam" type="string" required>
+  Material search parameter
+</ParamField>
+
+<ParamField query="depotId" type="Long">
+  Depot ID filter
+</ParamField>
+
+<ParamField query="categoryId" type="Long">
+  Category ID filter
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="Warning data">
+    <ResponseField name="rows" type="array">Materials with stock warnings</ResponseField>
+    <ResponseField name="total" type="integer">Total warning count</ResponseField>
+  </Expandable>
+</ResponseField>

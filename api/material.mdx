@@ -1,0 +1,737 @@
+---
+title: 'Material/Product API'
+description: 'API endpoints for managing materials, products, and inventory items'
+---
+
+## Overview
+
+The Material API provides comprehensive endpoints for managing products, materials, inventory items, and their associated information including pricing, units, categories, and stock levels.
+
+## Material Management
+
+### Get Material Info
+
+Retrieve detailed information about a specific material by ID.
+
+```bash
+GET /material/info?id={id}
+```
+
+<ParamField query="id" type="Long" required>
+  The unique identifier of the material
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code (200 for success)
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="Material object">
+    <ResponseField name="id" type="Long">Material ID</ResponseField>
+    <ResponseField name="name" type="string">Material name</ResponseField>
+    <ResponseField name="categoryId" type="Long">Category ID</ResponseField>
+    <ResponseField name="model" type="string">Model number</ResponseField>
+    <ResponseField name="standard" type="string">Product standard</ResponseField>
+    <ResponseField name="color" type="string">Color</ResponseField>
+    <ResponseField name="brand" type="string">Brand name</ResponseField>
+    <ResponseField name="mfrs" type="string">Manufacturer</ResponseField>
+    <ResponseField name="unit" type="string">Unit of measure</ResponseField>
+    <ResponseField name="unitId" type="Long">Unit ID (for multi-unit)</ResponseField>
+    <ResponseField name="weight" type="BigDecimal">Weight</ResponseField>
+    <ResponseField name="expiryNum" type="integer">Expiry days</ResponseField>
+    <ResponseField name="enabled" type="boolean">Whether material is enabled</ResponseField>
+    <ResponseField name="enableSerialNumber" type="string">Serial number tracking ("1" enabled)</ResponseField>
+    <ResponseField name="enableBatchNumber" type="string">Batch number tracking ("1" enabled)</ResponseField>
+    <ResponseField name="position" type="string">Storage position</ResponseField>
+    <ResponseField name="otherField1" type="string">Custom field 1</ResponseField>
+    <ResponseField name="otherField2" type="string">Custom field 2</ResponseField>
+    <ResponseField name="otherField3" type="string">Custom field 3</ResponseField>
+    <ResponseField name="remark" type="string">Additional remarks</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### List Materials
+
+Retrieve a paginated list of materials with optional search filters.
+
+```bash
+GET /material/list?search={search}
+```
+
+<ParamField query="search" type="string">
+  JSON string containing search parameters:
+  - `categoryId`: Category filter
+  - `materialParam`: Name/barcode search
+  - `standard`: Standard specification
+  - `model`: Model number
+  - `color`: Color filter
+  - `brand`: Brand filter
+  - `mfrs`: Manufacturer filter
+  - `enabled`: Enabled status
+  - `enableSerialNumber`: Serial tracking filter
+  - `enableBatchNumber`: Batch tracking filter
+</ParamField>
+
+### Create Material
+
+Create a new material/product.
+
+```bash
+POST /material/add
+```
+
+<ParamField body="name" type="string" required>
+  Material name
+</ParamField>
+
+<ParamField body="categoryId" type="Long" required>
+  Category ID
+</ParamField>
+
+<ParamField body="unit" type="string" required>
+  Unit of measure
+</ParamField>
+
+<ParamField body="model" type="string">
+  Model number
+</ParamField>
+
+<ParamField body="standard" type="string">
+  Product standard
+</ParamField>
+
+<ParamField body="color" type="string">
+  Color
+</ParamField>
+
+<ParamField body="brand" type="string">
+  Brand name
+</ParamField>
+
+<ParamField body="mfrs" type="string">
+  Manufacturer
+</ParamField>
+
+<ParamField body="weight" type="BigDecimal">
+  Product weight
+</ParamField>
+
+<ParamField body="enabled" type="boolean">
+  Enable status (default: true)
+</ParamField>
+
+<ParamField body="enableSerialNumber" type="string">
+  Enable serial number tracking ("1" for yes)
+</ParamField>
+
+<ParamField body="enableBatchNumber" type="string">
+  Enable batch number tracking ("1" for yes)
+</ParamField>
+
+<CodeGroup>
+```bash cURL
+curl -X POST "http://localhost:8080/material/add" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Laptop Computer",
+    "categoryId": 5,
+    "model": "XPS-15",
+    "brand": "Dell",
+    "unit": "台",
+    "standard": "15.6inch",
+    "enabled": true
+  }'
+```
+
+```json Response
+{
+  "code": 200,
+  "data": {
+    "message": "操作成功"
+  }
+}
+```
+</CodeGroup>
+
+### Update Material
+
+Update an existing material's information.
+
+```bash
+PUT /material/update
+```
+
+<ParamField body="id" type="Long" required>
+  Material ID to update
+</ParamField>
+
+<ParamField body="name" type="string">
+  Updated material name
+</ParamField>
+
+<ParamField body="model" type="string">
+  Updated model
+</ParamField>
+
+### Delete Material
+
+Delete a material by ID.
+
+```bash
+DELETE /material/delete?id={id}
+```
+
+<ParamField query="id" type="Long" required>
+  Material ID to delete
+</ParamField>
+
+### Batch Delete Materials
+
+Delete multiple materials at once.
+
+```bash
+DELETE /material/deleteBatch?ids={ids}
+```
+
+<ParamField query="ids" type="string" required>
+  Comma-separated material IDs (e.g., "1,2,3")
+</ParamField>
+
+### Batch Set Status
+
+Enable or disable multiple materials at once.
+
+```bash
+POST /material/batchSetStatus
+```
+
+<ParamField body="status" type="boolean" required>
+  true to enable, false to disable
+</ParamField>
+
+<ParamField body="ids" type="string" required>
+  Comma-separated material IDs
+</ParamField>
+
+## Material Search & Selection
+
+### Find by Select
+
+Search materials for dropdown/select components with pagination.
+
+```bash
+GET /material/findBySelect
+```
+
+<ParamField query="page" type="integer" required>
+  Page number (1-based)
+</ParamField>
+
+<ParamField query="rows" type="integer" required>
+  Number of rows per page
+</ParamField>
+
+<ParamField query="q" type="string">
+  Search query (name, barcode, etc.)
+</ParamField>
+
+<ParamField query="categoryId" type="Long">
+  Filter by category
+</ParamField>
+
+<ParamField query="depotId" type="Long">
+  Include stock info for depot
+</ParamField>
+
+<ParamField query="standardOrModel" type="string">
+  Filter by standard or model
+</ParamField>
+
+<ParamField query="color" type="string">
+  Filter by color
+</ParamField>
+
+<ParamField query="brand" type="string">
+  Filter by brand
+</ParamField>
+
+<ParamField query="enableSerialNumber" type="string">
+  Filter serial-tracked items
+</ParamField>
+
+<ParamField query="enableBatchNumber" type="string">
+  Filter batch-tracked items
+</ParamField>
+
+<ResponseField name="total" type="integer">
+  Total matching records
+</ResponseField>
+
+<ResponseField name="rows" type="array">
+  <Expandable title="Material items">
+    <ResponseField name="id" type="Long">Material extend ID</ResponseField>
+    <ResponseField name="mBarCode" type="string">Barcode</ResponseField>
+    <ResponseField name="name" type="string">Material name</ResponseField>
+    <ResponseField name="model" type="string">Model</ResponseField>
+    <ResponseField name="standard" type="string">Standard</ResponseField>
+    <ResponseField name="unit" type="string">Unit with ratio info</ResponseField>
+    <ResponseField name="stock" type="BigDecimal">Current stock</ResponseField>
+    <ResponseField name="sku" type="string">SKU code</ResponseField>
+    <ResponseField name="enableSerialNumber" type="string">Serial tracking enabled</ResponseField>
+    <ResponseField name="enableBatchNumber" type="string">Batch tracking enabled</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```bash cURL
+curl -X GET "http://localhost:8080/material/findBySelect?page=1&rows=20&q=laptop&depotId=1"
+```
+
+```json Response
+{
+  "total": 45,
+  "rows": [
+    {
+      "id": 101,
+      "mBarCode": "LAP001",
+      "name": "Dell Laptop",
+      "model": "XPS-15",
+      "standard": "15.6inch",
+      "unit": "台[基本]",
+      "stock": 25,
+      "brand": "Dell",
+      "enableSerialNumber": "1"
+    }
+  ]
+}
+```
+</CodeGroup>
+
+### Get Material by Parameter
+
+Quick search materials by keyword.
+
+```bash
+GET /material/getMaterialByParam?q={keyword}
+```
+
+<ParamField query="q" type="string" required>
+  Search keyword
+</ParamField>
+
+### Get Material by Barcode
+
+Retrieve material information by barcode with pricing and stock.
+
+```bash
+GET /material/getMaterialByBarCode
+```
+
+<ParamField query="barCode" type="string" required>
+  Material barcode
+</ParamField>
+
+<ParamField query="depotId" type="Long">
+  Depot ID for stock info
+</ParamField>
+
+<ParamField query="organId" type="Long">
+  Organization ID for pricing
+</ParamField>
+
+<ParamField query="mpList" type="string" required>
+  Material property list (comma-separated)
+</ParamField>
+
+<ParamField query="prefixNo" type="string">
+  Bill prefix (CGDD, XSCK, etc.) for price selection
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="array">
+  <Expandable title="Material with pricing">
+    <ResponseField name="id" type="Long">Material ID</ResponseField>
+    <ResponseField name="meId" type="Long">Material extend ID</ResponseField>
+    <ResponseField name="name" type="string">Material name</ResponseField>
+    <ResponseField name="barCode" type="string">Barcode</ResponseField>
+    <ResponseField name="stock" type="BigDecimal">Current stock</ResponseField>
+    <ResponseField name="billPrice" type="BigDecimal">Bill price (based on prefixNo)</ResponseField>
+    <ResponseField name="purchaseDecimal" type="BigDecimal">Purchase price</ResponseField>
+    <ResponseField name="wholesaleDecimal" type="BigDecimal">Wholesale price</ResponseField>
+    <ResponseField name="commodityDecimal" type="BigDecimal">Retail price</ResponseField>
+    <ResponseField name="depotId" type="Long">Default depot ID</ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```bash cURL
+curl -X GET "http://localhost:8080/material/getMaterialByBarCode?barCode=LAP001&depotId=1&mpList=model,brand&prefixNo=XSCK"
+```
+
+```json Response
+{
+  "code": 200,
+  "data": [
+    {
+      "id": 50,
+      "meId": 101,
+      "name": "Dell Laptop XPS-15",
+      "barCode": "LAP001",
+      "stock": 25,
+      "billPrice": 8500.00,
+      "purchaseDecimal": 7000.00,
+      "wholesaleDecimal": 8500.00,
+      "commodityDecimal": 9200.00,
+      "depotId": 1,
+      "unit": "台"
+    }
+  ]
+}
+```
+</CodeGroup>
+
+### Find by ID
+
+Get material information by material ID.
+
+```bash
+GET /material/findById?id={id}
+```
+
+<ParamField query="id" type="Long" required>
+  Material ID
+</ParamField>
+
+### Find by ID with Barcode
+
+Get material information by material extend ID.
+
+```bash
+GET /material/findByIdWithBarCode
+```
+
+<ParamField query="meId" type="Long" required>
+  Material extend ID
+</ParamField>
+
+<ParamField query="mpList" type="string" required>
+  Material property list
+</ParamField>
+
+## Stock & Inventory
+
+### Get List with Stock
+
+Retrieve materials with current stock levels.
+
+```bash
+GET /material/getListWithStock
+```
+
+<ParamField query="currentPage" type="integer" required>
+  Page number
+</ParamField>
+
+<ParamField query="pageSize" type="integer" required>
+  Records per page
+</ParamField>
+
+<ParamField query="materialParam" type="string" required>
+  Material search parameter
+</ParamField>
+
+<ParamField query="depotIds" type="string">
+  Comma-separated depot IDs
+</ParamField>
+
+<ParamField query="categoryId" type="Long">
+  Category filter
+</ParamField>
+
+<ParamField query="zeroStock" type="integer" required>
+  Include zero stock (0=exclude, 1=include)
+</ParamField>
+
+<ParamField query="column" type="string">
+  Sort column (default: createTime)
+</ParamField>
+
+<ParamField query="order" type="string">
+  Sort order (asc/desc, default: desc)
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <Expandable title="Stock data">
+    <ResponseField name="rows" type="array">Material stock records</ResponseField>
+    <ResponseField name="total" type="integer">Total record count</ResponseField>
+    <ResponseField name="currentStock" type="BigDecimal">Total stock quantity</ResponseField>
+    <ResponseField name="currentStockPrice" type="BigDecimal">Total stock value</ResponseField>
+    <ResponseField name="currentWeight" type="BigDecimal">Total weight</ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Get Material Depot Stock
+
+Get stock distribution across depots for a material.
+
+```bash
+GET /material/getMaterialDepotStock
+```
+
+<ParamField query="materialId" type="Long" required>
+  Material ID
+</ParamField>
+
+<ParamField query="depotIds" type="string">
+  Comma-separated depot IDs (optional, uses user's depots if not provided)
+</ParamField>
+
+<ResponseField name="rows" type="array">
+  <Expandable title="Depot stock records">
+    <ResponseField name="depotId" type="Long">Depot ID</ResponseField>
+    <ResponseField name="depotName" type="string">Depot name</ResponseField>
+    <ResponseField name="currentNumber" type="BigDecimal">Current stock quantity</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Validation & Utilities
+
+### Check Name Exists
+
+Check if a material name already exists.
+
+```bash
+GET /material/checkIsNameExist
+```
+
+<ParamField query="id" type="Long" required>
+  Material ID (use 0 for new material)
+</ParamField>
+
+<ParamField query="name" type="string" required>
+  Material name to check
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <ResponseField name="status" type="boolean">
+    true if name exists, false otherwise
+  </ResponseField>
+</ResponseField>
+
+### Check Material Exists
+
+Check if a material with specific attributes exists.
+
+```bash
+GET /material/checkIsExist
+```
+
+<ParamField query="id" type="Long" required>
+  Material ID (use 0 for new)
+</ParamField>
+
+<ParamField query="name" type="string" required>
+  Material name
+</ParamField>
+
+<ParamField query="model" type="string" required>
+  Model
+</ParamField>
+
+<ParamField query="color" type="string" required>
+  Color
+</ParamField>
+
+<ParamField query="standard" type="string" required>
+  Standard
+</ParamField>
+
+<ParamField query="mfrs" type="string" required>
+  Manufacturer
+</ParamField>
+
+<ParamField query="unit" type="string" required>
+  Unit
+</ParamField>
+
+<ParamField query="unitId" type="Long" required>
+  Unit ID
+</ParamField>
+
+### Get Max Barcode
+
+Get the next available barcode number.
+
+```bash
+GET /material/getMaxBarCode
+```
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  <ResponseField name="barCode" type="string">
+    Next available barcode
+  </ResponseField>
+</ResponseField>
+
+### Change Name to PinYin
+
+Convert Chinese name to pinyin abbreviation.
+
+```bash
+POST /material/changeNameToPinYin
+```
+
+<ParamField body="name" type="string" required>
+  Chinese name to convert
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="string">
+  Pinyin abbreviation
+</ResponseField>
+
+## Batch Operations
+
+### Batch Update
+
+Update multiple materials at once.
+
+```bash
+POST /material/batchUpdate
+```
+
+<ParamField body="ids" type="string" required>
+  Comma-separated material IDs
+</ParamField>
+
+<ParamField body="field" type="string" required>
+  Field name to update
+</ParamField>
+
+<ParamField body="value" type="string" required>
+  New value
+</ParamField>
+
+### Batch Set Current Stock
+
+Recalculate and set current stock for materials.
+
+```bash
+POST /material/batchSetMaterialCurrentStock
+```
+
+<ParamField body="ids" type="string" required>
+  Comma-separated material IDs
+</ParamField>
+
+### Batch Set Current Unit Price
+
+Recalculate and set current cost price for materials.
+
+```bash
+POST /material/batchSetMaterialCurrentUnitPrice
+```
+
+<ParamField body="ids" type="string" required>
+  Comma-separated material IDs
+</ParamField>
+
+## Import & Export
+
+### Export Excel
+
+Export materials to Excel file.
+
+```bash
+GET /material/exportExcel
+```
+
+<ParamField query="categoryId" type="string">
+  Category filter
+</ParamField>
+
+<ParamField query="materialParam" type="string">
+  Material search parameter
+</ParamField>
+
+<ParamField query="color" type="string">
+  Color filter
+</ParamField>
+
+<ParamField query="enabled" type="string">
+  Enabled status filter
+</ParamField>
+
+### Import Excel
+
+Import materials from Excel file.
+
+```bash
+POST /material/importExcel
+```
+
+<ParamField body="file" type="file" required>
+  Excel file containing material data
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code (200 for success)
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Import result message and details
+</ResponseField>
+
+## Serial Number Materials
+
+### Get Material Enable Serial Number List
+
+Get materials with serial number tracking enabled.
+
+```bash
+GET /material/getMaterialEnableSerialNumberList
+```
+
+<ParamField query="q" type="string">
+  Search query
+</ParamField>
+
+<ParamField query="page" type="integer" required>
+  Page number
+</ParamField>
+
+<ParamField query="rows" type="integer" required>
+  Rows per page
+</ParamField>
+
+### Get Material Name List
+
+Get list of all material names for autocomplete.
+
+```bash
+GET /material/getMaterialNameList
+```
+
+<ResponseField name="data" type="array">
+  <Expandable title="Name items">
+    <ResponseField name="value" type="string">Material name</ResponseField>
+    <ResponseField name="text" type="string">Material name (duplicate for compatibility)</ResponseField>
+  </Expandable>
+</ResponseField>

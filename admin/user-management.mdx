@@ -1,0 +1,508 @@
+---
+title: User Management
+description: Manage user accounts, authentication, and profiles in jshERP
+icon: users
+---
+
+## Overview
+
+jshERP provides comprehensive user management capabilities including account creation, authentication, role assignment, and profile management. All users are scoped to a specific tenant and inherit that tenant's permissions and limitations.
+
+<Note>
+Users can only be created by administrators and are automatically associated with the current tenant. Each tenant's user count is limited by their subscription.
+</Note>
+
+## User Account Structure
+
+Each user account contains:
+
+<ParamField path="id" type="Long">
+  Unique user identifier
+</ParamField>
+
+<ParamField path="username" type="String" required>
+  Display name for the user
+</ParamField>
+
+<ParamField path="loginName" type="String" required>
+  Username for authentication (must be unique)
+</ParamField>
+
+<ParamField path="password" type="String" required>
+  Encrypted password (MD5 hashed)
+</ParamField>
+
+<ParamField path="email" type="String">
+  User email address
+</ParamField>
+
+<ParamField path="phonenum" type="String">
+  Contact phone number
+</ParamField>
+
+<ParamField path="position" type="String">
+  Job position/title
+</ParamField>
+
+<ParamField path="department" type="String">
+  Department or division
+</ParamField>
+
+<ParamField path="leaderFlag" type="String">
+  Whether user has leadership permissions
+</ParamField>
+
+<ParamField path="ismanager" type="Byte">
+  Manager status flag
+</ParamField>
+
+<ParamField path="isystem" type="Byte">
+  System administrator flag
+</ParamField>
+
+<ParamField path="status" type="Byte">
+  Account status: 0 (enabled) or 1 (disabled)
+</ParamField>
+
+<ParamField path="tenantId" type="Long" required>
+  Associated tenant ID
+</ParamField>
+
+<ParamField path="weixinOpenId" type="String">
+  WeChat OpenID for WeChat login integration
+</ParamField>
+
+<ParamField path="description" type="String">
+  User description or notes
+</ParamField>
+
+**Reference**: `User.java:1-173`
+
+## Creating Users
+
+<Steps>
+  <Step title="Check Tenant Limits">
+    Before creating a user, verify the tenant hasn't reached their user limit.
+    
+    ```java
+    Long currentCount = userService.countUser(null, null);
+    if (currentCount >= tenant.getUserNumLimit()) {
+        throw new BusinessParamCheckingException(
+            "USER_OVER_LIMIT",
+            "Cannot create user: tenant limit exceeded"
+        );
+    }
+    ```
+    
+    **Reference**: `UserController.java:320-325`
+  </Step>
+  
+  <Step title="Prepare User Data">
+    Collect required user information including login credentials and profile details.
+  </Step>
+  
+  <Step title="Create User Account">
+    Submit the user creation request:
+    
+    ```java
+    POST /user/addUser
+    ```
+    
+    **Request Body**:
+    ```json
+    {
+      "username": "John Doe",
+      "loginName": "johndoe",
+      "password": "hashedPassword",
+      "email": "john@example.com",
+      "phonenum": "+1234567890",
+      "position": "Sales Manager",
+      "department": "Sales",
+      "orgaId": 1,
+      "roleId": [2, 3]
+    }
+    ```
+    
+    **Reference**: `UserController.java:313-331`
+  </Step>
+  
+  <Step title="Assign Roles">
+    Users can be assigned to multiple roles during creation. The role assignments control their permissions.
+  </Step>
+</Steps>
+
+## Authentication
+
+### Standard Login
+
+jshERP uses a session-based authentication system with CAPTCHA verification.
+
+<Steps>
+  <Step title="Get Verification Code">
+    Request a CAPTCHA image:
+    
+    ```java
+    GET /user/randomImage
+    ```
+    
+    **Response**:
+    ```json
+    {
+      "code": 200,
+      "data": {
+        "uuid": "abc123...",
+        "base64": "data:image/png;base64,..."
+      }
+    }
+    ```
+    
+    **Reference**: `UserController.java:511-532`
+  </Step>
+  
+  <Step title="Submit Login Credentials">
+    Post login credentials with CAPTCHA:
+    
+    ```java
+    POST /user/login
+    ```
+    
+    **Request Body**:
+    ```json
+    {
+      "loginName": "username",
+      "password": "hashedPassword",
+      "code": "1234",
+      "uuid": "abc123..."
+    }
+    ```
+    
+    **Reference**: `UserController.java:135-152`
+  </Step>
+  
+  <Step title="Session Management">
+    On successful login, the system creates a Redis-backed session with:
+    - User ID
+    - Client IP address
+    - Session expiration
+  </Step>
+</Steps>
+
+<Warning>
+The system automatically logs out users if their tenant has expired. Check `expireTime` during authentication.
+</Warning>
+
+### WeChat Login Integration
+
+jshERP supports WeChat authentication for mobile users:
+
+#### Bind WeChat Account
+
+```java
+POST /user/weixinBind
+```
+
+**Request Body**:
+```json
+{
+  "loginName": "username",
+  "password": "hashedPassword",
+  "weixinCode": "wx_openid_123"
+}
+```
+
+**Reference**: `UserController.java:179-193`
+
+#### WeChat Login
+
+```java
+POST /user/weixinLogin
+```
+
+**Request Body**:
+```json
+{
+  "weixinCode": "wx_openid_123"
+}
+```
+
+**Reference**: `UserController.java:154-177`
+
+## User Management Operations
+
+### Get User Information
+
+```java
+GET /user/info?id={userId}
+```
+
+Returns detailed user profile information.
+
+**Reference**: `UserController.java:65-77`
+
+### List Users
+
+```java
+GET /user/list?search={searchParams}
+```
+
+Search parameters:
+- `userName`: Filter by display name
+- `loginName`: Filter by login name
+
+**Reference**: `UserController.java:79-87`
+
+### Update User
+
+```java
+PUT /user/updateUser
+```
+
+**Request Body**:
+```json
+{
+  "id": 123,
+  "username": "John Doe Updated",
+  "email": "newemail@example.com",
+  "phonenum": "+1234567890",
+  "position": "Senior Sales Manager",
+  "roleId": [2, 3, 4],
+  "orgaId": 1
+}
+```
+
+**Reference**: `UserController.java:341-349`
+
+### Delete Users
+
+<Warning>
+Deleting users performs a soft delete, preserving audit trails.
+</Warning>
+
+```java
+DELETE /user/delete?id={userId}
+DELETE /user/deleteBatch?ids={id1,id2,id3}
+```
+
+**Reference**: `UserController.java:105-119`
+
+## Password Management
+
+### Change Password
+
+Users can update their own password:
+
+```java
+PUT /user/updatePwd
+```
+
+**Request Body**:
+```json
+{
+  "userId": 123,
+  "oldpassword": "oldHashedPassword",
+  "password": "newHashedPassword"
+}
+```
+
+<Note>
+The system validates the old password before allowing the change.
+</Note>
+
+**Reference**: `UserController.java:245-277`
+
+### Reset Password (Admin Only)
+
+Administrators can reset user passwords:
+
+```java
+POST /user/resetPwd
+```
+
+**Request Body**:
+```json
+{
+  "id": 123,
+  "password": "newHashedPassword"
+}
+```
+
+**Reference**: `UserController.java:230-243`
+
+## User Status Management
+
+### Enable/Disable Users
+
+Batch enable or disable user accounts:
+
+```java
+POST /user/batchSetStatus
+```
+
+**Request Body**:
+```json
+{
+  "status": 0,
+  "ids": "1,2,3"
+}
+```
+
+- Status `0`: Enabled
+- Status `1`: Disabled
+
+**Reference**: `UserController.java:540-553`
+
+## Organization Integration
+
+### Get Organization User Tree
+
+Retrieve the hierarchical organization structure with users:
+
+```java
+GET /user/getOrganizationUserTree
+```
+
+Returns a tree structure showing organizational hierarchy with associated users.
+
+**Reference**: `UserController.java:374-387`
+
+## User Registration
+
+jshERP supports self-service user registration:
+
+<Steps>
+  <Step title="Get CAPTCHA">
+    Request verification code (same as login flow).
+  </Step>
+  
+  <Step title="Submit Registration">
+    ```java
+    POST /user/registerUser
+    ```
+    
+    **Request Body**:
+    ```json
+    {
+      "loginName": "newuser",
+      "username": "newuser",
+      "password": "hashedPassword",
+      "code": "1234",
+      "uuid": "abc123..."
+    }
+    ```
+  </Step>
+  
+  <Step title="Auto-Assignment">
+    New users are automatically assigned to the default manager role (configurable via `manage.roleId`).
+  </Step>
+</Steps>
+
+**Reference**: `UserController.java:357-367`
+
+## Session Management
+
+### Get Current User Session
+
+```java
+GET /user/getUserSession
+```
+
+Returns the currently authenticated user's information.
+
+**Reference**: `UserController.java:195-213`
+
+### Logout
+
+```java
+GET /user/logout
+```
+
+Clears the user's session from Redis.
+
+**Reference**: `UserController.java:215-228`
+
+## User Business Permissions
+
+Users can be assigned specific business entities (customers, warehouses, etc.) through the UserBusiness relationship:
+
+```java
+GET /user/getUserWithChecked?UBType={type}&UBValue={value}
+```
+
+Returns users with checkmarks indicating which ones have access to specific business resources.
+
+**Reference**: `UserController.java:465-504`
+
+## Tenant Information
+
+### Get User Count and Tenant Info
+
+```java
+GET /user/infoWithTenant
+```
+
+**Response**:
+```json
+{
+  "type": "1",
+  "expireTime": "2025-12-31",
+  "userCurrentNum": 25,
+  "userNumLimit": 50,
+  "tenantId": 123
+}
+```
+
+This endpoint provides:
+- Current user count
+- User limit for the tenant
+- Tenant type and expiration
+
+**Reference**: `UserController.java:560-589`
+
+## Button Permissions
+
+Users inherit button-level permissions from their roles:
+
+```java
+GET /user/getUserBtnByCurrentUser
+```
+
+Returns an array of button permissions for the current user. The `admin` user has access to all buttons.
+
+**Reference**: `UserController.java:438-456`
+
+## Validation
+
+### Check Login Name Uniqueness
+
+```java
+GET /user/checkIsNameExist?id={id}&name={loginName}
+```
+
+Validates whether a login name is already in use.
+
+**Reference**: `UserController.java:121-133`
+
+## Best Practices
+
+<Note>
+**Security Recommendations**:
+- Always hash passwords before transmission
+- Enable CAPTCHA for login attempts
+- Monitor failed login attempts
+- Regularly audit user permissions
+- Set strong password policies
+</Note>
+
+<Warning>
+**Important Limitations**:
+- Users cannot exceed tenant limits
+- Expired tenants prevent all user access
+- Soft-deleted users retain audit history
+- The `admin` user has unrestricted access
+</Warning>
+
+## Related Documentation
+
+- [Tenant Management](/admin/tenant-management) - Managing tenant accounts
+- [Role & Permissions](/admin/role-permissions) - Configuring user roles
+- [System Configuration](/admin/system-configuration) - System-wide settings

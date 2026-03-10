@@ -1,0 +1,471 @@
+---
+title: 'Sales Reports'
+description: 'Analyze sales performance, track customer orders, and monitor revenue trends'
+icon: 'chart-mixed'
+---
+
+## Overview
+
+jshERP's sales reporting provides comprehensive insights into your sales performance, helping you understand revenue trends, analyze customer behavior, track product performance, and make data-driven sales decisions.
+
+## Available Reports
+
+<CardGroup cols={2}>
+  <Card title="Sales Out Report" icon="cart-shopping" href="#sales-out-report">
+    Analyze product-level sales with quantities, revenues, and returns
+  </Card>
+  <Card title="Retail Out Report" icon="store" href="#retail-out-report">
+    Track retail sales transactions and member purchases
+  </Card>
+  <Card title="Out Detail Report" icon="list" href="#out-detail-report">
+    View line-item details for all outbound transactions
+  </Card>
+  <Card title="Out Material Count" icon="calculator" href="#out-material-count">
+    Summarize total quantities sold by material
+  </Card>
+</CardGroup>
+
+---
+
+## Sales Out Report
+
+**Location:** Reports > Sales Out Report
+
+**Purpose:** Analyze product-level sales performance showing sales quantities, sales amounts, returns, and net sales revenue.
+
+### Key Metrics
+
+<AccordionGroup>
+  <Accordion title="Sales Performance Indicators">
+    - **Sales Quantity** (销售数量): Total units sold
+    - **Sales Amount** (销售金额): Total revenue from sales
+    - **Return Quantity** (退货数量): Units returned by customers
+    - **Return Amount** (退货金额): Revenue lost to returns
+    - **Net Sales Amount** (实际销售金额): Sales Amount - Return Amount
+  </Accordion>
+
+  <Accordion title="Product Information">
+    - Barcode, name, specifications, model
+    - Color, brand, manufacturer
+    - Custom property fields (3 configurable fields)
+    - Unit of measure
+  </Accordion>
+
+  <Accordion title="Multi-Dimensional Filtering">
+    - Date range (document date)
+    - Customer selection
+    - Warehouse/depot
+    - Organization/department
+    - Material category
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Access the Report**
+   - Navigate to **Reports > Sales Out Report**
+   - Report loads with default date range (last 3 months)
+
+2. **Set Date Range** (Required)
+   ```
+   Document Date: Select start and end dates
+   Default: Previous 3 months to today
+   This filter is mandatory for performance
+   ```
+
+3. **Apply Additional Filters** (Optional)
+   ```
+   Material Info: Search by barcode, name, specs, model
+   Customer: Select specific customer
+   Warehouse: Filter by warehouse location
+   Organization: Filter by department/branch
+   Category: Choose material category
+   ```
+
+4. **Analyze Results**
+   - View **Net Sales Amount** at top of page
+   - Sort by sales amount to identify top products
+   - Review return quantities to spot quality issues
+   - Compare performance across different products
+
+5. **Export and Share**
+   - Click **Export** for Excel download
+   - Share with sales team for analysis
+   - Use data for sales planning
+
+<Note>
+  The report displays the Net Sales Amount summary at the top, which equals total sales minus total returns. This is your actual realized revenue for the period.
+</Note>
+
+### Business Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Product Performance Analysis" icon="ranking-star">
+    Identify best-selling and poor-performing products to optimize inventory
+  </Card>
+  <Card title="Revenue Tracking" icon="dollar-sign">
+    Monitor sales revenue trends over time to meet targets
+  </Card>
+  <Card title="Return Analysis" icon="rotate-left">
+    Identify products with high return rates for quality improvement
+  </Card>
+  <Card title="Customer Insights" icon="user-group">
+    Analyze which products specific customers prefer
+  </Card>
+</CardGroup>
+
+---
+
+## Retail Out Report
+
+**Location:** Reports > Retail Out Report
+
+**Purpose:** Track retail sales transactions including member card purchases, providing insights into retail channel performance.
+
+### Key Features
+
+<AccordionGroup>
+  <Accordion title="Retail-Specific Metrics">
+    - Sales quantity and amount by product
+    - Return quantity and amount
+    - Net retail sales amount
+    - Member card number association
+    - Retail transaction details
+  </Accordion>
+
+  <Accordion title="Member Analysis">
+    - Filter by member card number
+    - Track member purchase behavior
+    - Analyze member loyalty
+    - Identify high-value members
+  </Accordion>
+
+  <Accordion title="Retail Operations">
+    - Filter by warehouse/store location
+    - Department/organization breakdown
+    - Category-level analysis
+    - Date range selection
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Access Retail Report**
+   - Navigate to **Reports > Retail Out Report**
+   - Default date range loads automatically
+
+2. **Select Report Criteria**
+   ```
+   Document Date: Choose date range (required)
+   Material Info: Search specific products
+   Member Card: Filter by member number
+   Warehouse: Select store/location
+   Organization: Filter by department
+   Category: Choose product category
+   ```
+
+3. **Review Retail Performance**
+   - View **Net Retail Sales Amount** summary
+   - Analyze product mix in retail channel
+   - Compare retail vs. wholesale performance
+   - Identify retail-specific trends
+
+4. **Member Analysis**
+   - Filter by member to see their purchase history
+   - Identify frequent buyers
+   - Analyze member spending patterns
+   - Plan member promotions
+
+### Business Use Cases
+
+<CardGroup cols={2}>
+  <Card title="Store Performance" icon="shop">
+    Compare sales performance across different retail locations
+  </Card>
+  <Card title="Member Loyalty Programs" icon="id-card">
+    Track member purchases to design effective loyalty rewards
+  </Card>
+  <Card title="Retail vs. Wholesale" icon="scale-balanced">
+    Compare performance between retail and wholesale channels
+  </Card>
+  <Card title="Product Mix Optimization" icon="boxes-stacked">
+    Optimize retail store product assortment based on sales data
+  </Card>
+</CardGroup>
+
+---
+
+## Out Detail Report
+
+**Location:** Reports > Out Detail
+
+**Purpose:** View detailed line-item information for all outbound transactions including sales orders, retail sales, and other shipments.
+
+### Detailed Information
+
+<AccordionGroup>
+  <Accordion title="Transaction Details">
+    - Document number and type
+    - Transaction date
+    - Customer/organization
+    - Warehouse/depot
+    - Approval status
+  </Accordion>
+
+  <Accordion title="Line Item Details">
+    - Material information (barcode, name, specs)
+    - Quantity shipped
+    - Unit price
+    - Line amount
+    - Tax information
+    - Discount applied
+  </Accordion>
+
+  <Accordion title="Search and Filter">
+    - Date range selection
+    - Customer filter
+    - Material search
+    - Document number search
+    - Status filter
+  </Accordion>
+</AccordionGroup>
+
+### How to Use
+
+1. **Access Detail Report**
+   - Navigate to **Reports > Out Detail**
+   - Report shows all outbound transactions
+
+2. **Filter Transactions**
+   - Select date range
+   - Choose customer or warehouse
+   - Search by document number
+   - Filter by material
+
+3. **Review Line Items**
+   - See every individual line item
+   - Verify quantities and prices
+   - Check approval status
+   - Review customer information
+
+4. **Export for Analysis**
+   - Export to Excel for detailed analysis
+   - Use for reconciliation
+   - Share with auditors
+
+### Use Cases
+
+- **Transaction Verification**: Verify specific sales orders and shipments
+- **Audit Trail**: Provide detailed transaction history for audits
+- **Dispute Resolution**: Research customer inquiries about specific orders
+- **Data Analysis**: Extract transaction data for advanced analytics
+
+---
+
+## Out Material Count
+
+**Location:** Reports > Out Material Count
+
+**Purpose:** Summarize total quantities shipped by material across all outbound transactions.
+
+### What It Shows
+
+- Material identification (barcode, name, specs)
+- Total quantity shipped in period
+- Number of transactions
+- Summary by material category
+- Aggregated across all customers and warehouses
+
+### How to Use
+
+1. **Access Summary Report**
+   - Navigate to **Reports > Out Material Count**
+   - Select date range
+
+2. **Filter Results**
+   - Choose material category
+   - Search specific materials
+   - Select warehouse
+
+3. **Analyze Volume**
+   - Identify high-volume materials
+   - Plan inventory replenishment
+   - Forecast future demand
+
+### Use Cases
+
+- **Demand Planning**: Analyze material demand patterns for forecasting
+- **Inventory Planning**: Plan purchases based on shipment volumes
+- **Capacity Planning**: Ensure adequate warehouse capacity for high-volume items
+- **Performance Metrics**: Track throughput and shipment volumes
+
+---
+
+## Advanced Analysis
+
+### Time-Based Analysis
+
+<AccordionGroup>
+  <Accordion title="Period Comparison">
+    - Compare sales across different time periods
+    - Export multiple date ranges
+    - Calculate growth rates
+    - Identify seasonal trends
+  </Accordion>
+
+  <Accordion title="Trend Analysis">
+    - Run reports for consistent periods (weekly, monthly)
+    - Track performance over time
+    - Identify upward or downward trends
+    - Forecast future performance
+  </Accordion>
+</AccordionGroup>
+
+### Customer Analysis
+
+<AccordionGroup>
+  <Accordion title="Customer Segmentation">
+    - Filter reports by customer
+    - Compare customer purchase patterns
+    - Identify high-value customers
+    - Target sales efforts effectively
+  </Accordion>
+
+  <Accordion title="Customer Profitability">
+    - Analyze sales by customer
+    - Review return rates by customer
+    - Calculate net sales per customer
+    - Optimize customer relationships
+  </Accordion>
+</AccordionGroup>
+
+### Product Analysis
+
+<AccordionGroup>
+  <Accordion title="Product Performance">
+    - Sort by sales amount to find top sellers
+    - Identify slow-moving products
+    - Analyze product returns
+    - Optimize product portfolio
+  </Accordion>
+
+  <Accordion title="Category Analysis">
+    - Filter by material category
+    - Compare category performance
+    - Identify growth categories
+    - Plan category-specific promotions
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Report Actions
+
+### Export to Excel
+
+- Complete dataset export with all columns
+- Includes summary totals
+- Preserves sorting and filtering
+- Enables pivot table analysis
+
+### Print Reports
+
+- Professional formatted output
+- Includes date range and filters applied
+- Shows summary statistics
+- Suitable for management presentations
+
+### Column Customization
+
+- Show/hide columns as needed
+- Reorder columns by preference
+- Adjust column widths
+- Save preferences per user
+
+<Note>
+  Use the Settings icon in the table header to customize which columns are displayed. Your preferences are saved automatically.
+</Note>
+
+---
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Regular Performance Reviews">
+    - Run Sales Out Report weekly to track performance
+    - Review top 20 products monthly
+    - Analyze return rates to identify quality issues
+    - Share results with sales team
+  </Accordion>
+
+  <Accordion title="Customer Analysis">
+    - Segment customers by purchase volume
+    - Identify at-risk customers (declining orders)
+    - Recognize high-value customers
+    - Tailor sales approach by segment
+  </Accordion>
+
+  <Accordion title="Product Optimization">
+    - Discontinue poor-performing products
+    - Increase inventory of best sellers
+    - Investigate high return products
+    - Launch promotions for slow movers
+  </Accordion>
+
+  <Accordion title="Data-Driven Decisions">
+    - Base inventory decisions on sales data
+    - Use reports to set sales targets
+    - Track actual vs. target performance
+    - Adjust strategies based on trends
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Sales amounts don't match expectations">
+    **Solutions:**
+    - Verify all sales orders are approved and posted
+    - Check if date range includes all relevant transactions
+    - Ensure no orders are pending approval
+    - Review if returns are properly recorded
+    - Check for any data entry errors
+  </Accordion>
+
+  <Accordion title="Missing transactions in report">
+    **Solutions:**
+    - Verify transactions are within selected date range
+    - Check that orders have been approved
+    - Ensure warehouse filter includes correct locations
+    - Clear customer filter if accidentally set
+    - Verify transactions are not still in draft status
+  </Accordion>
+
+  <Accordion title="Return quantities seem incorrect">
+    **Solutions:**
+    - Verify all return orders are properly posted
+    - Check that returns are linked to original sales
+    - Review return document dates
+    - Ensure return warehouse is correct
+  </Accordion>
+
+  <Accordion title="Export file is too large">
+    **Solutions:**
+    - Reduce date range
+    - Filter by specific customer or category
+    - Export in smaller batches
+    - Contact system administrator about performance
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Related Topics
+
+- [Purchase Reports](/reporting/purchase-reports) - Purchase analysis and supplier insights
+- [Inventory Reports](/reporting/inventory-reports) - Stock levels and movements
+- [Financial Reports](/reporting/financial-reports) - Customer receivables and financial data
+- [Sales Management](/modules/sales-management) - Create and manage sales orders
+- [Retail Management](/modules/retail-management) - Retail and member card configuration

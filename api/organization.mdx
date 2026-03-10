@@ -1,0 +1,593 @@
+---
+title: 'Organization Management API'
+description: 'API reference for organizational structure and hierarchy management'
+icon: 'sitemap'
+---
+
+## Overview
+
+The Organization Management API provides endpoints for managing organizational structures, including departments, divisions, and hierarchical relationships. Organizations help structure users and define reporting relationships within jshERP.
+
+**Base Path:** `/organization`
+
+<Info>
+Organizations support hierarchical structures with parent-child relationships, enabling complex organizational charts.
+</Info>
+
+---
+
+## CRUD Operations
+
+### Get Organization Information
+
+```http
+GET /organization/info?id={id}
+```
+
+Retrieves detailed information for a specific organization.
+
+<ParamField query="id" type="long" required>
+  Organization ID
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code (200 for success)
+</ResponseField>
+
+<ResponseField name="info" type="object">
+  Organization entity object
+  <Expandable title="Organization Fields">
+    <ResponseField name="id" type="long">
+      Organization ID
+    </ResponseField>
+    <ResponseField name="orgNo" type="string">
+      Organization code/number
+    </ResponseField>
+    <ResponseField name="orgAbr" type="string">
+      Organization abbreviation/short name
+    </ResponseField>
+    <ResponseField name="parentId" type="long">
+      Parent organization ID (null for root)
+    </ResponseField>
+    <ResponseField name="sort" type="string">
+      Sort order
+    </ResponseField>
+    <ResponseField name="remark" type="string">
+      Additional remarks
+    </ResponseField>
+    <ResponseField name="createTime" type="date">
+      Creation timestamp
+    </ResponseField>
+    <ResponseField name="updateTime" type="date">
+      Last update timestamp
+    </ResponseField>
+    <ResponseField name="tenantId" type="long">
+      Associated tenant ID
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```bash Request Example
+curl -X GET "http://localhost:8080/organization/info?id=1" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response Example
+{
+  "code": 200,
+  "info": {
+    "id": 1,
+    "orgNo": "ORG001",
+    "orgAbr": "Sales Dept",
+    "parentId": null,
+    "sort": "1",
+    "remark": "Main sales department",
+    "createTime": "2024-01-01 00:00:00",
+    "updateTime": "2024-06-15 10:30:00"
+  }
+}
+```
+</CodeGroup>
+
+---
+
+### Create Organization
+
+```http
+POST /organization/add
+```
+
+Creates a new organization.
+
+<ParamField body="orgNo" type="string" required>
+  Organization code/number (must be unique)
+</ParamField>
+
+<ParamField body="orgAbr" type="string" required>
+  Organization abbreviation or short name
+</ParamField>
+
+<ParamField body="parentId" type="long">
+  Parent organization ID (omit or set to null for root-level organization)
+</ParamField>
+
+<ParamField body="sort" type="string">
+  Sort order for display purposes
+</ParamField>
+
+<ParamField body="remark" type="string">
+  Additional remarks or description
+</ParamField>
+
+<CodeGroup>
+```json Request Example
+{
+  "orgNo": "ORG002",
+  "orgAbr": "Marketing",
+  "parentId": 1,
+  "sort": "2",
+  "remark": "Marketing and promotion team"
+}
+```
+
+```json Response Example
+{
+  "code": 200,
+  "data": {}
+}
+```
+</CodeGroup>
+
+---
+
+### Update Organization
+
+```http
+PUT /organization/update
+```
+
+Updates an existing organization's information.
+
+<ParamField body="id" type="long" required>
+  Organization ID
+</ParamField>
+
+<ParamField body="orgNo" type="string">
+  Organization code/number
+</ParamField>
+
+<ParamField body="orgAbr" type="string">
+  Organization abbreviation
+</ParamField>
+
+<ParamField body="parentId" type="long">
+  Parent organization ID
+</ParamField>
+
+<ParamField body="sort" type="string">
+  Sort order
+</ParamField>
+
+<ParamField body="remark" type="string">
+  Additional remarks
+</ParamField>
+
+<CodeGroup>
+```json Request Example
+{
+  "id": 2,
+  "orgAbr": "Marketing & Sales",
+  "remark": "Combined marketing and sales division"
+}
+```
+</CodeGroup>
+
+---
+
+### Delete Organization
+
+```http
+DELETE /organization/delete?id={id}
+```
+
+Deletes an organization (soft delete).
+
+<Warning>
+Deleting an organization with child organizations or associated users may fail. Remove dependencies first.
+</Warning>
+
+<ParamField query="id" type="long" required>
+  Organization ID to delete
+</ParamField>
+
+---
+
+### Batch Delete Organizations
+
+```http
+DELETE /organization/deleteBatch?ids={ids}
+```
+
+Deletes multiple organizations in a single operation.
+
+<ParamField query="ids" type="string" required>
+  Comma-separated organization IDs (e.g., "1,2,3")
+</ParamField>
+
+---
+
+## Organization Hierarchy
+
+### Get Organization Tree
+
+```http
+GET /organization/getOrganizationTree?id={id}
+```
+
+Retrieves a hierarchical tree structure of organizations starting from a specific node.
+
+<ParamField query="id" type="long" required>
+  Root organization ID (use null or 0 to get the entire tree)
+</ParamField>
+
+<ResponseField name="array" type="array">
+  Array of tree node objects with nested children
+  <Expandable title="Tree Node Structure">
+    <ResponseField name="id" type="long">
+      Organization ID
+    </ResponseField>
+    <ResponseField name="title" type="string">
+      Organization name/abbreviation
+    </ResponseField>
+    <ResponseField name="key" type="string">
+      Unique key for the node
+    </ResponseField>
+    <ResponseField name="children" type="array">
+      Array of child organization nodes
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```bash Request Example
+curl -X GET "http://localhost:8080/organization/getOrganizationTree?id=0" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response Example
+[
+  {
+    "id": 1,
+    "title": "Sales Dept",
+    "key": "1",
+    "children": [
+      {
+        "id": 2,
+        "title": "Regional Sales",
+        "key": "2",
+        "children": []
+      },
+      {
+        "id": 3,
+        "title": "Online Sales",
+        "key": "3",
+        "children": []
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Operations",
+    "key": "4",
+    "children": []
+  }
+]
+```
+</CodeGroup>
+
+---
+
+### Get All Organization Tree by User
+
+```http
+GET /organization/getAllOrganizationTreeByUser
+```
+
+Retrieves the complete organization tree based on current user's permissions.
+
+<Info>
+Only users with public role type can access the full organization tree. Other users will receive an empty array.
+</Info>
+
+<ResponseField name="array" type="array">
+  Array of tree node objects (empty if user doesn't have public role)
+</ResponseField>
+
+<CodeGroup>
+```bash Request Example
+curl -X GET "http://localhost:8080/organization/getAllOrganizationTreeByUser" \
+  -H "Authorization: Bearer {token}"
+```
+</CodeGroup>
+
+---
+
+### Find Organization by ID
+
+```http
+GET /organization/findById?id={id}
+```
+
+Retrieves organization information including parent organization name.
+
+<ParamField query="id" type="long" required>
+  Organization ID
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Organization details with parent information
+  <Expandable title="Response Fields">
+    <ResponseField name="id" type="long">
+      Organization ID
+    </ResponseField>
+    <ResponseField name="orgAbr" type="string">
+      Organization abbreviation
+    </ResponseField>
+    <ResponseField name="parentId" type="long">
+      Parent organization ID
+    </ResponseField>
+    <ResponseField name="orgParentName" type="string">
+      Parent organization abbreviation
+    </ResponseField>
+    <ResponseField name="orgNo" type="string">
+      Organization code
+    </ResponseField>
+    <ResponseField name="sort" type="string">
+      Sort order
+    </ResponseField>
+    <ResponseField name="remark" type="string">
+      Additional remarks
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<CodeGroup>
+```json Response Example
+{
+  "code": 200,
+  "data": {
+    "id": 2,
+    "orgAbr": "Regional Sales",
+    "parentId": 1,
+    "orgParentName": "Sales Dept",
+    "orgNo": "ORG002",
+    "sort": "1",
+    "remark": "Regional sales team"
+  }
+}
+```
+</CodeGroup>
+
+---
+
+## Validation
+
+### Check Organization Name Exists
+
+```http
+GET /organization/checkIsNameExist?id={id}&name={name}
+```
+
+Checks if an organization name (abbreviation) is already in use.
+
+<ParamField query="id" type="long" required>
+  Organization ID (0 for new organization)
+</ParamField>
+
+<ParamField query="name" type="string">
+  Organization abbreviation to check
+</ParamField>
+
+<ResponseField name="status" type="boolean">
+  `true` if name exists, `false` otherwise
+</ResponseField>
+
+<CodeGroup>
+```bash Request Example
+curl -X GET "http://localhost:8080/organization/checkIsNameExist?id=0&name=Finance" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response Example
+{
+  "code": 200,
+  "status": false
+}
+```
+</CodeGroup>
+
+---
+
+## Data Models
+
+### Organization Entity
+
+<ResponseField name="id" type="long">
+  Unique organization identifier
+</ResponseField>
+
+<ResponseField name="orgNo" type="string">
+  Organization code/number (must be unique within tenant)
+</ResponseField>
+
+<ResponseField name="orgAbr" type="string">
+  Organization abbreviation or short name (displayed in UI)
+</ResponseField>
+
+<ResponseField name="parentId" type="long">
+  Parent organization ID:
+  - `null` or `0`: Root-level organization
+  - Other value: Child organization
+</ResponseField>
+
+<ResponseField name="sort" type="string">
+  Sort order for display purposes (lower numbers appear first)
+</ResponseField>
+
+<ResponseField name="remark" type="string">
+  Additional remarks or description
+</ResponseField>
+
+<ResponseField name="createTime" type="date">
+  Timestamp when the organization was created
+</ResponseField>
+
+<ResponseField name="updateTime" type="date">
+  Timestamp of last update
+</ResponseField>
+
+<ResponseField name="tenantId" type="long">
+  Associated tenant ID (for multi-tenancy)
+</ResponseField>
+
+<ResponseField name="deleteFlag" type="string">
+  Soft delete flag (used internally)
+</ResponseField>
+
+---
+
+## Hierarchical Structure
+
+### Understanding Parent-Child Relationships
+
+Organizations support unlimited depth of hierarchy:
+
+```
+Company (parentId: null)
+├── Sales Department (parentId: 1)
+│   ├── Regional Sales (parentId: 2)
+│   └── Online Sales (parentId: 2)
+├── Operations (parentId: 1)
+│   ├── Warehouse (parentId: 3)
+│   └── Logistics (parentId: 3)
+└── Finance (parentId: 1)
+```
+
+### Root Organizations
+
+- Root organizations have `parentId` set to `null` or `0`
+- Typically represent top-level divisions or departments
+- Can have multiple root organizations per tenant
+
+### Child Organizations
+
+- Child organizations reference their parent via `parentId`
+- Can themselves be parents to other organizations
+- Inherit tenant from parent organization
+
+---
+
+## Common Use Cases
+
+### Creating an Organization Hierarchy
+
+1. Create root organization with `parentId: null`
+2. Create child organizations referencing the root's ID
+3. Continue creating nested levels as needed
+4. Use `sort` field to control display order at each level
+
+### Moving an Organization
+
+1. Get the organization's current information
+2. Update the organization with a new `parentId`
+3. Verify the change using `/organization/getOrganizationTree`
+
+### Restructuring Organizations
+
+1. Get the complete tree structure
+2. Identify organizations to move or delete
+3. Update parent relationships
+4. Remove obsolete organizations
+
+---
+
+## Best Practices
+
+<Tip>
+**Organization Codes**: Use a consistent naming scheme for organization codes (e.g., DEPT001, DEPT002) to maintain order and clarity.
+</Tip>
+
+<Tip>
+**Naming**: Keep organization abbreviations short and meaningful. They are displayed throughout the UI.
+</Tip>
+
+<Warning>
+**Circular References**: Never set an organization's parent to itself or to one of its descendants. This will cause errors in tree operations.
+</Warning>
+
+<Info>
+**User Assignment**: Users can be assigned to organizations through the user management API. This establishes their position in the organizational structure.
+</Info>
+
+---
+
+## Integration with Other Features
+
+### User Management
+
+- Users are assigned to organizations
+- Organization structure determines user hierarchy
+- Used for approval workflows and reporting lines
+
+### Permissions
+
+- Organization membership can affect data access
+- Users may only see data from their organization and below
+- Role permissions combine with organization structure
+
+### Reporting
+
+- Organization structure used for departmental reports
+- Hierarchical rollup of statistics
+- Department-level analytics
+
+---
+
+## Tree Operations
+
+The organization tree structure is commonly used in:
+
+- **Organization Pickers**: Select departments in forms
+- **User-Organization Trees**: Combined view showing users within organizations
+- **Permission Assignment**: Grant permissions by organization
+- **Reporting Hierarchies**: Structure reports by department
+
+---
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| 200  | Success |
+| 500  | Internal server error |
+
+<Note>
+All endpoints return a standard response format with `code` and `data` fields. Check the `code` field to determine success or failure.
+</Note>
+
+---
+
+## Performance Considerations
+
+<Tip>
+**Tree Loading**: For large organization structures, consider loading the tree incrementally rather than all at once.
+</Tip>
+
+<Info>
+**Caching**: Organization structures typically change infrequently. Consider caching tree structures to improve performance.
+</Info>

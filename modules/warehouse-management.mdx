@@ -1,0 +1,516 @@
+---
+title: 'Warehouse Management'
+description: 'Inventory control, stock tracking, and warehouse operations'
+icon: 'warehouse'
+---
+
+The Warehouse Management module provides comprehensive inventory control including stock tracking, transfers, adjustments, and multi-warehouse operations.
+
+## Overview
+
+Manage inventory across multiple warehouses with real-time stock visibility, serial/batch number tracking, and automated valuation updates.
+
+<Note>
+jshERP uses the term "Depot" (仓库) for warehouses. These terms are interchangeable throughout the documentation.
+</Note>
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card title="Multi-Warehouse" icon="building">
+    Manage inventory across unlimited warehouse locations
+  </Card>
+  <Card title="Real-Time Stock" icon="gauge-high">
+    View current stock levels and valuation instantly
+  </Card>
+  <Card title="Stock Transfers" icon="right-left">
+    Transfer inventory between warehouses
+  </Card>
+  <Card title="Inventory Adjustments" icon="sliders">
+    Other in/out operations for adjustments and corrections
+  </Card>
+  <Card title="Assembly/Disassembly" icon="screwdriver-wrench">
+    Create finished goods from components or break down assemblies
+  </Card>
+  <Card title="Serial & Batch Tracking" icon="barcode">
+    Track individual units and batches for quality control
+  </Card>
+</CardGroup>
+
+## Warehouse Configuration
+
+### Creating Warehouses
+
+Navigate to **System > Warehouse Management** to configure warehouses:
+
+- Warehouse name
+- Warehouse code
+- Location/address
+- Warehouse type (physical, virtual, consignment)
+- Default status (enabled/disabled)
+- Principal/manager assignment
+- Remarks
+
+### User Access Control
+
+Control which users can access specific warehouses:
+
+1. Go to **System > User Management**
+2. Edit user profile
+3. Assign warehouse permissions
+4. Users only see authorized warehouses in document dropdowns
+
+This ensures:
+- Department-specific inventory access
+- Location-based access control
+- Separation of duties
+
+## Stock Tracking
+
+### Current Stock Report
+
+View real-time inventory across all warehouses:
+
+**Navigation**: **Reports > Inventory > Material Stock**
+
+**Features:**
+- Filter by warehouse (support multiple selection)
+- Search by product info (barcode, name, mnemonic, specs)
+- Filter by category
+- Filter by warehouse position/shelf
+- Show/hide zero stock items
+
+**Display Information:**
+- Product image
+- Barcode and name
+- Category and specifications
+- Unit of measure
+- Current stock quantity
+- Stock value (at cost)
+- Unit cost price
+- Warehouse position
+- Multiple unit conversion (if configured)
+
+**Summary Totals:**
+- Total stock quantity across all products
+- Total stock value
+- Total weight
+
+### Stock Actions
+
+From the stock report:
+
+<Tabs>
+  <Tab title="View Flow">
+    Click **Flow** (流水) to see all in/out transactions for a product:
+    - Purchase receipts
+    - Sales deliveries
+    - Transfers
+    - Adjustments
+    - Returns
+    
+    Each transaction shows document number, date, quantity, and balance.
+  </Tab>
+  
+  <Tab title="View Distribution">
+    Click **Distribution** (分布) to see how stock is distributed across warehouses:
+    - Quantity per warehouse
+    - Stock value per warehouse
+    - Warehouse positions
+    - Serial/batch numbers by location
+  </Tab>
+</Tabs>
+
+## Stock Transfers (Allocation)
+
+### Transfer Process
+
+<Steps>
+  <Step title="Create Transfer">
+    Navigate to **Bills > Allocation/Transfer** and click **New**.
+    
+    Transfers move inventory from one warehouse to another within your organization.
+  </Step>
+  
+  <Step title="Select Warehouses">
+    - Choose **Source Warehouse** (inventory deducted)
+    - Choose **Destination Warehouse** (inventory added)
+    - Only your authorized warehouses appear
+  </Step>
+  
+  <Step title="Add Products">
+    Select products to transfer:
+    - Search by barcode, name, or specs
+    - Enter transfer quantity
+    - Verify available stock in source warehouse
+    - Add item remarks if needed
+  </Step>
+  
+  <Step title="Add Transfer Details">
+    - Set transfer date
+    - Enter document remarks
+    - Specify reason for transfer
+    - Link to related documents if applicable
+  </Step>
+  
+  <Step title="Audit Transfer">
+    Save and audit the transfer document to:
+    - Reduce stock in source warehouse
+    - Increase stock in destination warehouse
+    - Create audit trail
+  </Step>
+</Steps>
+
+<Note>
+Transfers do not affect total company inventory - they only change location distribution.
+</Note>
+
+## Other In/Out Operations
+
+Handle inventory adjustments and special transactions:
+
+### Other In (其他入库)
+
+**Use Cases:**
+- Found inventory during cycle count
+- Production output receipt
+- Gift/promotional items received
+- Inventory corrections (increase)
+- Sample receipts
+
+**Process:**
+1. Navigate to **Bills > Other In**
+2. Select destination warehouse
+3. Add products and quantities
+4. Select reason/type
+5. Optionally link to supplier for tracking
+6. Audit to increase inventory
+
+### Other Out (其他出库)
+
+**Use Cases:**
+- Scrap/waste disposal
+- Internal use/consumption
+- Samples given to customers
+- Inventory corrections (decrease)
+- Damaged goods write-off
+- Promotional giveaways
+
+**Process:**
+1. Navigate to **Bills > Other Out**
+2. Select source warehouse
+3. Add products and quantities
+4. Select reason/type
+5. Optionally link to customer/department
+6. Audit to decrease inventory
+
+<Note>
+Other in/out operations affect inventory totals. Use transfers for location changes without quantity changes.
+</Note>
+
+## Assembly and Disassembly
+
+### Product Assembly (组装单)
+
+Create finished products from component parts:
+
+<Steps>
+  <Step title="Create Assembly">
+    Navigate to **Bills > Assembly** and click **New**.
+  </Step>
+  
+  <Step title="Select Warehouse">
+    Choose the warehouse where assembly occurs.
+  </Step>
+  
+  <Step title="Add Components (Material In)">
+    Add raw materials and components:
+    - List each component
+    - Enter quantity consumed
+    - System deducts from inventory
+  </Step>
+  
+  <Step title="Add Finished Product (Material Out)">
+    Specify the finished product:
+    - Select finished goods item
+    - Enter quantity produced
+    - System adds to inventory
+  </Step>
+  
+  <Step title="Audit Assembly">
+    Audit to:
+    - Deduct components
+    - Add finished goods
+    - Update inventory valuation
+  </Step>
+</Steps>
+
+**Example:**
+```
+Components (Deducted):
+- Widget A: 2 units
+- Widget B: 3 units
+- Screw Pack: 1 unit
+
+Finished Product (Added):
+- Complete Widget Assembly: 1 unit
+```
+
+### Product Disassembly (拆卸单)
+
+Break down assemblies into components:
+
+<Steps>
+  <Step title="Create Disassembly">
+    Navigate to **Bills > Disassembly**.
+  </Step>
+  
+  <Step title="Add Assembly (Material In)">
+    Specify the finished product being disassembled:
+    - Select finished goods item
+    - Enter quantity being broken down
+    - System deducts from inventory
+  </Step>
+  
+  <Step title="Add Components (Material Out)">
+    List recovered components:
+    - Each component type
+    - Quantity recovered
+    - System adds to inventory
+  </Step>
+  
+  <Step title="Audit Disassembly">
+    Process updates inventory for both assemblies and components.
+  </Step>
+</Steps>
+
+**Use Cases:**
+- Reclaim components from defective assemblies
+- Repurpose obsolete finished goods
+- Salvage parts from returns
+- Convert between product configurations
+
+## Serial and Batch Number Tracking
+
+### Enabling Tracking
+
+Configure at the product level:
+
+1. Edit product in **Basic Data > Products**
+2. Enable **Serial Number** for unique unit tracking
+3. Enable **Batch Number** for lot tracking
+4. Save configuration
+
+### Serial Number Management
+
+**What are Serial Numbers?**
+Unique identifiers for individual units (like serial numbers on electronics).
+
+**Tracking Process:**
+- When receiving inventory, enter or scan serial numbers
+- System tracks each serial number's location and status
+- When shipping, select specific serial numbers
+- Cannot ship same serial number twice (enforced)
+
+**Benefits:**
+- Warranty tracking
+- Quality control
+- Theft prevention
+- Product recalls
+
+### Batch Number Management
+
+**What are Batch Numbers?**
+Lot identifiers for groups of products produced together.
+
+**Tracking Process:**
+- Assign batch number when receiving (production lot, shipment lot)
+- Optionally record production date and expiry date
+- Track inventory by batch
+- Select batch when shipping (FIFO, FEFO support)
+
+**Benefits:**
+- Expiry date management
+- Quality issue tracing
+- Production lot tracking
+- Recall management
+
+## Warehouse Positions and Shelves
+
+### Position Management
+
+Organize warehouse storage locations:
+
+**Format Examples:**
+- A-01-03 (Aisle-Row-Shelf)
+- WH1-R2-S5 (Warehouse-Rack-Shelf)
+- Zone A, Bay 12
+
+**Setup:**
+1. Define position naming convention
+2. Enter position in product record
+3. Update positions during cycle counts
+4. Filter stock reports by position
+
+**Benefits:**
+- Faster picking
+- Efficient putaway
+- Organized layout
+- Easier cycle counting
+
+## Inventory Reports
+
+### Available Reports
+
+<CardGroup cols={2}>
+  <Card title="Material Stock" icon="boxes-stacked">
+    Current inventory levels and values across all warehouses
+  </Card>
+  <Card title="Inbound Detail" icon="arrow-down">
+    All inventory receipts with document traceability
+  </Card>
+  <Card title="Outbound Detail" icon="arrow-up">
+    All inventory shipments and consumption
+  </Card>
+  <Card title="In/Out Stock Report" icon="arrows-left-right">
+    Combined inbound and outbound analysis
+  </Card>
+  <Card title="Material Inbound Count" icon="calculator">
+    Summarized receipt quantities by product
+  </Card>
+  <Card title="Material Outbound Count" icon="calculator">
+    Summarized shipment quantities by product
+  </Card>
+  <Card title="Stock Warning" icon="triangle-exclamation">
+    Low stock and overstock alerts
+  </Card>
+  <Card title="Allocation Detail" icon="shuffle">
+    Transfer history between warehouses
+  </Card>
+</CardGroup>
+
+### Stock Warning Report
+
+Monitor inventory levels:
+
+**Configure Thresholds:**
+- Min stock level (triggers low stock alert)
+- Max stock level (triggers overstock alert)
+- Set per product
+
+**Report Shows:**
+- Products below minimum
+- Products above maximum
+- Quantity variance from thresholds
+- Recommended actions
+
+## Inventory Valuation
+
+### Costing Methods
+
+jshERP supports multiple inventory valuation methods:
+
+- **Weighted Average Cost**: Default method, updates with each receipt
+- **FIFO (First In First Out)**: Uses oldest cost for issues
+- **Individual Cost**: Tracks cost per unit (serial numbers)
+
+### Cost Updates
+
+Inventory cost automatically updates:
+- Purchase receipts update weighted average cost
+- Returns adjust average cost
+- Assemblies calculate cost from components
+
+## Stock Corrections
+
+### Correcting Stock Levels
+
+If physical count differs from system:
+
+1. Use **Other In** to increase inventory
+2. Use **Other Out** to decrease inventory
+3. Document correction reason
+4. Audit to update records
+
+### Correcting Unit Cost
+
+From **Basic Data > Products**:
+
+1. Select products needing cost correction
+2. Click **Modify Unit Cost**
+3. Enter new cost prices
+4. System updates inventory valuation
+
+<Note>
+Cost corrections affect inventory value but not quantities. Use caution as this impacts financial statements.
+</Note>
+
+## Cycle Counting
+
+Implement regular physical inventory verification:
+
+1. **Plan Count**: Choose warehouse and products to count
+2. **Physical Count**: Verify actual quantities
+3. **Compare**: Match physical vs. system quantities
+4. **Adjust**: Create other in/out for variances
+5. **Analyze**: Investigate significant variances
+
+## Best Practices
+
+<CardGroup cols={1}>
+  <Card title="Regular Cycle Counts" icon="clipboard-check">
+    Perform periodic physical counts to maintain inventory accuracy. Focus on high-value and fast-moving items.
+  </Card>
+  
+  <Card title="Warehouse Segmentation" icon="layer-group">
+    Create separate warehouses for different purposes: finished goods, raw materials, returns, quarantine.
+  </Card>
+  
+  <Card title="Position System" icon="location-dot">
+    Implement consistent warehouse position naming for efficient operations.
+  </Card>
+  
+  <Card title="Serial/Batch Tracking" icon="hashtag">
+    Enable tracking for products with warranty, expiry dates, or recall risk.
+  </Card>
+  
+  <Card title="Min/Max Levels" icon="chart-line">
+    Set appropriate minimum and maximum stock levels to optimize inventory investment.
+  </Card>
+  
+  <Card title="Transfer Documentation" icon="file-lines">
+    Always document reasons for transfers and adjustments for audit purposes.
+  </Card>
+</CardGroup>
+
+## Integration Points
+
+<CardGroup cols={1}>
+  <Card title="Purchase Management" icon="cart-shopping">
+    Purchase receipts automatically add to warehouse inventory.
+  </Card>
+  
+  <Card title="Sales Management" icon="handshake">
+    Sales deliveries automatically deduct from warehouse stock.
+  </Card>
+  
+  <Card title="Financial Management" icon="sack-dollar">
+    Inventory valuation flows to balance sheet and COGS calculations.
+  </Card>
+  
+  <Card title="Product Management" icon="box">
+    Product master data defines tracking requirements and storage info.
+  </Card>
+</CardGroup>
+
+## Permissions
+
+Control warehouse operations:
+
+- **View Stock**: See inventory levels and reports
+- **Warehouse Access**: Control which warehouses users can access
+- **Create Transfers**: Move inventory between warehouses
+- **Other In/Out**: Perform inventory adjustments
+- **Assembly/Disassembly**: Process product conversions
+- **Audit Documents**: Approve inventory transactions
+- **Cost Modification**: Change product cost prices

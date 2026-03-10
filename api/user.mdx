@@ -1,0 +1,787 @@
+---
+title: 'User Management API'
+description: 'Complete API reference for user management operations'
+icon: 'user'
+---
+
+## Overview
+
+The User Management API provides endpoints for managing users, authentication, and user-related operations in jshERP. All endpoints require proper authentication unless otherwise specified.
+
+**Base Path:** `/user`
+
+---
+
+## Authentication Endpoints
+
+### User Login
+
+<Note>This endpoint does not require authentication.</Note>
+
+```http
+POST /user/login
+```
+
+Authenticates a user with login credentials and captcha verification.
+
+<ParamField body="loginName" type="string" required>
+  User's login name
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  User's password (MD5 hashed)
+</ParamField>
+
+<ParamField body="code" type="string" required>
+  Captcha verification code
+</ParamField>
+
+<ParamField body="uuid" type="string" required>
+  UUID from captcha request
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code (200 for success, 500 for error)
+</ResponseField>
+
+<ResponseField name="data" type="object">
+  Contains authentication token and user information
+</ResponseField>
+
+<CodeGroup>
+```json Request Example
+{
+  "loginName": "admin",
+  "password": "5f4dcc3b5aa765d61d8327deb882cf99",
+  "code": "1234",
+  "uuid": "a1b2c3d4e5f6g7h8"
+}
+```
+
+```json Response Example
+{
+  "code": 200,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": 1,
+      "username": "Administrator",
+      "loginName": "admin"
+    }
+  }
+}
+```
+</CodeGroup>
+
+---
+
+### WeChat Login
+
+```http
+POST /user/weixinLogin
+```
+
+Authenticates a user using WeChat authorization code.
+
+<ParamField body="weixinCode" type="string" required>
+  WeChat authorization code
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  - `200`: Success
+  - `501`: WeChat not bound
+  - `500`: Login failed
+</ResponseField>
+
+---
+
+### WeChat Binding
+
+```http
+POST /user/weixinBind
+```
+
+Binds a WeChat account to an existing user account.
+
+<ParamField body="loginName" type="string" required>
+  User's login name
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  User's password
+</ParamField>
+
+<ParamField body="weixinCode" type="string" required>
+  WeChat authorization code
+</ParamField>
+
+---
+
+### Get User Session
+
+```http
+GET /user/getUserSession
+```
+
+Retrieves current authenticated user information from session.
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="data.user" type="object">
+  User object without password
+  <Expandable title="User Fields">
+    <ResponseField name="id" type="long">
+      User ID
+    </ResponseField>
+    <ResponseField name="username" type="string">
+      Display name
+    </ResponseField>
+    <ResponseField name="loginName" type="string">
+      Login username
+    </ResponseField>
+    <ResponseField name="email" type="string">
+      Email address
+    </ResponseField>
+    <ResponseField name="phonenum" type="string">
+      Phone number
+    </ResponseField>
+    <ResponseField name="department" type="string">
+      Department name
+    </ResponseField>
+    <ResponseField name="position" type="string">
+      Job position
+    </ResponseField>
+    <ResponseField name="tenantId" type="long">
+      Tenant ID
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+### Logout
+
+```http
+GET /user/logout
+```
+
+Logs out the current user and clears session data.
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+---
+
+## User CRUD Operations
+
+### Get User Information
+
+```http
+GET /user/info?id={id}
+```
+
+Retrieves detailed information for a specific user.
+
+<ParamField query="id" type="long" required>
+  User ID
+</ParamField>
+
+<ResponseField name="code" type="integer">
+  Response status code
+</ResponseField>
+
+<ResponseField name="info" type="object">
+  User entity object
+</ResponseField>
+
+---
+
+### Get User List
+
+```http
+GET /user/list?search={search}
+```
+
+Retrieves a paginated list of users with optional filtering.
+
+<ParamField query="search" type="string">
+  JSON string containing search filters:
+  - `userName`: Filter by display name
+  - `loginName`: Filter by login name
+</ParamField>
+
+<ResponseField name="rows" type="array">
+  Array of UserEx objects with extended information
+</ResponseField>
+
+<ResponseField name="total" type="integer">
+  Total number of records
+</ResponseField>
+
+<CodeGroup>
+```bash Request Example
+curl -X GET "http://localhost:8080/user/list?search={\"userName\":\"John\"}" \
+  -H "Authorization: Bearer {token}"
+```
+
+```json Response Example
+{
+  "rows": [
+    {
+      "id": 1,
+      "username": "John Doe",
+      "loginName": "john",
+      "email": "john@example.com",
+      "phonenum": "1234567890",
+      "status": 1
+    }
+  ],
+  "total": 1
+}
+```
+</CodeGroup>
+
+---
+
+### Create User
+
+```http
+POST /user/add
+```
+
+Creates a new user account.
+
+<ParamField body="username" type="string" required>
+  Display name
+</ParamField>
+
+<ParamField body="loginName" type="string" required>
+  Login username (must be unique)
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Password (MD5 hashed)
+</ParamField>
+
+<ParamField body="email" type="string">
+  Email address
+</ParamField>
+
+<ParamField body="phonenum" type="string">
+  Phone number
+</ParamField>
+
+<ParamField body="department" type="string">
+  Department name
+</ParamField>
+
+<ParamField body="position" type="string">
+  Job position
+</ParamField>
+
+<ParamField body="status" type="byte" default="1">
+  User status (0: disabled, 1: enabled)
+</ParamField>
+
+---
+
+### Update User
+
+```http
+PUT /user/update
+```
+
+Updates an existing user's information.
+
+<ParamField body="id" type="long" required>
+  User ID
+</ParamField>
+
+<ParamField body="username" type="string">
+  Display name
+</ParamField>
+
+<ParamField body="email" type="string">
+  Email address
+</ParamField>
+
+<ParamField body="phonenum" type="string">
+  Phone number
+</ParamField>
+
+<ParamField body="department" type="string">
+  Department name
+</ParamField>
+
+<ParamField body="position" type="string">
+  Job position
+</ParamField>
+
+<ParamField body="status" type="byte">
+  User status
+</ParamField>
+
+---
+
+### Delete User
+
+```http
+DELETE /user/delete?id={id}
+```
+
+Deletes a user account (soft delete).
+
+<ParamField query="id" type="long" required>
+  User ID to delete
+</ParamField>
+
+---
+
+### Batch Delete Users
+
+```http
+DELETE /user/deleteBatch?ids={ids}
+```
+
+Deletes multiple users in a single operation.
+
+<ParamField query="ids" type="string" required>
+  Comma-separated user IDs (e.g., "1,2,3")
+</ParamField>
+
+---
+
+## User Management
+
+### Add User with Organization
+
+```http
+POST /user/addUser
+```
+
+Creates a new user and establishes organization relationships.
+
+<Note>This endpoint checks tenant user limits before creating the user.</Note>
+
+<ParamField body="username" type="string" required>
+  Display name
+</ParamField>
+
+<ParamField body="loginName" type="string" required>
+  Login username
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Password (MD5 hashed)
+</ParamField>
+
+<ParamField body="orgaId" type="long">
+  Organization ID to associate with user
+</ParamField>
+
+---
+
+### Update User with Organization
+
+```http
+PUT /user/updateUser
+```
+
+Updates user information and organization relationships.
+
+<ParamField body="id" type="long" required>
+  User ID
+</ParamField>
+
+<ParamField body="orgaId" type="long">
+  New organization ID
+</ParamField>
+
+---
+
+### Register User
+
+<Note>This endpoint does not require authentication.</Note>
+
+```http
+POST /user/registerUser
+```
+
+Registers a new user account with captcha verification.
+
+<ParamField body="loginName" type="string" required>
+  Login username (will also be used as display name)
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  Password (MD5 hashed)
+</ParamField>
+
+<ParamField body="code" type="string" required>
+  Captcha verification code
+</ParamField>
+
+<ParamField body="uuid" type="string" required>
+  UUID from captcha request
+</ParamField>
+
+---
+
+### Get User List (Dropdown)
+
+```http
+GET /user/getUserList
+```
+
+Retrieves a simplified user list for dropdown selections.
+
+<ResponseField name="array" type="array">
+  Array of objects with `id` and `userName` fields
+</ResponseField>
+
+<CodeGroup>
+```json Response Example
+[
+  {
+    "id": 1,
+    "userName": "John Doe"
+  },
+  {
+    "id": 2,
+    "userName": "Jane Smith"
+  }
+]
+```
+</CodeGroup>
+
+---
+
+## Password Management
+
+### Reset Password
+
+```http
+POST /user/resetPwd
+```
+
+Resets a user's password (admin function).
+
+<ParamField body="id" type="long" required>
+  User ID
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  New password (MD5 hashed)
+</ParamField>
+
+---
+
+### Update Password
+
+```http
+PUT /user/updatePwd
+```
+
+Allows a user to change their own password.
+
+<ParamField body="userId" type="long" required>
+  User ID
+</ParamField>
+
+<ParamField body="oldpassword" type="string" required>
+  Current password (MD5 hashed)
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  New password (MD5 hashed)
+</ParamField>
+
+<ResponseField name="status" type="integer">
+  - `1`: Success
+  - `2`: Old password incorrect
+  - `3`: Update failed
+</ResponseField>
+
+---
+
+## Permissions and Roles
+
+### Get Current User's Role Type
+
+```http
+GET /user/getRoleTypeByCurrentUser
+```
+
+Retrieves the role type for the current authenticated user.
+
+<ResponseField name="roleType" type="string">
+  Role type (e.g., "public", "tenant")
+</ResponseField>
+
+---
+
+### Get Current User's Button Permissions
+
+```http
+GET /user/getUserBtnByCurrentUser
+```
+
+Retrieves button-level permissions for the current user.
+
+<ResponseField name="userBtn" type="array">
+  Array of button permission strings
+</ResponseField>
+
+---
+
+### Get Current User's Price Limit
+
+```http
+GET /user/getCurrentPriceLimit
+```
+
+Retrieves price visibility limitations for the current user.
+
+<ResponseField name="priceLimit" type="string">
+  Price limit configuration
+</ResponseField>
+
+---
+
+## Organization and Tree
+
+### Get Organization User Tree
+
+```http
+GET /user/getOrganizationUserTree
+```
+
+Retrieves a hierarchical tree structure of organizations and their users.
+
+<ResponseField name="array" type="array">
+  Array of tree node objects with nested children
+  <Expandable title="Tree Node Structure">
+    <ResponseField name="id" type="long">
+      Node ID
+    </ResponseField>
+    <ResponseField name="title" type="string">
+      Display title
+    </ResponseField>
+    <ResponseField name="children" type="array">
+      Child nodes
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+---
+
+### Get Users with Checked Status
+
+```http
+GET /user/getUserWithChecked?UBType={type}&UBValue={value}
+```
+
+Retrieves user list with checked status for permission assignment.
+
+<ParamField query="UBType" type="string" required>
+  User business type
+</ParamField>
+
+<ParamField query="UBValue" type="string" required>
+  User business value
+</ParamField>
+
+---
+
+## Utility Endpoints
+
+### Check Login Name Exists
+
+```http
+GET /user/checkIsNameExist?id={id}&name={name}
+```
+
+Checks if a login name is already in use.
+
+<ParamField query="id" type="long" required>
+  User ID (0 for new user)
+</ParamField>
+
+<ParamField query="name" type="string">
+  Login name to check
+</ParamField>
+
+<ResponseField name="status" type="boolean">
+  `true` if name exists, `false` otherwise
+</ResponseField>
+
+---
+
+### Get Random Captcha
+
+<Note>This endpoint does not require authentication.</Note>
+
+```http
+GET /user/randomImage
+```
+
+Generates a random captcha image for verification.
+
+<ResponseField name="uuid" type="string">
+  UUID to include in login/register request
+</ResponseField>
+
+<ResponseField name="base64" type="string">
+  Base64-encoded captcha image
+</ResponseField>
+
+<CodeGroup>
+```json Response Example
+{
+  "code": 200,
+  "data": {
+    "uuid": "a1b2c3d4e5f6g7h8i9j0",
+    "base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+  }
+}
+```
+</CodeGroup>
+
+---
+
+### Batch Set User Status
+
+```http
+POST /user/batchSetStatus
+```
+
+Enables or disables multiple users at once.
+
+<ParamField body="status" type="byte" required>
+  Status to set (0: disabled, 1: enabled)
+</ParamField>
+
+<ParamField body="ids" type="string" required>
+  Comma-separated user IDs
+</ParamField>
+
+---
+
+### Get User Info with Tenant
+
+```http
+GET /user/infoWithTenant
+```
+
+Retrieves current user information along with tenant details and limits.
+
+<ResponseField name="type" type="string">
+  Tenant type (0: free, 1: paid)
+</ResponseField>
+
+<ResponseField name="expireTime" type="string">
+  Tenant expiration date
+</ResponseField>
+
+<ResponseField name="userCurrentNum" type="integer">
+  Current number of users
+</ResponseField>
+
+<ResponseField name="userNumLimit" type="integer">
+  Maximum allowed users
+</ResponseField>
+
+<ResponseField name="tenantId" type="long">
+  Tenant ID
+</ResponseField>
+
+---
+
+## Data Models
+
+### User Entity
+
+<ResponseField name="id" type="long">
+  Unique user identifier
+</ResponseField>
+
+<ResponseField name="username" type="string">
+  Display name
+</ResponseField>
+
+<ResponseField name="loginName" type="string">
+  Login username
+</ResponseField>
+
+<ResponseField name="password" type="string">
+  Encrypted password (never returned in responses)
+</ResponseField>
+
+<ResponseField name="leaderFlag" type="string">
+  Leader flag indicator
+</ResponseField>
+
+<ResponseField name="position" type="string">
+  Job position/title
+</ResponseField>
+
+<ResponseField name="department" type="string">
+  Department name
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  Email address
+</ResponseField>
+
+<ResponseField name="phonenum" type="string">
+  Phone number
+</ResponseField>
+
+<ResponseField name="ismanager" type="byte">
+  Manager flag (0: no, 1: yes)
+</ResponseField>
+
+<ResponseField name="isystem" type="byte">
+  System user flag (0: no, 1: yes)
+</ResponseField>
+
+<ResponseField name="status" type="byte">
+  User status (0: disabled, 1: enabled)
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  User description
+</ResponseField>
+
+<ResponseField name="remark" type="string">
+  Additional remarks
+</ResponseField>
+
+<ResponseField name="weixinOpenId" type="string">
+  WeChat Open ID for WeChat integration
+</ResponseField>
+
+<ResponseField name="tenantId" type="long">
+  Associated tenant ID
+</ResponseField>
+
+<ResponseField name="deleteFlag" type="string">
+  Soft delete flag
+</ResponseField>
+
+---
+
+## Error Codes
+
+| Code | Description |
+|------|-------------|
+| 200  | Success |
+| 500  | Internal server error |
+| 501  | WeChat not bound |
+
+<Note>
+Most endpoints return a standard response format with `code` and `data` fields. Check the `code` field to determine success or failure.
+</Note>
